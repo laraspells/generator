@@ -1,0 +1,242 @@
+<?php
+
+namespace {? namespace ?};
+
+use Illuminate\Database\Eloquent\Model;
+
+abstract class {? classname ?}
+{
+
+    /**
+     * User model
+     * 
+     * @var Illuminate\Database\Eloquent\Model
+     */
+    protected $model;
+
+    /**
+     * Searchable columns
+     * 
+     * @var array
+     */
+    protected $searchables = [];
+
+    /**
+     * Constructor
+     * 
+     * @param  Illuminate\Database\Eloquent\Model $model
+     * @return stdClass|null
+     */
+    public function __construct()
+    {
+        $this->model = $this->makeModel($this->getModel());
+    }
+
+    /**
+     * Get model class
+     *
+     * @return string
+     */
+    abstract public function getModel();
+
+    /**
+     * Get all records
+     * 
+     * @return array
+     */
+    public function all()
+    {
+        return $this->model->all()->toArray();
+    }
+
+    /**
+     * Get record by id
+     * 
+     * @param  string $id
+     * @param  array $options
+     * @return stdClass|null
+     */
+    public function findById($id, array $options = [])
+    {
+        $table = $this->model->getTable();
+        $primaryKey = $this->model->getKeyName();
+        $query = $this->makeQuery($options);
+        $record = $query->where($table.'.'.$primaryKey, $id)->first();
+        return $record? (object) $record->toArray() : null;
+    }
+
+    /**
+     * Insert new record
+     * 
+     * @param  array $data
+     * @return stdClass|null
+     */
+    public function create(array $data)
+    {
+        $record = $this->model->create($data);
+        return $record? (object) $record->toArray() : null;
+    }
+
+    /**
+     * Update record by id
+     * 
+     * @param  string $id
+     * @param  array $data
+     * @return bool
+     */
+    public function updateById($id, array $data)
+    {
+        $record = $this->model->find($id);
+        return $record? $record->update($data) : false;
+    }
+
+    /**
+     * Delete record by id
+     * 
+     * @param  string $id
+     * @return bool
+     */
+    public function deleteById($id)
+    {
+        $record = $this->model->find($id);
+        return $record? $record->delete() : true;
+    }
+
+    /**
+     * Get pagination data
+     * 
+     * @param  int $page 
+     * @param  int $limit 
+     * @param  array $options 
+     * @return stdClass
+     */
+    public function getPagination($page = 1, $limit = 10, array $options = array())
+    {
+        $options = array_merge([
+            'count_links' => 7,
+        ], $options);
+
+        $searchables = $this->searchables;
+        $query = $this->makeQuery($options);
+
+        $pagination = $query->paginate($limit, null, 'page', $page)->toArray();
+
+        // Set links for pagination buttons
+        $countPages = ceil($pagination['total']/$pagination['per_page']) ?: 1;
+        $links = $this->makeLinks($pagination['current_page'], $countPages, $options['count_links']);
+
+        return (object) [
+            'items'   => $pagination['data'],
+            'links'   => $links,
+            'page'    => $pagination['current_page'],
+            'from'    => $pagination['from'],
+            'to'      => $pagination['to'],
+            'total'   => $pagination['total'],
+            'perPage' => $pagination['per_page'],
+            'nextUrl' => $pagination['next_page_url'],
+            'prevUrl' => $pagination['prev_page_url']
+        ];
+    }
+
+    /**
+     * Make list pagination links
+     *
+     * @param int $currentPage
+     * @param int $countPages
+     * @param int $countLinks
+     * @return array
+     */
+    protected function makeLinks($currentPage, $countPages, $countLinks)
+    {
+        $links = [];
+        $start = 1;
+        $end = $countPages;
+
+        $from = $currentPage;
+        if ($from < 1) {
+            $from = 1;
+        }
+
+        $to = $from + $countLinks - 1;
+        if ($to > $end) {
+            $to = $end;
+        }
+        
+        $diff = $to - $from + 1;
+        $min = $to - $countLinks + 1;
+        if ($min > 0 AND $diff < $countLinks) {
+            $from = $min;
+        }
+
+        $pages = range($from, $to);
+        $queries = $_GET;
+        foreach($pages as $page) {
+            $queries['page'] = $page;
+            $links[] = [
+                'page' => $page,
+                'label' => $page,
+                'url' => url()->current().'?'.http_build_query($queries)
+            ];
+        }
+
+        return $links;
+    }
+
+    protected function makeQuery(array $options = [])
+    {
+        $options = array_merge([
+            'keyword' => null,
+            'order_by' => null,
+            'order_asc' => 'asc',
+            'columns' => [],
+            'joins' => []
+        ], $options);
+
+        $table = $this->model->getTable();
+        $selects = $options['columns'] ?: [$table.'.*'];
+
+        // Initialize query
+        $query = $this->model->select($selects);
+
+        // Query joins
+        foreach($options['joins'] as $join) {
+            $query->join(
+                $join['table'], 
+                $table.'.'.$join['key_from'],
+                '=',
+                $join['table'].'.'.$join['key_to']
+            );
+
+            $query->addSelect($join['selects']);
+        }
+
+        // Filtering
+        $searchables = (array) $this->searchables;
+        $keyword = $options['keyword'];
+        if ($keyword AND !empty($searchables)) {
+            $query->where(function($query) use ($searchables, $keyword) {
+                foreach($searchables as $col) {
+                    $query->orWhere($col, 'like', '%'.$keyword.'%');
+                }
+            });
+        }
+
+        // Sorting
+        if ($options['order_by']) {
+            $query->orderBy($options['order_by'], $options['order_asc']);
+        }
+
+        return $query;
+    }
+
+    /**
+     * Make model instance
+     *
+     * @return Illuminate\Database\Eloquent\Model
+     */
+    protected function makeModel($modelClass)
+    {
+        return new $modelClass;
+    }
+
+}

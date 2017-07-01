@@ -1,0 +1,24 @@
+{
+    "name": "laraspell/generator",
+    "description": "Laravel Crud Generator",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Muhammad Syifa",
+            "email": "emsifa@gmail.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "LaraSpell\\": "src"
+        }
+    },
+    "require": {
+        "symfony/yaml": "3.*"
+    },
+    "require-dev": {
+        "illuminate/support": "5.4",
+        "phpunit/phpunit": "^5.7"
+    }
+}

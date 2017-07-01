@@ -1,0 +1,35 @@
+<?php
+
+namespace Foo\Bar\Baz;
+
+use Closure;
+use Illuminate\Http\Request;
+
+/**
+ * Interface description here
+ * 
+ * @author  John Doe <johndoe@mail.com>
+ * @created 20/12/2017
+ */
+interface QuxInterface
+{
+
+    /**
+     * Method foo description
+     * 
+     * @param  string $a
+     * @param  array $b
+     * @return array
+     */
+    public function foo($a, array $b = []);
+
+    /**
+     * Method bar description
+     * 
+     * @param  Illuminate\Http\Request $a
+     * @param  Closure $b
+     * @return void
+     */
+    protected static function bar(Request $a, Closure $b = null);
+
+}

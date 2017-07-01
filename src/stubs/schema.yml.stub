@@ -1,0 +1,60 @@
+---
+name: {? filename_camel ?}
+template: vendor/laraspell/generator/template
+author:
+  name: Author Name
+  email: author@email.example
+config_file: {? filename ?}
+upload_disk: uploads
+provider:
+  file: app/Providers/{? filename_camel ?}ServiceProvider.php
+  class: App\Providers\{? filename_camel ?}ServiceProvider
+controller:
+  path: app/Http/Controllers
+  namespace: App\Http\Controllers
+request:
+  path: app/Http/Requests
+  namespace: App\Http\Requests
+model:
+  path: app/Models
+  namespace: App\Models
+repository:
+  path: app/Repositories
+  class: App\Repositories
+view:
+  path: resources/views
+  namespace: ""
+route:
+  file: routes/web.php
+  name: {? filename ?}::
+  prefix: {? filename ?} 
+tables:
+  todos:
+    label: Todo
+    icon: fa-list
+    fields:
+      title: 
+        type: string
+        label: Title
+        length: 80
+        input: text
+        rules:
+        - required
+      description:
+        type: text
+        label: Description
+        input: textarea
+        rules:
+        - required
+      status:
+        type: enum:waiting,progress,done
+        label: Status
+        input:
+          type: radios
+          options:
+            waiting: Waiting
+            progress: On Progress
+            done: Done
+        rules:
+        - required
+        - in:waiting,progress,done

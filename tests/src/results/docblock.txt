@@ -1,0 +1,11 @@
+/**
+ * Line 1
+ * 1234567890 1234567890 1234567890 1234567890 1234567890
+ * 1234567890 1234567890 1234567890 1234567890
+ * 
+ * @key    value1
+ * @key2   value2
+ * @param  string $varString foobar
+ * @param  int $varInt bazqux
+ * @return type
+ */

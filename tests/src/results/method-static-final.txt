@@ -1,0 +1,15 @@
+final public static function foobar($a, array $b, \Closure $c = null)
+{
+    $array = [
+        'a' => 1,
+        'b' => 2,
+        'c' => [
+            'c1' => 3,
+            'c2' => 4
+        ]
+    ];
+
+    $fn = function() {
+        return "value";
+    };
+}

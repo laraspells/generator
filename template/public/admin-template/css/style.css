@@ -1,0 +1,29 @@
+body {
+  padding-top: 50px;
+}
+
+.alert-message {
+	margin-top: 15px;
+}
+
+.alert-message + .page-heading {
+	margin-top: -15px;
+}
+
+.page-heading {
+	width: 100%;
+	float: left;
+	padding: 15px 0px;
+	border-bottom: 1px solid #ddd;
+	margin-bottom: 15px;
+}
+
+.page-heading .page-title {
+	width: auto;
+	float: left;
+	margin: 0px;
+}
+
+.pagination {
+	margin-top: 0px;
+}

@@ -1,0 +1,80 @@
+<?php
+
+namespace Foo\Bar\Baz;
+
+use App\Contracts\X;
+use App\Contracts\Y;
+use Closure;
+use Datetime;
+use Faker\Factory as Faker;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\Request;
+use Namespace\To\Traits\A;
+use Namespace\To\Traits\B;
+use Namespace\To\Traits\C;
+
+/**
+ * Class description here
+ * 
+ * @author  John Doe <johndoe@mail.com>
+ * @created 20/12/2017
+ */
+abstract class Qux extends Model implements X, Y
+{
+    use A;
+    use B;
+    use C;
+
+    /**
+     * Just a thing
+     * 
+     * @var string
+     */
+    public $thing;
+
+    /**
+     * An array values
+     * 
+     * @var array
+     */
+    protected $arr = [
+        "a",
+        "b",
+        "c"
+    ];
+
+    /**
+     * Method foo description
+     * 
+     * @param  string $a
+     * @param  array $b
+     * @return array
+     */
+    public function foo($a, array $b = [])
+    {
+        return array_filter($b, function($value) use ($a) {
+            $a = preg_quote($a);
+            return (bool) preg_match("/{$a}/i", $value);
+        });
+    }
+
+    /**
+     * Method bar description
+     * 
+     * @param  Illuminate\Http\Request $a
+     * @param  Closure $b
+     * @return void
+     */
+    protected static function bar(Request $a, Closure $b = null)
+    {
+        $a->validate([
+            'x' => 'required|numeric',
+            'y' => 'required'
+        ]);
+
+        if ($b) {
+            $b($a);
+        }
+    }
+
+}

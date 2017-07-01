@@ -1,0 +1,24 @@
+@extends('{? view_namespace ?}layout.master')
+
+@section('content')
+@include('{? view_namespace ?}partials.alert-messages')
+<div class="page-heading">
+	<h2 class="page-title">{? page_title ?}</h2>
+</div>
+<div class="row">
+	<div class="col-md-12">
+		<form class="form-inline" method="GET">
+			<a class="btn btn-success" href="{{ route('{? route_create ?}') }}"><i class="fa fa-plus"></i> Create</a>
+			<div class="form-group pull-right">
+				<input name="keyword" class="form-control" value="{{ request('keyword') }}"/>
+				<button class="btn btn-primary"><i class="fa fa-search"></i></button>
+			</div>
+		</form>
+		<br/>
+		<div class="table-responsive">
+		  {? table.html ?}
+		</div>
+		{? table.pagination ?}
+	</div>
+</div>
+@stop

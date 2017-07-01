@@ -1,0 +1,27 @@
+/**
+ * Line 1
+ * 1234567890 1234567890 1234567890 1234567890 1234567890
+ * 1234567890 1234567890 1234567890 1234567890
+ * 
+ * @key    value1
+ * @key2   value2
+ * @param  string $a foobar
+ * @param  array $b bazqux
+ * @param  Closure $c callback
+ * @return void
+ */
+public function foobar($a, array $b, \Closure $c = null)
+{
+    $array = [
+        'a' => 1,
+        'b' => 2,
+        'c' => [
+            'c1' => 3,
+            'c2' => 4
+        ]
+    ];
+
+    $fn = function() {
+        return "value";
+    };
+}
