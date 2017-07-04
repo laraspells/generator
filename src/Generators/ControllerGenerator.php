@@ -215,10 +215,12 @@ class ControllerGenerator extends ClassGenerator
                 // Insert data
                 \${$data->model_varname} = \$this->{$data->repository->varname}->create(\$data);
                 if (!\${$data->model_varname}) {
-                    return back()->with('danger', 'Something went wrong when create {$data->label}');
+                    \$message = 'Something went wrong when create {$data->label}';
+                    return back()->with('danger', \$message);
                 }
 
-                return redirect()->route('{$data->route->page_list}')->with('info', '{$data->label} has been created!');
+                \$message = '{$data->label} has been created!';
+                return redirect()->route('{$data->route->page_list}')->with('info', \$message);
             ");
         });
     }
@@ -311,10 +313,12 @@ class ControllerGenerator extends ClassGenerator
                 // Update data
                 \$updated = \$this->{$data->repository->varname}->updateById(\${$data->primary_varname}, \$data);
                 if (!\$updated) {
-                    return back()->with('danger', 'Something went wrong when update {$data->label}');
+                    \$message = 'Something went wrong when update {$data->label}';
+                    return back()->with('danger', \$message);
                 }
 
-                return redirect()->route('{$data->route->page_list}')->with('info', '{$data->label} has been updated!');
+                \$message = '{$data->label} has been updated!';
+                return redirect()->route('{$data->route->page_list}')->with('info', \$message);
             ");
         });
     }
@@ -339,10 +343,12 @@ class ControllerGenerator extends ClassGenerator
                 // Delete data
                 \$deleted = \$this->{$data->repository->varname}->deleteById(\${$data->primary_varname});
                 if (!\$deleted) {
-                    return back()->with('danger', 'Something went wrong when delete {$data->label}');
+                    \$message = 'Something went wrong when delete {$data->label}';
+                    return back()->with('danger', \$message);
                 }
 
-                return redirect()->route('{$data->route->page_list}')->with('info', '{$data->label} has been deleted!');
+                \$message = '{$data->label} has been deleted!';
+                return redirect()->route('{$data->route->page_list}')->with('info', \$message);
             ");
         });
     }
@@ -429,7 +435,7 @@ class ControllerGenerator extends ClassGenerator
     {
         return array_filter($this->tableSchema->getFields(), function($field) {
             return !empty($field->getRelation()) AND $field->hasInput();
-        });      
+        });
     }
 
     protected function getRepositoryPropertyName(Table $table)

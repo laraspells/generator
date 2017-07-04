@@ -93,7 +93,11 @@ abstract class BaseGenerator
                     $tab--;
                 }
 
-                $lines[$i] = str_repeat($indent, $tab).$line;                
+                if (starts_with($line, '->')) {
+                    $lines[$i] = str_repeat($indent, $tab + 1).$line;
+                } else {
+                    $lines[$i] = str_repeat($indent, $tab).$line;
+                }
 
                 if (ends_with($line, ["{", "[", "("])) {
                     $tab++;
@@ -106,7 +110,7 @@ abstract class BaseGenerator
 
     protected function isHtml($line)
     {
-        return starts_with($line, "<") AND ends_with($line, ">"); 
+        return starts_with($line, "<") AND ends_with($line, ">");
     }
 
     protected function isClosingTag($line, $tagName)
@@ -121,7 +125,7 @@ abstract class BaseGenerator
         if (empty($match['tag'])) {
             return [null, false];
         } else {
-            $tagName = $match['tag']; 
+            $tagName = $match['tag'];
             return [$tagName, !ends_with($line, "</{$tagName}>")];
         }
     }
