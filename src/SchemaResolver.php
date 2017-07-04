@@ -51,8 +51,9 @@ class SchemaResolver implements SchemaResolverInterface
         'number',
         'email',
         'select',
-        'checkboxes',
-        'radios',
+        'select-multiple',
+        'checkbox',
+        'radio',
     ];
 
     public function resolve(array $schema)
@@ -240,6 +241,10 @@ class SchemaResolver implements SchemaResolverInterface
         // Get read field code
         $fieldSchema['read_code'] = $this->getReadFieldCode($fieldSchema);
 
+        if (true === array_get($fieldSchema, 'input.multiple')) {
+            $fieldSchema = $this->resolveInputMultiple($colName, $fieldSchema, $tableName);
+        }
+
         return $fieldSchema;
     }
 
@@ -260,16 +265,20 @@ class SchemaResolver implements SchemaResolverInterface
         return $this->resolveOptionableField($colName, $fieldSchema, $tableName);
     }
 
-    protected function resolveFieldInputRadios($colName, $fieldSchema, $tableName)
+    protected function resolveFieldInputRadio($colName, $fieldSchema, $tableName)
     {
         return $this->resolveOptionableField($colName, $fieldSchema, $tableName);
     }
 
-    protected function resolveFieldInputCheckboxes($colName, $fieldSchema, $tableName)
+    protected function resolveFieldInputCheckbox($colName, $fieldSchema, $tableName)
     {
-        if (!isset($fieldSchema['input']['multiple'])) {
-            $fieldSchema['input']['multiple'] = true;
-        }
+        data_fill($fieldSchema, 'input.multiple', true);
+        return $this->resolveOptionableField($colName, $fieldSchema, $tableName);
+    }
+
+    protected function resolveFieldInputSelectMultiple($colName, $fieldSchema, $tableName)
+    {
+        data_fill($fieldSchema, 'input.multiple', true);
         return $this->resolveOptionableField($colName, $fieldSchema, $tableName);
     }
 
@@ -437,9 +446,40 @@ class SchemaResolver implements SchemaResolverInterface
         return $tables;
     }
 
+    /**
+     * Resolve field with input multpile
+     *
+     * @param  string $colName
+     * @param  array $fieldSchema
+     * @param  string $tableName
+     * @return array
+     */
+    protected function resolveInputMultiple($colName, array $fieldSchema, $tableName)
+    {
+        data_fill($fieldSchema, 'input_resolver', "json_encode({? value ?})");
+        data_fill($fieldSchema, 'data_resolver', "json_decode({? value ?})");
+        return $fieldSchema;
+    }
+
+    /**
+     * Check if table has given relation
+     *
+     * @param array $tableSchema
+     * @param string $toTable
+     * @param string $keyFrom
+     * @param string $keyTo
+     * @return bool
+     */
     protected function tableHasRelation(array $tableSchema, $toTable, $keyFrom, $keyTo)
     {
-
+        $relations = array_get($tableSchema, 'relations') ?: [];
+        return null !== array_first($relations, function($relation) use ($toTable, $keyFrom, $keyTo) {
+            return (
+                $relation['table'] == $table
+                AND $relation['key_from'] == $keyFrom
+                AND $relation['key_to'] == $keyTo
+            );
+        });
     }
 
     protected function assertHasKeys(array $data, array $keys, $message)

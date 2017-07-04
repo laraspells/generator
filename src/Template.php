@@ -112,9 +112,10 @@ class Template
             $this->viewDirectory.'/partials/fields/email.blade.php',
             $this->viewDirectory.'/partials/fields/textarea.blade.php',
             $this->viewDirectory.'/partials/fields/select.blade.php',
+            $this->viewDirectory.'/partials/fields/select-multiple.blade.php',
             $this->viewDirectory.'/partials/fields/file.blade.php',
-            $this->viewDirectory.'/partials/fields/checkboxes.blade.php',
-            $this->viewDirectory.'/partials/fields/radios.blade.php',
+            $this->viewDirectory.'/partials/fields/checkbox.blade.php',
+            $this->viewDirectory.'/partials/fields/radio.blade.php',
             $this->viewDirectory.'/layout/master.blade.php',
         ];
 

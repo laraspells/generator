@@ -249,6 +249,16 @@ class Field extends AbstractSchema
         return $this->get('relation');
     }
 
+    public function getInputResolver()
+    {
+        return $this->get('input_resolver');
+    }
+
+    public function getDataResolver()
+    {
+        return $this->get('data_resolver');
+    }
+
     protected function validateAndResolveSchema(array $schema)
     {
         $this->validateSchema($schema);

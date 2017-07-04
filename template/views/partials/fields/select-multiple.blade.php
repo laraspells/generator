@@ -3,7 +3,7 @@ $id = "input-{$name}";
 $label = isset($label)? $label : ucwords(snake_case(camel_case($name), ' '));
 $required = isset($required)? (bool) $required : false;
 $empty_option = isset($empty_option)? $empty_option : 'Pick '.$label;
-$value = isset($value)? $value : '';
+$value = isset($value)? $value : [];
 @endphp
 
 <div class="form-group {{ $errors->has($name)? 'has-error' : '' }}">
@@ -13,12 +13,18 @@ $value = isset($value)? $value : '';
     <strong class="text-danger">*</strong>
     @endif
   </label>
-  @foreach($options as $option_value => $option_label)
-    <div class="input-checkbox">
-      <input id="cb-{{ $id }}-{{ $option_value }}" name="{{ $name }}" type='checkbox' value="{{ $option_value }}" {{ $value == $option_value? 'checked' : '' }}>
-      <span>{{ $option_label }}</span>
-    </div>
-  @endforeach
+  <select multiple
+    class="form-control"
+    name="{{ $name }}[]"
+    id="{{ $id }}"
+    {{ $required? 'required' : '' }}>
+    @if($empty_option)
+    <option value="">{{ $empty_option }}</option>
+    @endif
+    @foreach($options as $option)
+    <option value="{{ $option['value'] }}" {{ in_array($option['value'], $value)? 'selected' : '' }}>{{ $option['label'] }}</option>
+    @endforeach
+  </select>
   @if($errors->has($name))
   <div class="help-block">{{ $errors->first($name) }}</div>
   @endif

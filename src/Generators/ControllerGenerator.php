@@ -3,6 +3,7 @@
 namespace LaraSpell\Generators;
 
 use LaraSpell\Schema\Table;
+use LaraSpell\Stub;
 use LaraSpell\Traits\TableDataGetter;
 
 class ControllerGenerator extends ClassGenerator
@@ -190,7 +191,7 @@ class ControllerGenerator extends ClassGenerator
         $method->setCode(function($code) use ($data) {
             $inputFiles = $this->tableSchema->getInputFileFields();
             $code->addStatements("
-                \$data = \$request->all();
+                \$data = \$this->resolveFormInputs(\$request->all());
             ");
             $code->ln();
 
@@ -244,7 +245,7 @@ class ControllerGenerator extends ClassGenerator
             $code->ln();
             $view = $this->tableSchema->getRootSchema()->getView($data->model_varname.'.form-edit');
             $code->addStatements("\$data['title'] = 'Form Create {$data->label}';");
-            $code->addStatements("\$data['{$data->model_varname}'] = \${$data->model_varname};");
+            $code->addStatements("\$data['{$data->model_varname}'] = \$this->resolveFormData(\${$data->model_varname});");
             foreach($fieldsHasRelation as $field) {
                 $relation = $field->getRelation();
                 $varName = $relation['var_name'];
@@ -290,7 +291,7 @@ class ControllerGenerator extends ClassGenerator
             $code->addStatements($initModelCode);
             $code->ln();
             $code->addStatements("
-                \$data = \$request->all();
+                \$data = \$this->resolveFormInputs(\$request->all());
             ");
             $code->ln();
             foreach($inputFiles as $field) {
@@ -403,6 +404,64 @@ class ControllerGenerator extends ClassGenerator
 
                 return \${$data->model_varname};
             ");
+        });
+    }
+
+    protected function methodResolveFormInputs(MethodGenerator $method)
+    {
+        $resolveableFields = array_filter($this->tableSchema->getFields(), function($field) {
+            return $field->hasInput() AND !empty($field->getInputResolver());
+        });
+
+        $method->setDocblock(function($docblock) {
+            $docblock->addText('Resolve form inputs into storable data.');
+            $docblock->addParam('inputs', 'array');
+            $docblock->setReturn('array');
+        });
+
+        $method->addArgument('inputs', 'array');
+        $method->setCode(function($code) use ($resolveableFields) {
+            foreach($resolveableFields as $field) {
+                $name = $field->getColumnName();
+                $inputResolver = (new Stub($field->getInputResolver()))->render([
+                    'value' => "\$inputs['{$name}']"
+                ]);
+                $code->addStatements("
+                    // Resolve input {$name}
+                    \$inputs['{$name}'] = {$inputResolver};
+                ");
+                $code->ln();
+            }
+            $code->addStatements("return \$inputs;");
+        });
+    }
+
+    protected function methodResolveFormData(MethodGenerator $method)
+    {
+        $resolveableFields = array_filter($this->tableSchema->getFields(), function($field) {
+            return $field->hasInput() AND !empty($field->getDataResolver());
+        });
+
+        $method->setDocblock(function($docblock) {
+            $docblock->addText('Resolve data (form database) into form values.');
+            $docblock->addParam('data', 'array');
+            $docblock->setReturn('array');
+        });
+
+        $method->addArgument('data', 'array');
+        $method->setCode(function($code) use ($resolveableFields) {
+            foreach($resolveableFields as $field) {
+                $name = $field->getColumnName();
+                $inputResolver = (new Stub($field->getDataResolver()))->render([
+                    'value' => "\$data['{$name}']"
+                ]);
+                $code->addStatements("
+                    // Resolve input {$name}
+                    \$data['{$name}'] = {$inputResolver};
+                ");
+                $code->ln();
+            }
+            $code->addStatements("return \$data;");
         });
     }
 
