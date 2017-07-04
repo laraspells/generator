@@ -44,7 +44,7 @@ class SchemaResolver implements SchemaResolverInterface
     ];
 
     protected $availableInputTypes = [
-        'text', 
+        'text',
         'textarea',
         'file',
         'image',
@@ -90,7 +90,7 @@ class SchemaResolver implements SchemaResolverInterface
         data_fill($schema, 'route.prefix', 'admin');
 
         data_fill($schema, 'migration.path', 'database/migrations');
-       
+
         data_fill($schema, 'config_file', 'admin');
 
         // Resolve tables
@@ -203,7 +203,7 @@ class SchemaResolver implements SchemaResolverInterface
 
         // Set input max length
         if (
-            isset($fieldSchema['length']) 
+            isset($fieldSchema['length'])
             AND in_array($fieldSchema['input']['type'], ['text', 'textarea'])
             AND !isset($fieldSchema['input']['maxlength'])
         ) {
@@ -257,12 +257,12 @@ class SchemaResolver implements SchemaResolverInterface
 
     protected function resolveFieldInputSelect($colName, $fieldSchema, $tableName)
     {
-        return $this->resolveOptionableField($colName, $fieldSchema, $tableName);  
+        return $this->resolveOptionableField($colName, $fieldSchema, $tableName);
     }
 
     protected function resolveFieldInputRadios($colName, $fieldSchema, $tableName)
     {
-        return $this->resolveOptionableField($colName, $fieldSchema, $tableName);  
+        return $this->resolveOptionableField($colName, $fieldSchema, $tableName);
     }
 
     protected function resolveFieldInputCheckboxes($colName, $fieldSchema, $tableName)
@@ -270,7 +270,7 @@ class SchemaResolver implements SchemaResolverInterface
         if (!isset($fieldSchema['input']['multiple'])) {
             $fieldSchema['input']['multiple'] = true;
         }
-        return $this->resolveOptionableField($colName, $fieldSchema, $tableName);  
+        return $this->resolveOptionableField($colName, $fieldSchema, $tableName);
     }
 
     protected function resolveOptionableField($colName, $fieldSchema, $tableName)
@@ -301,7 +301,7 @@ class SchemaResolver implements SchemaResolverInterface
                 break;
             }
         }
-        
+
         if (!$needRelation) {
             return $fieldSchema;
         }
@@ -428,7 +428,7 @@ class SchemaResolver implements SchemaResolverInterface
                             'key_to' => $relation['key_from']
                         ];
                     }
-                }   
+                }
             }
 
             $tables[$tableName]['relations'] = $relations;
@@ -478,7 +478,7 @@ class SchemaResolver implements SchemaResolverInterface
 
     protected function getReadFieldCode(array $fieldSchema)
     {
-        $tableCode = preg_replace("/\[\'(.+)\'\]/", "->$1", $fieldSchema['table_code']);
+        $tableCode = $fieldSchema['table_code'];
         return '
             <tr>
                 <td width="200" class="field-name"><strong>{? label ?}</strong></td>

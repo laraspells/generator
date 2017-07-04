@@ -73,9 +73,9 @@ class ViewListGenerator extends ViewGenerator
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach($pagination->items as $i => $'.$tableData->model_varname.')
+                    @foreach($pagination[\'items\'] as $i => $'.$tableData->model_varname.')
                     <tr>
-                        <td class="text-center column-number">{{ $pagination->from + $i }}</td>
+                        <td class="text-center column-number">{{ $pagination[\'from\'] + $i }}</td>
                         '.implode("\n", $tbodys).'
                         <td width="200" class="text-center column-action">
                             <a class="btn btn-sm btn-edit btn-default" href="{{ route(\''.$tableData->route->page_detail.'\', [$'.$tableData->model_varname.'[\''.$tableData->primary_key.'\']]) }}">Show</a>
@@ -96,8 +96,8 @@ class ViewListGenerator extends ViewGenerator
         $code = $this->makeCodeGenerator();
         $code->addStatements('
             <ul class="pagination">
-                @foreach($pagination->links as $link)
-                <li class="{{ $link[\'page\'] == $pagination->page? \'active\' : \'\' }}">
+                @foreach($pagination[\'links\'] as $link)
+                <li class="{{ $link[\'page\'] == $pagination[\'page\']? \'active\' : \'\' }}">
                     <a href="{{ $link[\'url\'] }}">{{ $link[\'label\'] }}</a>
                 </li>
                 @endforeach

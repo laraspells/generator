@@ -25,19 +25,12 @@ abstract class {? classname ?}
      * Constructor
      * 
      * @param  Illuminate\Database\Eloquent\Model $model
-     * @return stdClass|null
+     * @return void
      */
-    public function __construct()
+    public function __construct(Model $model)
     {
-        $this->model = $this->makeModel($this->getModel());
+        $this->model = $model;
     }
-
-    /**
-     * Get model class
-     *
-     * @return string
-     */
-    abstract public function getModel();
 
     /**
      * Get all records
@@ -54,7 +47,7 @@ abstract class {? classname ?}
      * 
      * @param  string $id
      * @param  array $options
-     * @return stdClass|null
+     * @return array|null
      */
     public function findById($id, array $options = [])
     {
@@ -62,19 +55,19 @@ abstract class {? classname ?}
         $primaryKey = $this->model->getKeyName();
         $query = $this->makeQuery($options);
         $record = $query->where($table.'.'.$primaryKey, $id)->first();
-        return $record? (object) $record->toArray() : null;
+        return $record? $record->toArray() : null;
     }
 
     /**
      * Insert new record
      * 
      * @param  array $data
-     * @return stdClass|null
+     * @return array|null
      */
     public function create(array $data)
     {
         $record = $this->model->create($data);
-        return $record? (object) $record->toArray() : null;
+        return $record? $record->toArray() : null;
     }
 
     /**
@@ -108,7 +101,7 @@ abstract class {? classname ?}
      * @param  int $page 
      * @param  int $limit 
      * @param  array $options 
-     * @return stdClass
+     * @return array
      */
     public function getPagination($page = 1, $limit = 10, array $options = array())
     {
@@ -125,7 +118,7 @@ abstract class {? classname ?}
         $countPages = ceil($pagination['total']/$pagination['per_page']) ?: 1;
         $links = $this->makeLinks($pagination['current_page'], $countPages, $options['count_links']);
 
-        return (object) [
+        return [
             'items'   => $pagination['data'],
             'links'   => $links,
             'page'    => $pagination['current_page'],
@@ -227,16 +220,6 @@ abstract class {? classname ?}
         }
 
         return $query;
-    }
-
-    /**
-     * Make model instance
-     *
-     * @return Illuminate\Database\Eloquent\Model
-     */
-    protected function makeModel($modelClass)
-    {
-        return new $modelClass;
     }
 
 }

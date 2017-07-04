@@ -20,7 +20,7 @@ class ViewEditGenerator extends ViewCreateGenerator
         $data['page_title'] = 'Edit '.$this->tableSchema->getLabel();
         $data['form'] = [
             'table' => $this->tableSchema->getName(),
-            'table_singular' => str_singular($this->tableSchema->getName()),
+            'table_singular' => $this->tableSchema->getSingularName(),
             'id' => $this->getFormId(),
             'attributes' => $this->getFormAttributes(),
             'fields' => $this->getFormFields(),
@@ -40,7 +40,7 @@ class ViewEditGenerator extends ViewCreateGenerator
         foreach($inputableFields as $field) {
             $params = $field->getInputParams();
             $key = $field->getColumnName();
-            $params['value'] = "eval(\"\${$modelVarname}->{$key}\")";
+            $params['value'] = "eval(\"\${$modelVarname}['{$key}']\")";
             $view = $rootSchema->getView($field->getInputView());
             $includeFields[] = "@include('{$view}', ".$this->phpify($params, true).")";
         }
@@ -57,11 +57,11 @@ class ViewEditGenerator extends ViewCreateGenerator
         $modelVarname = $tableData->model_varname;
         $pk = $tableData->primary_key;
         $routeName = $tableData->route->post_edit;
-        return "{{ route('{$routeName}', [\${$modelVarname}->{$pk}]) }}";
+        return "{{ route('{$routeName}', [\${$modelVarname}['{$pk}']]) }}";
     }
 
     protected function getFormId()
     {
-        return "form-edit-".str_singular($this->tableSchema->getName());
+        return "form-edit-".$this->tableSchema->getSingularName();
     }
 }

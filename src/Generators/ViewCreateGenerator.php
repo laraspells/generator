@@ -13,14 +13,14 @@ class ViewCreateGenerator extends ViewGenerator
     {
         return $this->tableSchema;
     }
-    
+
     public function getData()
     {
         $data = parent::getData();
         $data['page_title'] = 'Create '.$this->tableSchema->getLabel();
         $data['form'] = [
             'table' => $this->tableSchema->getName(),
-            'table_singular' => str_singular($this->tableSchema->getName()),
+            'table_singular' => $this->tableSchema->getSingularName(),
             'id' => $this->getFormId(),
             'attributes' => $this->getFormAttributes(),
             'fields' => $this->getFormFields(),
@@ -31,7 +31,7 @@ class ViewCreateGenerator extends ViewGenerator
 
     protected function getFormId()
     {
-        return "form-create-".str_singular($this->tableSchema->getName());
+        return "form-create-".$this->tableSchema->getSingularName();
     }
 
     protected function getActionUrl()

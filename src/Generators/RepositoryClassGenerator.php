@@ -39,15 +39,16 @@ class RepositoryClassGenerator extends ClassGenerator
         });
     }
 
-    protected function methodGetModel(MethodGenerator $method)
+    protected function methodConstruct(MethodGenerator $method)
     {
-        $modelClass = $this->tableSchema->getModelClass(false);
-        $method->setDocblock(function($docblock) {
-            $docblock->addText("Get model class name");
-            $docblock->setReturn("string");
+        $modelClass = $this->tableSchema->getModelClass(true);
+        $method->addArgument('model', $modelClass);
+        $method->setDocblock(function($docblock) use ($modelClass) {
+            $docblock->addText("Constructor");
+            $docblock->addParam('model', $modelClass);
         });
         $method->setCode(function($code) use ($modelClass) {
-            $code->addStatements('return '.$modelClass.'::class;');
+            $code->addStatements('parent::__construct($model);');
         });
     }
 
