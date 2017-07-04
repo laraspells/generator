@@ -64,7 +64,7 @@ template: vendor/laraspell/generator/template       # Template directory
 author: 
   name: Author Name                                 # Author name (used for generated PHP classes)
   email: author@email.example                       # Author email
-config_file: admin                                  # Config filename (without extension)
+config_file: admin                                  # Config file to store 'menu' and 'repositories' configuration
 upload_disk: uploads                                # Upload disk to store uploaded files
 provider:
   file: app/Providers/AdminServiceProvider.php      # Provider class filepath 
