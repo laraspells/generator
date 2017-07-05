@@ -88,7 +88,7 @@ class Schema extends AbstractSchema
      * Get controller filepath
      *
      * @param string $controller
-     * @return string 
+     * @return string
      */
     public function getControllerPath($controller = null)
     {
@@ -99,7 +99,7 @@ class Schema extends AbstractSchema
     /**
      * Get controller namespace
      *
-     * @return string 
+     * @return string
      */
     public function getControllerNamespace()
     {
@@ -110,18 +110,18 @@ class Schema extends AbstractSchema
      * Get controller class name (with namespace)
      *
      * @param string $controller
-     * @return string 
+     * @return string
      */
     public function getControllerClass($controller)
     {
         return $this->getControllerNamespace()."\\".$controller;
     }
-    
+
     /**
      * Get request filepath
      *
      * @param string $request
-     * @return string 
+     * @return string
      */
     public function getRequestPath($request = null)
     {
@@ -132,7 +132,7 @@ class Schema extends AbstractSchema
     /**
      * Get request namespace
      *
-     * @return string 
+     * @return string
      */
     public function getRequestNamespace()
     {
@@ -143,7 +143,7 @@ class Schema extends AbstractSchema
      * Get request class name (with namespace)
      *
      * @param string $request
-     * @return string 
+     * @return string
      */
     public function getRequestClass($request)
     {
@@ -154,7 +154,7 @@ class Schema extends AbstractSchema
      * Get model filepath
      *
      * @param string $model
-     * @return string 
+     * @return string
      */
     public function getModelPath($model = null)
     {
@@ -165,7 +165,7 @@ class Schema extends AbstractSchema
     /**
      * Get model namespace
      *
-     * @return string 
+     * @return string
      */
     public function getModelNamespace()
     {
@@ -175,7 +175,7 @@ class Schema extends AbstractSchema
     /**
      * Get service provider filepath
      *
-     * @return string 
+     * @return string
      */
     public function getServiceProviderPath()
     {
@@ -185,7 +185,7 @@ class Schema extends AbstractSchema
     /**
      * Get service provider class
      *
-     * @return string 
+     * @return string
      */
     public function getServiceProviderClass()
     {
@@ -196,7 +196,7 @@ class Schema extends AbstractSchema
      * Get model class name (with namespace)
      *
      * @param string $Model
-     * @return string 
+     * @return string
      */
     public function getModelClass($model)
     {
@@ -207,7 +207,7 @@ class Schema extends AbstractSchema
      * Get repository interface filepath
      *
      * @param string $repository
-     * @return string 
+     * @return string
      */
     public function getRepositoryInterfacePath($file = null)
     {
@@ -219,7 +219,7 @@ class Schema extends AbstractSchema
      * Get repository interface filepath
      *
      * @param string $repository
-     * @return string 
+     * @return string
      */
     public function getRepositoryClassPath($file = null)
     {
@@ -230,7 +230,7 @@ class Schema extends AbstractSchema
     /**
      * Get repository namespace
      *
-     * @return string 
+     * @return string
      */
     public function getRepositoryNamespace()
     {
@@ -240,7 +240,7 @@ class Schema extends AbstractSchema
     /**
      * Get repository interface
      *
-     * @return string 
+     * @return string
      */
     public function getRepositoryInterface($class)
     {
@@ -255,7 +255,7 @@ class Schema extends AbstractSchema
     /**
      * Get repository class
      *
-     * @return string 
+     * @return string
      */
     public function getRepositoryClass($class)
     {
@@ -271,7 +271,7 @@ class Schema extends AbstractSchema
      * Get view filepath
      *
      * @param string $view
-     * @return string 
+     * @return string
      */
     public function getViewPath($view = null)
     {
@@ -282,7 +282,7 @@ class Schema extends AbstractSchema
     /**
      * Get view namespace
      *
-     * @return string 
+     * @return string
      */
     public function getViewNamespace()
     {
@@ -293,7 +293,7 @@ class Schema extends AbstractSchema
      * Get view declaration (with namespace)
      *
      * @param string $view
-     * @return string 
+     * @return string
      */
     public function getView($view)
     {
@@ -327,7 +327,7 @@ class Schema extends AbstractSchema
      * Get route name
      *
      * @param string $route
-     * @return string 
+     * @return string
      */
     public function getRouteName($route, $includeNamespace = true)
     {

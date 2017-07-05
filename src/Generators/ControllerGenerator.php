@@ -31,7 +31,7 @@ class ControllerGenerator extends ClassGenerator
     protected function initClass()
     {
         $repositories = $this->getRequiredRepositories();
-        $this->setParentClass('Controller');
+        $this->setParentClass('App\Http\Controllers\Controller');
         $this->useClass(static::CLASS_REQUEST);
         foreach($repositories as $varName => $repository) {
             $label = ucfirst(snake_case($varName, ' '));

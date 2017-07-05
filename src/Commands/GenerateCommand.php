@@ -22,7 +22,7 @@ class GenerateCommand extends Command
      * @var string
      */
     protected $signature = '
-        spell:generate 
+        spell:generate
         {schema : Path to schema (yml) file}
         {--replace-all : Replace existing files}
         {--askme : Ask before generate existing files}
@@ -80,7 +80,7 @@ class GenerateCommand extends Command
         if (!ends_with($schemaFile, '.yml')) {
             $schemaFile .= '.yml';
         }
-        $this->generator = new Generator($schemaFile); 
+        $this->generator = new Generator($schemaFile);
     }
 
     protected function getSchema()
@@ -171,7 +171,7 @@ class GenerateCommand extends Command
         $providerClass = $this->getSchema()->getServiceProviderClass();
         $generatedMigrations = $this->generatedMigrations;
         if (count($missingDisks)) {
-            $disks = [];   
+            $disks = [];
             $code = new CodeGenerator;
             foreach($missingDisks as $disk => $option) {
                 $columns = $option['columns'];
@@ -247,9 +247,9 @@ class GenerateCommand extends Command
         $this->writeFile($filePath, $content);
         switch($action) {
             case "[overwrite]": $this->addModifiedFile($filePath); break;
-            case "[generate]": 
+            case "[generate]":
                 $this->generatedMigrations[] = $filePath;
-                $this->addAddedFile($filePath); 
+                $this->addAddedFile($filePath);
                 break;
         }
     }
@@ -391,7 +391,7 @@ class GenerateCommand extends Command
                 'name' => $route['delete']
             ];
         }
-        
+
         if (!$this->router->has($namespace.$route['page_detail'])) {
             $this->missingRoutes[] = [
                 'method' => 'get',
@@ -455,12 +455,11 @@ class GenerateCommand extends Command
     }
 
     protected function generateConfig()
-    {   
+    {
         $configKey = $this->getSchema()->getConfigKey();
-        $configs = config($configKey) ?: [
-            'repositories' => [],
-            'menu' => []
-        ];
+        $configs = config($configKey) ?: [];
+        data_fill($configs, 'repositories', []);
+        data_fill($configs, 'menu', []);
 
         // Add missing config repositories
         $repositories = $this->repositories;
@@ -546,7 +545,7 @@ class GenerateCommand extends Command
         $ask = $this->option('askme');
         $replace = $this->option('replace-all');
         $exists = $this->hasFile($filepath);
-        
+
         if (!$exists) {
             $this->writeFile($filepath, $content);
             $this->addGeneratedFile($filepath);
@@ -650,7 +649,7 @@ class GenerateCommand extends Command
 
     /**
      * Get missing filesystem disks
-     * 
+     *
      * @return array
      */
     protected function getMissingDisks()
@@ -698,7 +697,7 @@ class GenerateCommand extends Command
                     $line++;
                     $lines[$line] = $word;
                 } else {
-                    $lines[$line] .= ' '.$word;           
+                    $lines[$line] .= ' '.$word;
                 }
             }
         }
