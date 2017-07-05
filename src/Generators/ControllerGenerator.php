@@ -85,7 +85,7 @@ class ControllerGenerator extends ClassGenerator
 
             $joins[] = [
                 'table' => $relation['table'],
-                'type' => 'inner',
+                'type' => 'left',
                 'key_from' => $relation['key_from'],
                 'key_to' => $relation['key_to'],
                 'selects' => [
@@ -474,7 +474,7 @@ class ControllerGenerator extends ClassGenerator
     protected function getRequiredRepositories()
     {
         $repositories = [];
-        $varName = $this->tableSchema->getSingularName();
+        $varName = camel_case($this->tableSchema->getSingularName());
         $repositories[$varName] = $this->tableSchema->getRepositoryInterface();
         $relations = $this->tableSchema->getRelations();
         foreach($relations as $relation) {

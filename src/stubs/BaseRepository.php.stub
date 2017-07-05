@@ -193,14 +193,25 @@ abstract class {? classname ?}
 
         // Query joins
         foreach($options['joins'] as $join) {
-            $query->join(
-                $join['table'], 
+            switch($join['type']) {
+                case 'left': $method = "leftJoin"; break;
+                case 'right': $method = "rightJoin"; break;
+                default: $method = "join";
+            }
+
+            // Get table alias
+            $exp = explode(" as ", $join['table']);
+            list($joinTable, $joinTableAlias) = count($exp) == 1? [$exp[0], null] : [$exp[0], $exp[1]];
+            $query->{$method}(
+                $joinTableAlias? $joinTable.' as '.$joinTableAlias : $joinTable, 
                 $table.'.'.$join['key_from'],
                 '=',
-                $join['table'].'.'.$join['key_to']
+                ($joinTableAlias ?: $joinTable).'.'.$join['key_to']
             );
 
-            $query->addSelect($join['selects']);
+            $query->addSelect(array_map(function($column) use ($joinTable, $joinTableAlias) {
+                return ($joinTableAlias ?: $joinTable).'.'.$column;
+            }, $join['selects']));
         }
 
         // Filtering
