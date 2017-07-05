@@ -29,11 +29,18 @@ class ModelGenerator extends ClassGenerator
     protected function initClass()
     {
         $data = $this->getTableData();
+        $usingSoftDelete = $this->tableSchema->usingSoftDelete();
         $fillables = $this->tableSchema->getFillableColumns();
         $this->setParentClass(static::CLASS_MODEL);
         $this->addProperty('table', 'string', 'protected', $data->table_name, 'Table name');
         $this->addProperty('fillable', 'array', 'protected', $fillables, 'Fillable columns');
         $this->addProperty('primaryKey', 'string', 'protected', $data->primary_key, 'The primary key for the model');
+
+        if ($usingSoftDelete) {
+            $this->useTrait('Illuminate\Database\Eloquent\SoftDeletes');
+            $this->addProperty('dates', 'array', 'protected', ['deleted_at'], 'The attributes that should be mutated to dates.');
+        }
+
         $this->setDocblock(function($docblock) use ($data) {
             $authorName = $this->tableSchema->getRootSchema()->getAuthorName();
             $authorEmail = $this->tableSchema->getRootSchema()->getAuthorEmail();

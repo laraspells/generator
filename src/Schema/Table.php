@@ -28,7 +28,7 @@ class Table extends AbstractSchema
 
     /**
      * Set root schema
-     * 
+     *
      * @param LaraSpell\Schema\Schema $rootSchema
      */
     public function setRootSchema(Schema $rootSchema)
@@ -233,13 +233,23 @@ class Table extends AbstractSchema
     }
 
     /**
-     * Determina the crud has timestamps field for migration
+     * Determine the crud has timestamps field for migration
      *
      * @return string
      */
-    public function hasTimestamps()
+    public function usingTimestamps()
     {
         return $this->get('timestamps') === true;
+    }
+
+    /**
+     * Determine the crud is using soft delete
+     *
+     * @return string
+     */
+    public function usingSoftDelete()
+    {
+        return $this->get('soft_delete') === true;
     }
 
     /**
@@ -452,7 +462,7 @@ class Table extends AbstractSchema
 
     public function getRelations()
     {
-        return $this->get('relations');   
+        return $this->get('relations');
     }
 
     protected function validateAndResolveSchema(array $schema)

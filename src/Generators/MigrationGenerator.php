@@ -83,7 +83,8 @@ class MigrationGenerator extends ClassGenerator
         $schema = $this->tableSchema;
         $fields = $schema->getFields();
         $columns = [];
-        $timestamps = $schema->hasTimestamps();
+        $usingTimestamps = $schema->usingTimestamps();
+        $usingSoftDelete = $schema->usingSoftDelete();
 
         foreach($fields as $field) {
             $index = $field->getIndex();
@@ -111,8 +112,11 @@ class MigrationGenerator extends ClassGenerator
 
             $columns[] = $code;
         }
-        if ($timestamps) {
+        if ($usingTimestamps) {
             $columns[] = "\$table->timestamps();";
+        }
+        if ($usingSoftDelete) {
+            $columns[] = "\$table->softDeletes();";
         }
 
         return $columns;
