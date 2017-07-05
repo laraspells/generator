@@ -20,7 +20,7 @@ model:
   namespace: App\Models
 repository:
   path: app/Repositories
-  class: App\Repositories
+  namespace: App\Repositories
 view:
   path: resources/views
   namespace: ""
@@ -50,7 +50,7 @@ tables:
         type: enum:waiting,progress,done
         label: Status
         input:
-          type: radios
+          type: radio
           options:
             waiting: Waiting
             progress: On Progress
