@@ -324,7 +324,7 @@ class GenerateCommand extends Command
     protected function collectMissingRoutes(Table $table)
     {
         $rootSchema = $table->getRootSchema();
-        $tableName = $table->getName();
+        $tableName = str_replace("_", "-", $table->getName());
         $pk = $table->getPrimaryColumn();
         $controller = $table->getControllerClass(false);
         $namespace = $rootSchema->get('route.name');
