@@ -456,7 +456,7 @@ class Table extends AbstractSchema
 
     public function getRouteName($action, $namespace = true)
     {
-        $table = $this->getName();
+        $table = str_replace("_", "-", $this->getName());
         return $this->getRootSchema()->getRouteName($table.'.'.$action, $namespace);
     }
 
