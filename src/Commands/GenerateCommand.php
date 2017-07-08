@@ -7,15 +7,38 @@ use Illuminate\Routing\Router;
 use LaraSpell\Exceptions\InvalidTemplateException;
 use LaraSpell\Generator;
 use LaraSpell\Generators\CodeGenerator;
+use LaraSpell\Generators\ControllerGenerator;
+use LaraSpell\Generators\CreateRequestGenerator;
+use LaraSpell\Generators\MigrationGenerator;
+use LaraSpell\Generators\ModelGenerator;
+use LaraSpell\Generators\RepositoryClassGenerator;
+use LaraSpell\Generators\RepositoryInterfaceGenerator;
 use LaraSpell\Generators\RouteGenerator;
+use LaraSpell\Generators\ServiceProviderGenerator;
+use LaraSpell\Generators\UpdateRequestGenerator;
+use LaraSpell\Generators\ViewCreateGenerator;
+use LaraSpell\Generators\ViewDetailGenerator;
+use LaraSpell\Generators\ViewEditGenerator;
+use LaraSpell\Generators\ViewListGenerator;
 use LaraSpell\Schema\Schema;
 use LaraSpell\Schema\Table;
 use LaraSpell\Stub;
 use LaraSpell\Template;
+use LaraSpell\Traits\GeneratorUtils;
+use LaraSpell\Traits\TemplateUtil;
 use Symfony\Component\Yaml\Yaml;
 
-class GenerateCommand extends Command
+class GenerateCommand extends SchemaBasedCommand
 {
+    use GeneratorUtils;
+
+    const HOOK_BEFORE_GENERATE_CRUDS    = 'BEFORE_GENERATE_CRUDS';
+    const HOOK_BEFORE_EACH_CRUD         = 'BEFORE_EACH_CRUD';
+    const HOOK_AFTER_EACH_CRUD          = 'AFTER_EACH_CRUD';
+    const HOOK_AFTER_GENERATE_CRUDS     = 'AFTER_GENERATE_CRUDS';
+    const HOOK_BEFORE_REPORTS           = 'BEFORE_REPORTS';
+    const HOOK_END                      = 'END';
+
     /**
      * The name and signature of the console command.
      *
@@ -40,8 +63,6 @@ class GenerateCommand extends Command
     protected $description = 'Generate CRUD from given schema';
 
     protected $router;
-    protected $schema;
-    protected $generator;
     protected $menu = [];
     protected $repositories = [];
     protected $missingRoutes = [];
@@ -49,6 +70,7 @@ class GenerateCommand extends Command
     protected $modifiedFiles = [];
     protected $addedFiles = [];
     protected $generatedMigrations = [];
+    protected $suggestions = [];
 
     /**
      * Create a new command instance.
@@ -70,24 +92,16 @@ class GenerateCommand extends Command
     {
         $tableName = $this->option('table');
         $schemaFile = $this->argument('schema');
-        $this->initializeGenerator($schemaFile);
-        $this->runGenerator($tableName);
+        $this->initializeSchema($schemaFile);
+        $this->runGenerators($tableName);
         $this->showResult();
     }
 
-    protected function initializeGenerator($schemaFile)
-    {
-        if (!ends_with($schemaFile, '.yml')) {
-            $schemaFile .= '.yml';
-        }
-        $this->generator = new Generator($schemaFile);
-    }
-
-    protected function getSchema()
-    {
-        return $this->generator->getSchema();
-    }
-
+    /**
+     * Get tables to generate
+     *
+     * @return array of LaraSpell\Schema\Table
+     */
     protected function getTablesToGenerate()
     {
         $specificTable = $this->option('table');
@@ -104,12 +118,21 @@ class GenerateCommand extends Command
         return $tables;
     }
 
-    protected function runGenerator()
+    /**
+     * Generate and publish files
+     *
+     * @return void
+     */
+    protected function runGenerators()
     {
         $tables = $this->getTablesToGenerate();
+        $this->applyHook(self::HOOK_BEFORE_GENERATE_CRUDS, [$tables]);
         foreach($tables as $table) {
+            $this->applyHook(self::HOOK_BEFORE_EACH_CRUD, [$table]);
             $this->generateCrudForTable($table);
+            $this->applyHook(self::HOOK_AFTER_EACH_CRUD, [$table]);
         }
+        $this->applyHook(self::HOOK_AFTER_GENERATE_CRUDS, [$tables]);
 
         $this->generateBaseRepository();
         $this->generateRoutes();
@@ -123,10 +146,17 @@ class GenerateCommand extends Command
         }
     }
 
+    /**
+     * Show results
+     *
+     * @return void
+     */
     protected function showResult()
     {
-        print(PHP_EOL);
+        $this->applyHook(self::HOOK_BEFORE_REPORTS);
+
         // Show info count affected files
+        print(PHP_EOL);
         $this->info("DONE!");
         $countGenerateds = count($this->generatedFiles);
         $countAddeds = count($this->addedFiles);
@@ -136,6 +166,63 @@ class GenerateCommand extends Command
         $this->info("> {$countModifieds} ".($countModifieds > 1? 'files overwriteds' : 'file overwrited'));
 
         // Show suggestions
+        $this->showSuggestions();
+        $this->applyHook(self::HOOK_END);
+    }
+
+    /**
+     * Get suggestions
+     *
+     * @return array
+     */
+    protected function getSuggestions()
+    {
+        $suggestions = $this->suggestions;
+
+        // Suggestion missing disks
+        $missingDisks = $this->getMissingDisks();
+        $providers = config('app.providers');
+        $providerClass = $this->getSchema()->getServiceProviderClass();
+        $generatedMigrations = $this->generatedMigrations;
+        if (count($missingDisks)) {
+            $disks = [];
+            $code = new CodeGenerator;
+            foreach($missingDisks as $disk => $option) {
+                $columns = $option['columns'];
+                $disks[] = "'{$disk}' => ".$code->phpify($option['config'], true);
+            }
+            $code->addStatements("
+                // Find this section
+                'disks' => [
+                    ...
+                    // Add codes below
+                    ".implode(",".PHP_EOL, $disks)."
+                    // To this
+                ]
+            ");
+            $suggestions[] = "Add ".(count($disks) > 1? 'disks' : 'disk')." configuration to your 'config/filesystems.php':".PHP_EOL.$code->generateCode();
+        }
+
+        // Suggestion register provider
+        if (!in_array($providerClass, $providers)) {
+            $suggestions[] = "Add provider '{$providerClass}' to your 'config/app.php'.";
+        }
+
+        // Suggestion register provider
+        if (count($this->generatedMigrations)) {
+            $suggestions[] = "Run 'php artisan migrate' to run generated migrations.";
+        }
+
+        return $suggestions;
+    }
+
+    /**
+     * Display suggestions
+     *
+     * @return void
+     */
+    protected function showSuggestions()
+    {
         $suggestions = $this->getSuggestions();
         $lineLength = 80;
         if (!empty($suggestions)) {
@@ -163,61 +250,38 @@ class GenerateCommand extends Command
         }
     }
 
-    protected function getSuggestions()
-    {
-        $suggestions = [];
-        $missingDisks = $this->getMissingDisks();
-        $providers = config('app.providers');
-        $providerClass = $this->getSchema()->getServiceProviderClass();
-        $generatedMigrations = $this->generatedMigrations;
-        if (count($missingDisks)) {
-            $disks = [];
-            $code = new CodeGenerator;
-            foreach($missingDisks as $disk => $option) {
-                $columns = $option['columns'];
-                $disks[] = "'{$disk}' => ".$code->phpify($option['config'], true);
-            }
-            $code->addStatements("
-                // Find this section
-                'disks' => [
-                    ...
-                    // Add codes below
-                    ".implode(",".PHP_EOL, $disks)."
-                    // To this
-                ]
-            ");
-            $suggestions[] = "Add ".(count($disks) > 1? 'disks' : 'disk')." configuration to your 'config/filesystems.php':".PHP_EOL.$code->generateCode();
-        }
-        if (!in_array($providerClass, $providers)) {
-            $suggestions[] = "Add provider '{$providerClass}' to your 'config/app.php'.";
-        }
-        if (count($this->generatedMigrations)) {
-            $suggestions[] = "Run 'php artisan migrate' to run generated migrations.";
-        }
-
-        return $suggestions;
-    }
-
+    /**
+     * Generate CRUD for specific table
+     *
+     * @param  LaraSpell\Schema\Table $table
+     * @return void
+     */
     protected function generateCrudForTable(Table $table)
     {
-        $migration = !$this->option('no-migration');
+        app()->instance(Table::class, $table);
 
+        $migration = !$this->option('no-migration');
         if ($migration) {
-            $this->generateMigration($table);
+            $this->generateMigrationForTable($table);
         }
-        $this->generateController($table);
-        $this->generateCreateRequest($table);
-        $this->generateUpdateRequest($table);
-        $this->generateModel($table);
-        $this->generateRepositoryInterface($table);
-        $this->generateRepositoryClass($table);
+        $this->generateControllerForTable($table);
+        $this->generateCreateRequestForTable($table);
+        $this->generateUpdateRequestForTable($table);
+        $this->generateModelForTable($table);
+        $this->generateRepositoryInterfaceForTable($table);
+        $this->generateRepositoryClassForTable($table);
         $this->generateViews($table);
         $this->collectMissingRoutes($table);
-        $this->addMenu($table);
-        $this->addRepository($table);
+        $this->addMenu($table->getLabel(), $table->get('icon'), $table->getRouteListName());
+        $this->addRepository($table->getRepositoryInterface(), $table->getRepositoryClass());
     }
 
-    protected function generateMigration(Table $table)
+    /**
+     * Generate Migration for specific table
+     *
+     * @return void
+     */
+    protected function generateMigrationForTable(Table $table)
     {
         $ask = $this->option('askme');
         $replace = $this->option('replace-all');
@@ -243,7 +307,8 @@ class GenerateCommand extends Command
         }
 
         if (!$shouldGenerate) return;
-        $content = $this->generator->generateMigration($table);
+        $content = $this->runGenerator(MigrationGenerator::class);
+
         $this->writeFile($filePath, $content);
         switch($action) {
             case "[overwrite]": $this->addModifiedFile($filePath); break;
@@ -254,45 +319,45 @@ class GenerateCommand extends Command
         }
     }
 
-    protected function generateController(Table $table)
+    protected function generateControllerForTable(Table $table)
     {
         $filePath = $table->getControllerPath();
-        $content = $this->generator->generateController($table);
+        $content = $this->runGenerator(ControllerGenerator::class);
         $this->generateFile($filePath, $content);
     }
 
-    protected function generateCreateRequest(Table $table)
+    protected function generateCreateRequestForTable(Table $table)
     {
         $filePath = $table->getCreateRequestPath();
-        $content = $this->generator->generateCreateRequest($table);
+        $content = $this->runGenerator(CreateRequestGenerator::class);
         $this->generateFile($filePath, $content);
     }
 
-    protected function generateUpdateRequest(Table $table)
+    protected function generateUpdateRequestForTable(Table $table)
     {
         $filePath = $table->getUpdateRequestPath();
-        $content = $this->generator->generateUpdateRequest($table);
+        $content = $this->runGenerator(UpdateRequestGenerator::class);
         $this->generateFile($filePath, $content);
     }
 
-    protected function generateModel(Table $table)
+    protected function generateModelForTable(Table $table)
     {
         $filePath = $table->getModelPath();
-        $content = $this->generator->generateModel($table);
+        $content = $this->runGenerator(ModelGenerator::class);
         $this->generateFile($filePath, $content);
     }
 
-    protected function generateRepositoryInterface(Table $table)
+    protected function generateRepositoryInterfaceForTable(Table $table)
     {
         $filePath = $table->getRepositoryInterfacePath();
-        $content = $this->generator->generateRepositoryInterface($table);
+        $content = $this->runGenerator(RepositoryInterfaceGenerator::class);
         $this->generateFile($filePath, $content);
     }
 
-    protected function generateRepositoryClass(Table $table)
+    protected function generateRepositoryClassForTable(Table $table)
     {
         $filePath = $table->getRepositoryClassPath();
-        $content = $this->generator->generateRepositoryClass($table);
+        $content = $this->runGenerator(RepositoryClassGenerator::class);
         $this->generateFile($filePath, $content);
     }
 
@@ -310,10 +375,18 @@ class GenerateCommand extends Command
     protected function generateViews(Table $table)
     {
         $views = [
-            $table->getViewListPath() => $this->generator->generateViewPageList($table),
-            $table->getViewDetailPath() => $this->generator->generateViewPageDetail($table),
-            $table->getViewCreatePath() => $this->generator->generateViewFormCreate($table),
-            $table->getViewEditPath() => $this->generator->generateViewFormEdit($table),
+            $table->getViewListPath() => $this->runGenerator(ViewListGenerator::class, [
+                'stubContent' => $this->getTemplate()->getStubContent('page-list.stub')
+            ]),
+            $table->getViewDetailPath() => $this->runGenerator(ViewDetailGenerator::class, [
+                'stubContent' => $this->getTemplate()->getStubContent('page-detail.stub')
+            ]),
+            $table->getViewCreatePath() => $this->runGenerator(ViewCreateGenerator::class, [
+                'stubContent' => $this->getTemplate()->getStubContent('form-create.stub')
+            ]),
+            $table->getViewEditPath() => $this->runGenerator(ViewEditGenerator::class, [
+                'stubContent' => $this->getTemplate()->getStubContent('form-edit.stub')
+            ]),
         ];
 
         foreach($views as $path => $content) {
@@ -411,7 +484,7 @@ class GenerateCommand extends Command
         $missingRoutes = $this->missingRoutes;
         if (empty($missingRoutes)) return;
 
-        $generator = new RouteGenerator;
+        $generator = $this->makeGenerator(RouteGenerator::class);
         $namespace = ltrim(str_replace('App\Http\Controllers', '', $schema->getControllerNamespace()), "\\");
         $generator->addGroup([
             'namespace' => $namespace,
@@ -435,22 +508,17 @@ class GenerateCommand extends Command
         }
     }
 
-    protected function addMenu(Table $table)
+    public function addMenu($label, $icon, $route)
     {
-        $label = $table->getLabel();
-        $icon = $table->get('icon');
-        $routeName = $table->getRouteListName();
         $this->menu[] = [
             'label' => $label,
             'icon' => $icon,
-            'route' => $routeName
+            'route' => $route
         ];
     }
 
-    protected function addRepository(Table $table)
+    public function addRepository($interface, $class)
     {
-        $interface = $table->getRepositoryInterface();
-        $class = $table->getRepositoryClass();
         $this->repositories[$interface] = $class;
     }
 
@@ -487,20 +555,30 @@ class GenerateCommand extends Command
         } else {
             $this->addModifiedFile($configFilepath);
         }
-        $content = $this->generator->generateConfig($configs['repositories'], $configs['menu']);
-        $this->writeFile($configFilepath, $content);
+        $code = new CodeGenerator;
+        $config = [
+            'repositories' => $repositories,
+            'menu' => $menu
+        ];
+
+        foreach($config['repositories'] as $interface => $class) {
+            $config['repositories'][$interface] = 'eval("\''.$class.'\'")';
+        }
+        $configArray = $code->phpify($config, true);
+        $content = "<?php\n\nreturn {$configArray};\n";
+        $this->writeFile('config/'.$configFile, $content);
     }
 
     protected function generateProvider()
     {
         $filePath = $this->getSchema()->getServiceProviderPath();
-        $content = $this->generator->generateServiceProvider();
+        $content = $this->runGenerator(ServiceProviderGenerator::class);
         $this->generateFile($filePath, $content);
     }
 
     protected function publishViewFiles()
     {
-        $template = $this->generator->getTemplate();
+        $template = $this->getTemplate();
         $viewPath = $this->getSchema()->getViewpath();
         $templateViewDir = $template->getDirectory().'/'.$template->getViewDirectory();
         $viewFiles = $template->getViewFiles();
@@ -522,7 +600,7 @@ class GenerateCommand extends Command
     protected function publishPublicFiles()
     {
         $replace = $this->option('replace-all');
-        $template = $this->generator->getTemplate();
+        $template = $this->getTemplate();
         $publicFiles = $template->getPublicFiles();
         $publicPath = 'public';
         $templatePublicPath = $template->getDirectory().'/'.$template->getPublicDirectory();
