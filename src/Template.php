@@ -53,9 +53,9 @@ class Template
         return $this->getContent($this->viewDirectory.'/'.$viewFile);
     }
 
-    public function getPublicFiles()
+    public function getPublicFiles($dir = null)
     {
-        return $this->getFiles($this->publicDirectory);
+        return $this->getFiles($this->publicDirectory.($dir? '/'.$dir : ''));
     }
 
     public function getViewFiles()
