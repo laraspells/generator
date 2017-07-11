@@ -326,13 +326,54 @@ class Schema extends AbstractSchema
     /**
      * Get route name
      *
-     * @param string $route
+     * @param  string $route
+     * @param  bool $includeNamespace
      * @return string
      */
-    public function getRouteName($route, $includeNamespace = true)
+    public function getRouteName($route = '', $includeNamespace = true)
     {
         $namespace = $this->get('route.name');
         return $includeNamespace? $namespace.$route : $route;
+    }
+
+    /**
+     * Get route controller namespace.
+     *
+     * @return string
+     */
+    public function getRouteNamespace()
+    {
+        return $this->get('route.namespace');
+    }
+
+    /**
+     * Get route prefix
+     *
+     * @return string
+     */
+    public function getRoutePrefix()
+    {
+        return $this->get('route.prefix');
+    }
+
+    /**
+     * Get route middleware
+     *
+     * @return string
+     */
+    public function getRouteMiddleware()
+    {
+        return $this->get('route.middleware');
+    }
+
+    /**
+     * Get route domain
+     *
+     * @return string
+     */
+    public function getRouteDomain()
+    {
+        return $this->get('route.domain');
     }
 
     /**

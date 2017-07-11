@@ -21,6 +21,7 @@ abstract class SchemaBasedCommand extends Command
     protected $schema;
     protected $template;
     protected $hooks = [];
+    protected $schemaFile;
 
     /**
      * Set SchemaResolver instance
@@ -59,6 +60,7 @@ abstract class SchemaBasedCommand extends Command
         if (!is_file($schemaFile)) {
             throw new InvalidArgumentException("Schema file '{$schemaFile}' not found.");
         }
+        $this->schemaFile = $schemaFile;
 
         // Parse schema yml file
         $schemaFileContent = file_get_contents($schemaFile);
@@ -77,6 +79,16 @@ abstract class SchemaBasedCommand extends Command
         $arraySchema = $resolver->resolve($arraySchema);
         $this->schema = new Schema($arraySchema);
         app()->instance(Schema::class, $this->schema);
+    }
+
+    /**
+     * Get schema file
+     *
+     * @return string
+     */
+    protected function getSchemaFile()
+    {
+        return $this->schemaFile;
     }
 
     /**

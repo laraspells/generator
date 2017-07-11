@@ -9,6 +9,7 @@ use LaraSpell\Generator;
 use LaraSpell\Generators\CodeGenerator;
 use LaraSpell\Generators\ControllerGenerator;
 use LaraSpell\Generators\CreateRequestGenerator;
+use LaraSpell\Generators\DocblockGenerator;
 use LaraSpell\Generators\MigrationGenerator;
 use LaraSpell\Generators\ModelGenerator;
 use LaraSpell\Generators\RepositoryClassGenerator;
@@ -24,13 +25,15 @@ use LaraSpell\Schema\Schema;
 use LaraSpell\Schema\Table;
 use LaraSpell\Stub;
 use LaraSpell\Template;
-use LaraSpell\Traits\GeneratorUtils;
 use LaraSpell\Traits\TemplateUtil;
 use Symfony\Component\Yaml\Yaml;
 
 class GenerateCommand extends SchemaBasedCommand
 {
-    use GeneratorUtils;
+    use Concerns\GeneratorBinder,
+        Concerns\RouteUtils,
+        Concerns\MigrationUtils,
+        Concerns\ConfigUtils;
 
     const HOOK_BEFORE_GENERATE_CRUDS    = 'BEFORE_GENERATE_CRUDS';
     const HOOK_BEFORE_EACH_CRUD         = 'BEFORE_EACH_CRUD';
@@ -119,6 +122,19 @@ class GenerateCommand extends SchemaBasedCommand
     }
 
     /**
+     * Run generator.
+     *
+     * @param  string $class
+     * @param  array $params
+     * @return string
+     */
+    public function runGenerator($class, array $params = [])
+    {
+        $generator = $this->makeGenerator($class, $params);
+        return $generator->generateCode();
+    }
+
+    /**
      * Generate and publish files
      *
      * @return void
@@ -135,8 +151,8 @@ class GenerateCommand extends SchemaBasedCommand
         $this->applyHook(self::HOOK_AFTER_GENERATE_CRUDS, [$tables]);
 
         $this->generateBaseRepository();
-        $this->generateRoutes();
-        $this->generateConfig();
+        $this->generateAddedRoutes();
+        $this->persistConfigs();
         $this->generateProvider();
         if (!$this->option('no-views')) {
             $this->publishViewFiles();
@@ -271,9 +287,9 @@ class GenerateCommand extends SchemaBasedCommand
         $this->generateRepositoryInterfaceForTable($table);
         $this->generateRepositoryClassForTable($table);
         $this->generateViews($table);
-        $this->collectMissingRoutes($table);
-        $this->addMenu($table->getLabel(), $table->get('icon'), $table->getRouteListName());
-        $this->addRepository($table->getRepositoryInterface(), $table->getRepositoryClass());
+        $this->addCrudMissingRoutes($table);
+        $this->addConfigRepository($table->getRepositoryInterface(), $table->getRepositoryClass());
+        $this->addConfigMenu($table->getRouteListName(), $table->getLabel(), ['icon' => $table->get('icon')]);
     }
 
     /**
@@ -394,179 +410,61 @@ class GenerateCommand extends SchemaBasedCommand
         }
     }
 
-    protected function collectMissingRoutes(Table $table)
+    protected function generateAddedRoutes()
     {
-        $rootSchema = $table->getRootSchema();
-        $tableName = str_replace("_", "-", $table->getName());
-        $pk = $table->getPrimaryColumn();
-        $controller = $table->getControllerClass(false);
-        $namespace = $rootSchema->get('route.name');
-        $route = [
-            'list' => $table->getRouteListName(false),
-            'page_detail' => $table->getRouteDetailName(false),
-            'form_create' => $table->getRouteCreateName(false),
-            'post_create' => $table->getRoutePostCreateName(false),
-            'form_edit' => $table->getRouteEditName(false),
-            'post_edit' => $table->getRoutePostEditName(false),
-            'delete' => $table->getRouteDeleteName(false),
-        ];
-
-        if (!$this->router->has($namespace.$route['list'])) {
-            $this->missingRoutes[] = [
-                'method' => 'get',
-                'path' => $tableName,
-                'uses' => $controller.'@pageList',
-                'name' => $route['list']
-            ];
-        }
-
-        if (!$this->router->has($namespace.$route['form_create'])) {
-            $this->missingRoutes[] = [
-                'method' => 'get',
-                'path' => $tableName.'/create',
-                'uses' => $controller.'@formCreate',
-                'name' => $route['form_create']
-            ];
-        }
-
-        if (!$this->router->has($namespace.$route['post_create'])) {
-            $this->missingRoutes[] = [
-                'method' => 'post',
-                'path' => $tableName.'/create',
-                'uses' => $controller.'@postCreate',
-                'name' => $route['post_create']
-            ];
-        }
-
-        if (!$this->router->has($namespace.$route['form_edit'])) {
-            $this->missingRoutes[] = [
-                'method' => 'get',
-                'path' => $tableName.'/edit/{'.$pk.'}',
-                'uses' => $controller.'@formEdit',
-                'name' => $route['form_edit']
-            ];
-        }
-
-        if (!$this->router->has($namespace.$route['post_edit'])) {
-            $this->missingRoutes[] = [
-                'method' => 'post',
-                'path' => $tableName.'/edit/{'.$pk.'}',
-                'uses' => $controller.'@postEdit',
-                'name' => $route['post_edit']
-            ];
-        }
-
-        if (!$this->router->has($namespace.$route['delete'])) {
-            $this->missingRoutes[] = [
-                'method' => 'get',
-                'path' => $tableName.'/delete/{'.$pk.'}',
-                'uses' => $controller.'@delete',
-                'name' => $route['delete']
-            ];
-        }
-
-        if (!$this->router->has($namespace.$route['page_detail'])) {
-            $this->missingRoutes[] = [
-                'method' => 'get',
-                'path' => $tableName.'/{'.$pk.'}',
-                'uses' => $controller.'@pageDetail',
-                'name' => $route['page_detail']
-            ];
+        if ($this->countAddedRoutes() > 0) {
+            $docblock = new DocblockGenerator;
+            $authorName = $this->getSchema()->getAuthorName();
+            $authorEmail = $this->getSchema()->getAuthorEmail();
+            $docblock->addText("Generated by LaraSpell");
+            $docblock->addAnnotation("author", "{$authorName}<{$authorEmail}>");
+            $docblock->addAnnotation("added", date('Y-m-d H:i'));
+            $this->writeOrAppendRouteFile("\n".$docblock->generateCode());
+            $this->writeOrAppendRouteFile($this->getRouteGeneratorOutside()->generateCode());
         }
     }
 
-    protected function generateRoutes()
+    /**
+     * Write or append route file
+     *
+     * @param  string $code
+     * @return void
+     */
+    protected function writeOrAppendRouteFile($code)
     {
-        $schema = $this->getSchema();
-        $routeFile = $schema->get('route.file');
-        if (!ends_with($routeFile, '.php')) $routeFile .= '.php';
+        $routeFile = $this->getSchema()->getRouteFile();
+        $routeFileExists = $this->hasFile($routeFile);
 
-        $missingRoutes = $this->missingRoutes;
-        if (empty($missingRoutes)) return;
-
-        $generator = $this->makeGenerator(RouteGenerator::class);
-        $namespace = ltrim(str_replace('App\Http\Controllers', '', $schema->getControllerNamespace()), "\\");
-        $generator->addGroup([
-            'namespace' => $namespace,
-            'name' => $schema->get('route.name') ?: null,
-            'prefix' => $schema->get('route.prefix') ?: null,
-            'middleware' => $schema->get('route.middleware') ?: null,
-            'domain' => $schema->get('route.domain') ?: null
-        ], function($routeGenerator) use ($missingRoutes) {
-            foreach($missingRoutes as $route) {
-                $routeGenerator->addRoute($route['method'], $route['path'], $route['uses'], [
-                    'name' => $route['name']
-                ]);
-            }
-        });
-
-        $content = $generator->generateCode();
-        if ($this->hasFile($routeFile)) {
-            $this->appendFile($routeFile, $content);
+        if ($routeFileExists) {
+            return $this->appendFile($routeFile, $code);
         } else {
-            $this->writeFile($routeFile, "<?php\n\n".$content);
+            return $this->writeFile($routeFile, "<?php\n\n".$code);
         }
     }
 
-    public function addMenu($label, $icon, $route)
+    protected function addRoutesToGenerator(array $routes, RouteGenerator $generator)
     {
-        $this->menu[] = [
-            'label' => $label,
-            'icon' => $icon,
-            'route' => $route
-        ];
-    }
-
-    public function addRepository($interface, $class)
-    {
-        $this->repositories[$interface] = $class;
-    }
-
-    protected function generateConfig()
-    {
-        $configKey = $this->getSchema()->getConfigKey();
-        $configs = config($configKey) ?: [];
-        data_fill($configs, 'repositories', []);
-        data_fill($configs, 'menu', []);
-
-        // Add missing config repositories
-        $repositories = $this->repositories;
-        foreach($repositories as $interface => $class) {
-            if (!isset($configs['repositories'][$interface])) {
-                $configs['repositories'][$interface] = $class;
-            }
+        foreach($routes as $route) {
+            $generator->addRoute($route['method'], $route['path'], $route['uses'], [
+                'name' => $route['name']
+            ]);
         }
+    }
 
-        // Add missing config menu
-        $menu = $this->menu;
-        foreach($menu as $option) {
-            $exists = array_first($configs['menu'], function($menu) use ($option) {
-                return $menu['route'] == $option['route'];
+    protected function addRouteGroupsToGenerator(array $groups, RouteGenerator $generator)
+    {
+        foreach($groups as $group) {
+            $generator->addGroup(array_merge([
+                'name' => array_get($group, 'name'),
+            ], $group['options']), function($routeGenerator) use ($group) {
+                $routes = $group['routes'];
+                foreach($routes as $route) {
+                    $routeGenerator->addRoute($route['method'], $route['path'], $route['uses'], [
+                        'name' => $route['name']
+                    ]);
+                }
             });
-            if (!$exists) {
-                $configs['menu'][] = $option;
-            }
         }
-
-        $configFile = $this->getSchema()->getConfigFile();
-        $configFilepath = 'config/'.$configFile;
-        if (!$this->hasFile($configFilepath)) {
-            $this->addGeneratedFile($configFilepath);
-        } else {
-            $this->addModifiedFile($configFilepath);
-        }
-        $code = new CodeGenerator;
-        $config = [
-            'repositories' => $repositories,
-            'menu' => $menu
-        ];
-
-        foreach($config['repositories'] as $interface => $class) {
-            $config['repositories'][$interface] = 'eval("\''.$class.'\'")';
-        }
-        $configArray = $code->phpify($config, true);
-        $content = "<?php\n\nreturn {$configArray};\n";
-        $this->writeFile('config/'.$configFile, $content);
     }
 
     protected function generateProvider()
@@ -678,6 +576,11 @@ class GenerateCommand extends SchemaBasedCommand
         return file_exists(base_path($path));
     }
 
+    protected function getFileContent($path)
+    {
+        return file_get_contents(base_path($path));
+    }
+
     protected function addGeneratedFile($file, $info = true)
     {
         $this->generatedFiles[] = $file;
@@ -710,19 +613,6 @@ class GenerateCommand extends SchemaBasedCommand
     protected function getModifiedFiles()
     {
         return $this->modifiedFiles;
-    }
-
-    protected function getExistingMigrationFile(Table $table)
-    {
-        $table = $table->getName();
-        $migrations = glob(base_path('database/migrations/*.php'));
-        foreach($migrations as $migration) {
-            $content = file_get_contents($migration);
-            if (str_contains($content, "Schema::create('{$table}'")) {
-                return ltrim(str_replace(base_path(), '', $migration), '/');
-            }
-        }
-        return null;
     }
 
     /**

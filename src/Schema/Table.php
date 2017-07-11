@@ -138,7 +138,7 @@ class Table extends AbstractSchema
     public function getControllerClass($namespace = true)
     {
         $table = $this->getName();
-        $controller = $this->get('controller') ?: ucfirst(camel_case(str_singular($table))).'Controller';
+        $controller = $this->get('controller') ?: ucfirst(camel_case($this->getSingularName())).'Controller';
         return $namespace? $this->getRootSchema()->getControllerClass($controller) : $controller;
     }
 
@@ -207,7 +207,7 @@ class Table extends AbstractSchema
     public function getModelClass($namespace = true)
     {
         $table = $this->getName();
-        $model = $this->get('model') ?: ucfirst(camel_case(str_singular($table)));
+        $model = $this->get('model') ?: ucfirst(camel_case($this->getSingularName()));
         return $namespace? $this->getRootSchema()->getModelClass($model) : $model;
     }
 
@@ -280,7 +280,7 @@ class Table extends AbstractSchema
      */
     public function getRepositoryInterface($namespace = true)
     {
-        $interface = ucfirst(str_singular($this->getName())).'Repository';
+        $interface = ucfirst(camel_case($this->getSingularName())).'Repository';
         return $namespace? $this->getRootSchema()->getRepositoryInterface($interface) : $interface;
     }
 
@@ -292,7 +292,7 @@ class Table extends AbstractSchema
      */
     public function getRepositoryClass($namespace = true)
     {
-        $class = ucfirst(str_singular($this->getName())).'Repository';
+        $class = ucfirst(camel_case($this->getSingularName())).'Repository';
         return $namespace? $this->getRootSchema()->getRepositoryClass($class) : $class;
     }
 
@@ -454,10 +454,14 @@ class Table extends AbstractSchema
         return $this->getRouteName('delete', $namespace);
     }
 
-    public function getRouteName($action, $namespace = true)
+    public function getRouteName($action = '', $namespace = true)
     {
-        $table = str_replace("_", "-", $this->getName());
-        return $this->getRootSchema()->getRouteName($table.'.'.$action, $namespace);
+        return $this->getRootSchema()->getRouteName($this->getRoutePrefix().'.'.$action, $namespace);
+    }
+
+    public function getRoutePrefix()
+    {
+        return str_replace("_", "-", $this->getName());
     }
 
     public function getRelations()

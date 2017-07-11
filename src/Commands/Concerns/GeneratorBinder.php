@@ -1,6 +1,6 @@
 <?php
 
-namespace LaraSpell\Traits;
+namespace LaraSpell\Commands\Concerns;
 
 use InvalidArgumentException;
 use LaraSpell\Generators\BaseGenerator;
@@ -20,15 +20,29 @@ use LaraSpell\Generators\ViewEditGenerator;
 use LaraSpell\Generators\ViewListGenerator;
 use LaraSpell\Template;
 
-trait GeneratorUtils
+trait GeneratorBinder
 {
 
+    /**
+     * Bind generator class.
+     *
+     * @param  string $class
+     * @param  string $generatorClass
+     * @return void
+     */
     public function bindGenerator($class, $generatorClass)
     {
         $this->validateBindableGenerator($class, $generatorClass);
         app()->bind($class, $generatorClass);
     }
 
+    /**
+     * Make generator instance.
+     *
+     * @param  string $class
+     * @param  array $params
+     * @return LaraSpell\Generators\BaseGenerator
+     */
     public function makeGenerator($class, array $params = [])
     {
         $this->validateBindableGenerator($class);
@@ -39,12 +53,13 @@ trait GeneratorUtils
         }
     }
 
-    public function runGenerator($class, array $params = [])
-    {
-        $generator = $this->makeGenerator($class, $params);
-        return $generator->generateCode();
-    }
-
+    /**
+     * Validate bindable generator.
+     *
+     * @param  string $class
+     * @param  string $generatorClass
+     * @return void
+     */
     protected function validateBindableGenerator($class, $generatorClass = null)
     {
         $bindableGenerators = $this->getBindableGenerators();
@@ -60,6 +75,11 @@ trait GeneratorUtils
         }
     }
 
+    /**
+     * Get bindable generator classes
+     *
+     * @return array
+     */
     protected function getBindableGenerators()
     {
         return [
