@@ -157,6 +157,8 @@ class GenerateCommand extends SchemaBasedCommand
         $this->setGeneratorInstance(ViewEditGenerator::class, $this->makeGenerator(ViewEditGenerator::class, [
             $this->getTemplate()->getStubContent('form-edit.stub')
         ]));
+
+        dd($this->getGeneratorViewList()->getContent());
     }
 
     /**
