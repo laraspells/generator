@@ -3,11 +3,11 @@
 namespace LaraSpell\Generators;
 
 use LaraSpell\Stub;
-use LaraSpell\Traits\TableDataGetter;
+use LaraSpell\Traits\Concerns\TableUtils;
 
 class ViewCreateGenerator extends ViewGenerator
 {
-    use TableDataGetter;
+    use Concerns\TableUtils;
 
     protected function getTableSchema()
     {
@@ -77,7 +77,7 @@ class ViewCreateGenerator extends ViewGenerator
         }
 
         $code = $this->makeCodeGenerator();
-        $code->addStatements(implode("\n\n", $includeFields));
+        $code->addCode(implode("\n\n", $includeFields));
 
         return $code->generateCode();
     }

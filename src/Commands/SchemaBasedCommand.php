@@ -2,20 +2,19 @@
 
 namespace LaraSpell\Commands;
 
+use Closure;
 use Illuminate\Console\Command;
 use Illuminate\Routing\Router;
 use InvalidArgumentException;
 use LaraSpell\Exceptions\InvalidSchemaException;
+use LaraSpell\Extension;
 use LaraSpell\SchemaResolver;
 use LaraSpell\Schema\Schema;
 use LaraSpell\Template;
 use Symfony\Component\Yaml\Yaml;
-use Closure;
 
 abstract class SchemaBasedCommand extends Command
 {
-    const TEMPLATE_INIT_FILE = 'init.php';
-
     protected $originalSchema;
     protected $schemaResolver;
     protected $schema;
@@ -23,25 +22,12 @@ abstract class SchemaBasedCommand extends Command
     protected $hooks = [];
     protected $schemaFile;
 
-    /**
-     * Set SchemaResolver instance
-     *
-     * @param  LaraSpell\SchemaResolver $resolver
-     * @return void
-     */
-    public function setSchemaResolver(SchemaResolver $schemaResolver)
+    public function __construct()
     {
-        $this->schemaResolver = $schemaResolver;
-    }
+        parent::__construct();
 
-    /**
-     * Get SchemaResolver instance
-     *
-     * @return null|LaraSpell\SchemaResolver
-     */
-    public function getSchemaResolver()
-    {
-        return $this->schemaResolver;
+        // Bind command instance for template and extensions
+        app()->instance(self::class, $this);
     }
 
     /**
@@ -71,11 +57,12 @@ abstract class SchemaBasedCommand extends Command
         $this->initializeTemplate($arraySchema);
 
         // Resolve Schema
-        $resolver = $this->getSchemaResolver();
+        $resolver = $this->getTemplate()->getSchemaResolver();
         if (!$resolver) {
             $resolver = new SchemaResolver();
         }
 
+        // Initialize Schema
         $arraySchema = $resolver->resolve($arraySchema);
         $this->schema = new Schema($arraySchema);
         app()->instance(Schema::class, $this->schema);
@@ -113,26 +100,39 @@ abstract class SchemaBasedCommand extends Command
             throw new InvalidSchemaException("Schema must have 'template' key.");
         }
 
-        $templateDir = $arraySchema['template'];
-        if (!is_dir($templateDir)) {
-            throw new InvalidSchemaException("Template directory '{$templateDir}' not found.");
+        $templateClass = $arraySchema['template'];
+        $template = $this->template = app($templateClass);
+        if (!$template instanceof Template) {
+            throw new InvalidSchemaException("Template '{$templateClass}' must be subclass of '".Template::class."'.");
         }
-
-        $this->template = new Template($templateDir);
-        $this->includeTemplateInitFile($this->template);
+        $this->validateTemplate($template);
     }
 
-    /**
-     * Include template init file
-     *
-     * @return void
-     */
-    protected function includeTemplateInitFile(Template $template)
+    protected function validateTemplate(Template $template)
     {
-        $templateInitFile = static::TEMPLATE_INIT_FILE;
-        if ($template->hasFile($templateInitFile)) {
-            $generator = $this;
-            require_once($template->getFilePath($templateInitFile));
+        $folderStub = $template->getFolderStub();
+        $folderView = $template->getFolderView();
+        $requiredFiles = [
+            $folderStub.'/page-list.stub',
+            $folderStub.'/page-detail.stub',
+            $folderStub.'/form-create.stub',
+            $folderStub.'/form-edit.stub',
+            $folderView.'/partials/fields/text.blade.php',
+            $folderView.'/partials/fields/number.blade.php',
+            $folderView.'/partials/fields/email.blade.php',
+            $folderView.'/partials/fields/textarea.blade.php',
+            $folderView.'/partials/fields/select.blade.php',
+            $folderView.'/partials/fields/select-multiple.blade.php',
+            $folderView.'/partials/fields/file.blade.php',
+            $folderView.'/partials/fields/checkbox.blade.php',
+            $folderView.'/partials/fields/radio.blade.php',
+            $folderView.'/layout/master.blade.php',
+        ];
+        foreach($requiredFiles as $file) {
+            if (!$template->hasFile($file)) {
+                $filepath = $template->getFilepath($file);
+                throw new \Exception("Template must have file '{$filepath}'.");
+            }
         }
     }
 
@@ -150,12 +150,26 @@ abstract class SchemaBasedCommand extends Command
      * Register/set an hook callback
      *
      * @param  string $key
-     * @param  Closure $callback
+     * @param  callable $callback
      * @return void
      */
-    public function hook($key, Closure $callback)
+    public function hook($key, callable $callback)
     {
-        $this->hooks[$key] = $callback;
+        if (!isset($this->hooks[$key])) {
+            $this->hooks[$key] = [];
+        }
+        $this->hooks[$key][] = $callback;
+    }
+
+    /**
+     * Get hooks by key
+     *
+     * @param  string $key
+     * @return array
+     */
+    protected function getHooks($key)
+    {
+        return isset($this->hooks[$key])? $this->hooks[$key] : [];
     }
 
     /**
@@ -167,12 +181,9 @@ abstract class SchemaBasedCommand extends Command
      */
     protected function applyHook($key, array $params = [])
     {
-        if (!isset($this->hooks[$key])) {
-            return;
+        foreach($this->getHooks($key) as $hook) {
+            call_user_func_array($hook, $params);
         }
-
-        $hook = $this->hooks[$key];
-        call_user_func_array($hook, $params);
     }
 
 }

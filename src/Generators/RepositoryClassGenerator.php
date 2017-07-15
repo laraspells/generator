@@ -39,7 +39,7 @@ class RepositoryClassGenerator extends ClassGenerator
         });
     }
 
-    protected function methodConstruct(MethodGenerator $method)
+    protected function setMethodConstruct(MethodGenerator $method)
     {
         $modelClass = $this->tableSchema->getModelClass(true);
         $method->addArgument('model', $modelClass);
@@ -48,7 +48,7 @@ class RepositoryClassGenerator extends ClassGenerator
             $docblock->addParam('model', $modelClass);
         });
         $method->setCode(function($code) use ($modelClass) {
-            $code->addStatements('parent::__construct($model);');
+            $code->addCode('parent::__construct($model);');
         });
     }
 

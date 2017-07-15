@@ -24,6 +24,11 @@ abstract class AbstractSchema
         return array_get($this->schema, $key);
     }
 
+    public function has($key)
+    {
+        return array_has($this->schema, $key);
+    }
+
     public function toArray()
     {
         return $this->schema;

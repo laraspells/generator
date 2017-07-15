@@ -1,13 +1,43 @@
 <?php
 
-namespace LaraSpell\Traits;
+namespace LaraSpell\Generators\Concerns;
 
-trait TableDataGetter
+use LaraSpell\Schema\Table;
+
+trait TableUtils
 {
 
     protected $tableData;
+    protected $tableSchema;
 
-    protected function getTableData($key = null)
+    /**
+     * Set table schema.
+     *
+     * @param  LaraSpell\Schema\Table $tableSchema
+     * @return void
+     */
+    public function setTableSchema(Table $tableSchema)
+    {
+        $this->tableSchema = $tableSchema;
+        return $this;
+    }
+
+    /**
+     * Get table schema.
+     *
+     * @return null|LaraSpell\Schema\Table
+     */
+    public function getTableSchema()
+    {
+        return $this->tableSchema;
+    }
+
+    /**
+     * Get table common data.
+     *
+     * @return stdClass
+     */
+    public function getTableData($key = null)
     {
         if (!$this->tableData) {
             $schema = $this->getTableSchema();

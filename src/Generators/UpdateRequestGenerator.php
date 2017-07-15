@@ -3,12 +3,12 @@
 namespace LaraSpell\Generators;
 
 use LaraSpell\Schema\Table;
-use LaraSpell\Traits\TableDataGetter;
+use LaraSpell\Traits\Concerns\TableUtils;
 
 class UpdateRequestGenerator extends CreateRequestGenerator
 {
 
-    use TableDataGetter;
+    use Concerns\TableUtils;
 
     protected $tableSchema;
 

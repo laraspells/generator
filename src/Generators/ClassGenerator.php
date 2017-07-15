@@ -7,6 +7,7 @@ use ReflectionClass;
 
 class ClassGenerator extends BaseGenerator
 {
+    use Concerns\Docblockable;
 
     protected $className;
     protected $namespace;
@@ -16,7 +17,6 @@ class ClassGenerator extends BaseGenerator
 
     protected $isAbstract = false;
 
-    protected $docblock;
     protected $parent;
     protected $implements = [];
     protected $methods = [];
@@ -26,46 +26,104 @@ class ClassGenerator extends BaseGenerator
         $this->setClassName($class);
     }
 
+    /**
+     * Set class namespace.
+     *
+     * @param  string $namespace
+     * @return void
+     */
     public function setNamespace($namespace)
     {
         $this->namespace = $namespace;
     }
 
+    /**
+     * Get class namespace.
+     *
+     * @return string
+     */
     public function getNamespace()
     {
         return $this->namespace;
     }
 
+    /**
+     * Get used classes.
+     *
+     * @return array
+     */
     public function getUsedClasses()
     {
         return $this->uses;
     }
 
-    public function getTraits()
+    /**
+     * Get used traits.
+     *
+     * @return array
+     */
+    public function getUsedTraits()
     {
         return $this->traits;
     }
 
+    /**
+     * Set parent class name.
+     *
+     * @param  string $class
+     * @return void
+     */
     public function setParentClass($class)
     {
         $this->parent = $class;
     }
 
+    /**
+     * Get parent class name.
+     *
+     * @return string
+     */
     public function getParentClass()
     {
         return $this->parent;
     }
 
+    /**
+     * Add used class.
+     *
+     * @param  string $usedClass
+     * @param  string $alias
+     * @return void
+     */
     public function useClass($usedClass, $alias = null)
     {
         $this->uses[ltrim($usedClass, "\\")] = $alias;
     }
 
+    /**
+     * Add used trait.
+     *
+     * @param  string $usedTrait
+     * @return void
+     */
     public function useTrait($usedTrait)
     {
-        $this->traits[] = $usedTrait;
+        if (!in_array($usedTrait, $this->traits)) {
+            $this->traits[] = $usedTrait;
+        }
     }
 
+    /**
+     * Add class property.
+     *
+     * @param  string $name
+     * @param  string $type
+     * @param  string $visibility
+     * @param  mixed $initialValue
+     * @param  string $description
+     * @param  bool $static
+     * @return void
+     */
     public function addProperty($name, $type, $visibility, $initialValue = null, $description = null, $static = false)
     {
         $this->properties[$name] = [
@@ -77,35 +135,67 @@ class ClassGenerator extends BaseGenerator
         ];
     }
 
+    /**
+     * Get registered properties.
+     *
+     * @return array
+     */
     public function getProperties()
     {
         return $this->properties;
     }
 
+    /**
+     * Set class is abstract (true) or not (false).
+     *
+     * @return void
+     */
     public function setAbstract($bool)
     {
         $this->isAbstract = $bool;
     }
 
+    /**
+     * Check if class is abstract class.
+     *
+     * @return bool
+     */
     public function isAbstract()
     {
         return (bool) $this->isAbstract;
     }
 
+    /**
+     * Set class name (can be using namespace).
+     *
+     * @param  string $class
+     * @return void
+     */
     public function setClassName($class)
     {
         list($namespace, $className) = $this->parseClassNamespace($class);
         $this->className = $className;
         if ($namespace) {
             $this->setNamespace($namespace);
-        } 
+        }
     }
 
+    /**
+     * Get class name without namespace.
+     *
+     * @return string
+     */
     public function getClassName()
     {
         return $this->className;
     }
 
+    /**
+     * Add new method
+     *
+     * @param   string $method
+     * @return  LaraSpell\Generators\MethodGenerator
+     */
     public function addMethod($method)
     {
         $methodGenerator = new MethodGenerator($method);
@@ -114,32 +204,69 @@ class ClassGenerator extends BaseGenerator
         return $methodGenerator;
     }
 
-    public function getMethod($method)
+    /**
+     * Check if class has given method
+     *
+     * @param  string $method
+     * @return bool
+     */
+    public function hasMethod($method)
     {
-        return isset($this->methods[$method])? $this->methods[$method] : null;
+        return isset($this->methods[$method]);
     }
 
+    /**
+     * Get method by name
+     *
+     * @param  string $method
+     * @return null|LaraSpell\Generators\MethodGenerator
+     */
+    public function getMethod($method)
+    {
+        return $this->hasMethod($method)? $this->methods[$method] : null;
+    }
+
+    /**
+     * Get registered methods
+     *
+     * @return array
+     */
     public function getMethods()
     {
         return $this->methods;
     }
 
-    public function setDocblock(Closure $callback)
+    /**
+     * Add or modify method.
+     *
+     * @param  string $method
+     * @param  Closure $callback
+     * @return void
+     */
+    public function method($method, Closure $callback)
     {
-        $this->docblock = new DocblockGenerator;
-        $callback($this->docblock);
+        $method = $this->getMethod($method) ?: $this->addMethod($method);
+        $callback($method);
     }
 
-    public function getDocblock()
+    /**
+     * Add implemented interface.
+     *
+     * @param  $interface
+     * @return void
+     */
+    public function addImplement($interface)
     {
-        return $this->docblock;
+        if (!in_array($interface, $this->implements)) {
+            $this->implements[] = $interface;
+        }
     }
 
-    public function addImplement($class)
-    {
-        $this->implements[] = $class;
-    }
-
+    /**
+     * Get implemented interfaces.
+     *
+     * @return array
+     */
     public function getImplements()
     {
         return $this->implements;
@@ -151,7 +278,7 @@ class ClassGenerator extends BaseGenerator
         $className = $this->getClassName();
         $parentClass = $this->getParentClass();
         $implements = $this->getImplements();
-        $traits = $this->getTraits();
+        $traits = $this->getUsedTraits();
         $uses = $this->getUsedClasses();
         list($uses, $parentClass, $implements, $traits) = $this->resolveUses($uses, $parentClass, $implements, $traits);
 
@@ -212,7 +339,7 @@ class ClassGenerator extends BaseGenerator
                 $options['static']? 'static' : '',
                 '$'.$property,
                 $options['initialValue']? '= '.$this->phpify($options['initialValue'], true) : '',
-            ]))).';')); 
+            ]))).';'));
 
             $lines = array_merge($lines, $this->applyIndents($propertyLines, 1));
         }
@@ -282,12 +409,12 @@ class ClassGenerator extends BaseGenerator
         $reflection = new ReflectionClass($object ?: $this);
         $methods = array_filter($reflection->getMethods(), function($method) {
             $name = $method->getName();
-            return starts_with($name, 'method');
+            return (bool) preg_match("/^setMethod[A-Z]/", $name);
         });
 
         foreach($methods as $reflectionMethod) {
             // Remove 'method' from 'methodName'
-            $name = camel_case(substr($reflectionMethod->getName(), 6));
+            $name = camel_case(substr($reflectionMethod->getName(), 9));
             if (strtolower($name) == 'construct') {
                 $name = '__construct';
             }

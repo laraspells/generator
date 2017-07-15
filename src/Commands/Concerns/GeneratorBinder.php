@@ -23,6 +23,8 @@ use LaraSpell\Template;
 trait GeneratorBinder
 {
 
+    protected $generators = [];
+
     /**
      * Bind generator class.
      *
@@ -69,7 +71,11 @@ trait GeneratorBinder
 
         if ($generatorClass) {
             $parentClass = $bindableGenerators[$class];
-            if (!is_subclass_of($generatorClass, $parentClass)) {
+            if (is_object($generatorClass)) {
+                $generatorClass = get_class($generatorClass);
+            }
+
+            if ($generatorClass != $parentClass AND !is_subclass_of($generatorClass, $parentClass)) {
                 throw new InvalidArgumentException("Class '{$class}' must be subclass of '{$parentClass}'.");
             }
         }
@@ -83,14 +89,14 @@ trait GeneratorBinder
     protected function getBindableGenerators()
     {
         return [
-            ControllerGenerator::class          => ClassGenerator::class,
-            MigrationGenerator::class           => ClassGenerator::class,
-            ModelGenerator::class               => ClassGenerator::class,
-            RepositoryClassGenerator::class     => ClassGenerator::class,
-            RepositoryInterfaceGenerator::class => ClassGenerator::class,
-            ServiceProviderGenerator::class     => ClassGenerator::class,
-            CreateRequestGenerator::class       => ClassGenerator::class,
-            UpdateRequestGenerator::class       => ClassGenerator::class,
+            ControllerGenerator::class          => ControllerGenerator::class,
+            MigrationGenerator::class           => MigrationGenerator::class,
+            ModelGenerator::class               => ModelGenerator::class,
+            RepositoryClassGenerator::class     => RepositoryClassGenerator::class,
+            RepositoryInterfaceGenerator::class => RepositoryInterfaceGenerator::class,
+            ServiceProviderGenerator::class     => ServiceProviderGenerator::class,
+            CreateRequestGenerator::class       => CreateRequestGenerator::class,
+            UpdateRequestGenerator::class       => UpdateRequestGenerator::class,
             ViewCreateGenerator::class          => BaseGenerator::class,
             ViewDetailGenerator::class          => BaseGenerator::class,
             ViewEditGenerator::class            => BaseGenerator::class,
@@ -98,4 +104,60 @@ trait GeneratorBinder
             RouteGenerator::class               => RouteGenerator::class,
         ];
     }
+
+    public function hasGeneratorInstance($class)
+    {
+        return isset($this->generators[$class]);
+    }
+
+    public function setGeneratorInstance($class, $instance)
+    {
+        $this->validateBindableGenerator($class, $instance);
+        $this->generators[$class] = $instance;
+    }
+
+    public function getOrMakeGeneratorInstance($class)
+    {
+        if (!$this->hasGeneratorInstance($class)) {
+            $this->generators[$class] = $this->makeGenerator($class);
+        }
+
+        return $this->generators[$class];
+    }
+
+    public function getGeneratorProvider()
+    {
+        return $this->getOrMakeGeneratorInstance(ServiceProviderGenerator::class);
+    }
+
+    public function getGeneratorController()
+    {
+        return $this->getOrMakeGeneratorInstance(ControllerGenerator::class);
+    }
+
+    public function getGeneratorModel()
+    {
+        return $this->getOrMakeGeneratorInstance(ModelGenerator::class);
+    }
+
+    public function getGeneratorViewList()
+    {
+        return $this->getOrMakeGeneratorInstance(ViewListGenerator::class);
+    }
+
+    public function getGeneratorViewDetail()
+    {
+        return $this->getOrMakeGeneratorInstance(ViewDetailGenerator::class);
+    }
+
+    public function getGeneratorViewCreate()
+    {
+        return $this->getOrMakeGeneratorInstance(ViewCreateGenerator::class);
+    }
+
+    public function getGeneratorViewEdit()
+    {
+        return $this->getOrMakeGeneratorInstance(ViewEditGenerator::class);
+    }
+
 }

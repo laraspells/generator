@@ -12,7 +12,7 @@ class ViewGenerator extends BaseGenerator
 
     protected $tableSchema;
 
-    public function __construct(Table $tableSchema, $stubContent)
+    public function __construct(Table $tableSchema, $stubContent = '')
     {
         $this->tableSchema = $tableSchema;
         $this->setContent($stubContent);

@@ -326,13 +326,13 @@ class RouteGenerator extends BaseGenerator
         $count = count($routes);
         $code = new CodeGenerator;
         foreach($routes as $i => $route) {
-            $code->ln();
+            $code->nl();
             switch($route['type']) {
                 case self::TYPE_GROUP: $this->writeGroup($route, $code); break;
                 case self::TYPE_ROUTE: $this->writeRoute($route, $code); break;
             }
             if ($i == $count - 1) {
-                $code->ln();
+                $code->nl();
             }
         }
         return $this->applyIndents($code->generateLines(), $this->getLevel());
@@ -358,7 +358,7 @@ class RouteGenerator extends BaseGenerator
             $chain[] = "name('{$name}')";
         }
 
-        $code->addStatements("Route::".implode("->", $chain).";");
+        $code->addCode("Route::".implode("->", $chain).";");
     }
 
     protected function writeGroup($route, CodeGenerator $code)
@@ -376,7 +376,7 @@ class RouteGenerator extends BaseGenerator
             {$routes}
         })";
 
-        $code->addStatements("Route::".implode("->", $chain).";");
+        $code->addCode("Route::".implode("->", $chain).";");
     }
 
     protected function register($type, array $params = [])

@@ -4,68 +4,69 @@ namespace LaraSpell;
 
 use InvalidArgumentException;
 use LaraSpell\Exceptions\InvalidTemplateException;
+use ReflectionClass;
 
-class Template
+abstract class Template extends Extension
 {
 
     protected $directory;
-
-    protected $publicDirectory = 'public';
-    protected $stubDirectory = 'stubs';
-    protected $viewDirectory = 'views';
-
-    public function __construct($directory)
-    {
-        if (!is_dir($directory)) {
-            throw new InvalidArgumentException("Template directory '{$this->directory}' doesn't exists");
-        }
-        $this->directory = realpath($directory);
-        $this->validate();
-    }
+    protected $folderPublic = 'public';
+    protected $folderStub = 'stubs';
+    protected $folderView = 'views';
 
     public function getDirectory()
     {
+        if (!$this->directory) {
+            // Get class file directory
+            $ref = new ReflectionClass($this);
+            $this->directory = dirname($ref->getFilename());
+        }
         return $this->directory;
     }
 
-    public function getViewDirectory()
+    public function getSchemaResolver()
     {
-        return $this->viewDirectory;
+        return new SchemaResolver;
     }
 
-    public function getPublicDirectory()
+    public function getFolderView()
     {
-        return $this->publicDirectory;
+        return $this->folderView;
     }
 
-    public function getStubDirectory()
+    public function getFolderPublic()
     {
-        return $this->stubDirectory;
+        return $this->folderPublic;
+    }
+
+    public function getFolderStub()
+    {
+        return $this->folderStub;
     }
 
     public function getStubContent($stubFile)
     {
-        return $this->getContent($this->stubDirectory.'/'.$stubFile);
+        return $this->getContent($this->folderStub.'/'.$stubFile);
     }
 
     public function getViewContent($viewFile)
     {
-        return $this->getContent($this->viewDirectory.'/'.$viewFile);
+        return $this->getContent($this->folderView.'/'.$viewFile);
     }
 
     public function getPublicFiles($dir = null)
     {
-        return $this->getFiles($this->publicDirectory.($dir? '/'.$dir : ''));
+        return $this->getFiles($this->folderPublic.($dir? '/'.$dir : ''));
     }
 
     public function getViewFiles()
     {
-        return $this->getFiles($this->viewDirectory);
+        return $this->getFiles($this->folderView);
     }
 
     public function getStubFiles()
     {
-        return $this->getFiles($this->stubDirectory);
+        return $this->getFiles($this->folderStub);
     }
 
     public function getContent($file)
@@ -98,32 +99,6 @@ class Template
     {
         $rootDir = $this->getDirectory();
         return $rootDir.'/'.ltrim($file, '/');
-    }
-
-    protected function validate()
-    {
-        $requiredFiles = [
-            $this->stubDirectory.'/page-list.stub',
-            $this->stubDirectory.'/page-detail.stub',
-            $this->stubDirectory.'/form-create.stub',
-            $this->stubDirectory.'/form-edit.stub',
-            $this->viewDirectory.'/partials/fields/text.blade.php',
-            $this->viewDirectory.'/partials/fields/number.blade.php',
-            $this->viewDirectory.'/partials/fields/email.blade.php',
-            $this->viewDirectory.'/partials/fields/textarea.blade.php',
-            $this->viewDirectory.'/partials/fields/select.blade.php',
-            $this->viewDirectory.'/partials/fields/select-multiple.blade.php',
-            $this->viewDirectory.'/partials/fields/file.blade.php',
-            $this->viewDirectory.'/partials/fields/checkbox.blade.php',
-            $this->viewDirectory.'/partials/fields/radio.blade.php',
-            $this->viewDirectory.'/layout/master.blade.php',
-        ];
-
-        foreach($requiredFiles as $file) {
-            if (!$this->hasFile($file)) {
-                throw new InvalidTemplateException("Template must have file '{$file}'");
-            }
-        }
     }
 
 }

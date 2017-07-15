@@ -3,11 +3,11 @@
 namespace LaraSpell\Generators;
 
 use LaraSpell\Schema\Table;
-use LaraSpell\Traits\TableDataGetter;
+use LaraSpell\Traits\Concerns\TableUtils;
 
 class RepositoryInterfaceGenerator extends InterfaceGenerator
 {
-    use TableDataGetter;
+    use Concerns\TableUtils;
 
     protected $tableSchema;
 
@@ -38,7 +38,7 @@ class RepositoryInterfaceGenerator extends InterfaceGenerator
         });
     }
 
-    protected function methodAll(MethodGenerator $method)
+    protected function setMethodAll(MethodGenerator $method)
     {
         $data = $this->getTableData();
         $method->setDocblock(function($docblock) use ($data) {
@@ -47,7 +47,7 @@ class RepositoryInterfaceGenerator extends InterfaceGenerator
         });
     }
 
-    protected function methodFindById(MethodGenerator $method)
+    protected function setMethodFindById(MethodGenerator $method)
     {
         $data = $this->getTableData();
         $method->addArgument($data->primary_varname);
@@ -60,7 +60,7 @@ class RepositoryInterfaceGenerator extends InterfaceGenerator
         });
     }
 
-    protected function methodGetPagination(MethodGenerator $method)
+    protected function setMethodGetPagination(MethodGenerator $method)
     {
         $data = $this->getTableData();
         $method->addArgument('page', null, 1);
@@ -75,7 +75,7 @@ class RepositoryInterfaceGenerator extends InterfaceGenerator
         });
     }
 
-    protected function methodCreate(MethodGenerator $method)
+    protected function setMethodCreate(MethodGenerator $method)
     {
         $data = $this->getTableData();
         $method->addArgument('data', 'array');
@@ -86,7 +86,7 @@ class RepositoryInterfaceGenerator extends InterfaceGenerator
         });
     }
 
-    protected function methodUpdateById(MethodGenerator $method)
+    protected function setMethodUpdateById(MethodGenerator $method)
     {
         $data = $this->getTableData();
         $method->addArgument($data->primary_varname);
@@ -99,7 +99,7 @@ class RepositoryInterfaceGenerator extends InterfaceGenerator
         });
     }
 
-    protected function methodDeleteById(MethodGenerator $method)
+    protected function setMethodDeleteById(MethodGenerator $method)
     {
         $data = $this->getTableData();
         $method->addArgument($data->primary_varname);

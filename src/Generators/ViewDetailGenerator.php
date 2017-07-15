@@ -3,12 +3,12 @@
 namespace LaraSpell\Generators;
 
 use LaraSpell\Stub;
-use LaraSpell\Traits\TableDataGetter;
+use LaraSpell\Traits\Concerns\TableUtils;
 
 class ViewDetailGenerator extends ViewGenerator
 {
 
-    use TableDataGetter;
+    use Concerns\TableUtils;
 
     protected function getTableSchema()
     {
@@ -40,8 +40,8 @@ class ViewDetailGenerator extends ViewGenerator
                 $column = $relation['col_alias'];
             }
             $stub = new Stub($field->getReadCode());
-            $code->addStatements("<!-- Column ".$field->getColumnName()." -->");
-            $code->addStatements($stub->render([
+            $code->addCode("<!-- Column ".$field->getColumnName()." -->");
+            $code->addCode($stub->render([
                 'label' => $field->getLabel(),
                 'field' => $field->toArray(),
                 'varname' => $tableData->model_varname,

@@ -6,13 +6,13 @@ use Closure;
 
 class MethodGenerator extends BaseGenerator
 {
+    use Concerns\Docblockable;
 
     const VISIBILITY_PUBLIC = 'public';
     const VISIBILITY_PROTECTED = 'protected';
     const VISIBILITY_PRIVATE = 'private';
 
     protected $name;
-    protected $docblock;
     protected $code;
     protected $visibility;
     protected $static = false;
@@ -96,7 +96,7 @@ class MethodGenerator extends BaseGenerator
                 $type = "\\".$type;
             }
         }
-        
+
         $this->arguments[$varname] = [
             'type' => $type,
             'default_value' => $defaultValue,
@@ -107,18 +107,6 @@ class MethodGenerator extends BaseGenerator
     public function getArguments()
     {
         return $this->arguments;
-    }
-
-    public function setDocblock(Closure $callback)
-    {
-        $this->docblock = new DocblockGenerator;
-        $this->docblock->setReturn('void');
-        $callback($this->docblock, $this);
-    }
-
-    public function getDocblock()
-    {
-        return $this->docblock;
     }
 
     public function setCode(Closure $callback)

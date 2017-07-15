@@ -3,12 +3,12 @@
 namespace LaraSpell\Generators;
 
 use LaraSpell\Stub;
-use LaraSpell\Traits\TableDataGetter;
+use LaraSpell\Traits\Concerns\TableUtils;
 
 class ViewListGenerator extends ViewGenerator
 {
 
-    use TableDataGetter;
+    use Concerns\TableUtils;
 
     protected function getTableSchema()
     {
@@ -63,7 +63,7 @@ class ViewListGenerator extends ViewGenerator
         }
 
         $code = $this->makeCodeGenerator();
-        $code->addStatements('
+        $code->addCode('
             <table id="'.$tableId.'" class="table table-bordered table-striped table-hover">
                 <thead>
                     <tr>
@@ -94,7 +94,7 @@ class ViewListGenerator extends ViewGenerator
     protected function generateHtmlPagination()
     {
         $code = $this->makeCodeGenerator();
-        $code->addStatements('
+        $code->addCode('
             <ul class="pagination">
                 @foreach($pagination[\'links\'] as $link)
                 <li class="{{ $link[\'page\'] == $pagination[\'page\']? \'active\' : \'\' }}">

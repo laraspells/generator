@@ -3,12 +3,12 @@
 namespace LaraSpell\Generators;
 
 use LaraSpell\Schema\Table;
-use LaraSpell\Traits\TableDataGetter;
+use LaraSpell\Traits\Concerns\TableUtils;
 
 class CreateRequestGenerator extends ClassGenerator
 {
 
-    use TableDataGetter;
+    use Concerns\TableUtils;
 
     protected $tableSchema;
 
@@ -34,18 +34,18 @@ class CreateRequestGenerator extends ClassGenerator
         });
     }
 
-    protected function methodAuthorize(MethodGenerator $method)
+    protected function setMethodAuthorize(MethodGenerator $method)
     {
         $method->setDocblock(function($docblock) {
             $docblock->addText("Determine if the user is authorized to make this request.");
             $docblock->setReturn('bool');
         });
         $method->setCode(function($code) {
-            $code->addStatements("return true;");
+            $code->addCode("return true;");
         });
     }
 
-    protected function methodRules(MethodGenerator $method)
+    protected function setMethodRules(MethodGenerator $method)
     {
         $rules = $this->getRules();
         $method->setDocblock(function($docblock) {
@@ -53,7 +53,7 @@ class CreateRequestGenerator extends ClassGenerator
             $docblock->setReturn('array');
         });
         $method->setCode(function($code) use ($rules) {
-            $code->addStatements("return ".$this->phpify($rules, true).";");
+            $code->addCode("return ".$this->phpify($rules, true).";");
         });
     }
 

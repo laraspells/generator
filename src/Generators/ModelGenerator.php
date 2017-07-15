@@ -3,12 +3,12 @@
 namespace LaraSpell\Generators;
 
 use LaraSpell\Schema\Table;
-use LaraSpell\Traits\TableDataGetter;
+use LaraSpell\Traits\Concerns\TableUtils;
 
 class ModelGenerator extends ClassGenerator
 {
 
-    use TableDataGetter;
+    use Concerns\TableUtils;
 
     const CLASS_MODEL = 'Illuminate\Database\Eloquent\Model';
 
@@ -19,11 +19,6 @@ class ModelGenerator extends ClassGenerator
         parent::__construct($tableSchema->getModelClass());
         $this->tableSchema = $tableSchema;
         $this->initClass();
-    }
-
-    protected function getTableSchema()
-    {
-        return $this->tableSchema;
     }
 
     protected function initClass()

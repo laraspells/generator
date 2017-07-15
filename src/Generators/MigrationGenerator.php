@@ -4,11 +4,11 @@ namespace LaraSpell\Generators;
 
 use LaraSpell\Schema\Field;
 use LaraSpell\Schema\Table;
-use LaraSpell\Traits\TableDataGetter;
+use LaraSpell\Traits\Concerns\TableUtils;
 
 class MigrationGenerator extends ClassGenerator
 {
-    use TableDataGetter;
+    use Concerns\TableUtils;
 
     protected $tableSchema;
 
@@ -47,7 +47,7 @@ class MigrationGenerator extends ClassGenerator
         });
     }
 
-    protected function methodUp(MethodGenerator $method)
+    protected function setMethodUp(MethodGenerator $method)
     {
         $data = $this->getTableData();
         $columns = $this->getColumnDefinitions();
@@ -56,7 +56,7 @@ class MigrationGenerator extends ClassGenerator
         });
 
         $method->setCode(function($code) use ($data, $columns) {
-            $code->addStatements("
+            $code->addCode("
                 Schema::create('{$data->table_name}', function (Blueprint \$table) {
                     ".implode("\n\r\t", $columns)."
                 });
@@ -64,7 +64,7 @@ class MigrationGenerator extends ClassGenerator
         });
     }
 
-    protected function methodDown(MethodGenerator $method)
+    protected function setMethodDown(MethodGenerator $method)
     {
         $data = $this->getTableData();
         $method->setDocblock(function($docblock) use ($data) {
@@ -72,7 +72,7 @@ class MigrationGenerator extends ClassGenerator
         });
 
         $method->setCode(function($code) use ($data) {
-            $code->addStatements("
+            $code->addCode("
                 Schema::dropIfExists('{$data->table_name}');
             ");
         });

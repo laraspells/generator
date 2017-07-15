@@ -12,6 +12,7 @@ trait ConfigUtils
     public function getConfigs()
     {
         $schema = $this->getSchema();
+        $configKey = $schema->getConfigKey();
         if (!$this->configs) {
             $this->configs = config($configKey) ?: [];
         }
@@ -74,8 +75,8 @@ trait ConfigUtils
         $configs = $this->getConfigs();
         $filePath = 'config/'.$this->getSchema()->getConfigFile();
         $code = new CodeGenerator;
-        $code->addStatements("<?php\n\nreturn ".$code->phpify($configs, true).";");
-        $code->ln();
+        $code->addCode("<?php\n\nreturn ".$code->phpify($configs, true).";");
+        $code->nl();
         $this->writeFile($filePath, $code->generateCode());
     }
 

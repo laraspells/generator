@@ -30,14 +30,14 @@ class ServiceProviderGenerator extends ClassGenerator
         });
     }
 
-    protected function methodRegister(MethodGenerator $method)
+    protected function setMethodRegister(MethodGenerator $method)
     {
         $configKey = $this->schema->getConfigKey();
         $method->setDocblock(function($docblock) {
             $docblock->addText("Register the application services.");
         });
         $method->setCode(function($code) use ($configKey) {
-            $code->addStatements("
+            $code->addCode("
                 // Binding repositories
                 \$repositories = config('{$configKey}.repositories') ?: [];
                 foreach(\$repositories as \$interface => \$class) {
@@ -47,7 +47,7 @@ class ServiceProviderGenerator extends ClassGenerator
         });
     }
 
-    protected function methodBoot(MethodGenerator $method)
+    protected function setMethodBoot(MethodGenerator $method)
     {
         $method = $this->addMethod('boot');
         $method->setDocblock(function($docblock) {

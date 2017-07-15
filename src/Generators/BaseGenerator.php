@@ -59,6 +59,12 @@ abstract class BaseGenerator
         return [implode("\\", $exp), $className];
     }
 
+    public function formatCode($code)
+    {
+        $lines = $this->parseLines($code);
+        return implode($this->getNewLine(), $lines);
+    }
+
     protected function parseLines($code)
     {
         $code = trim($code);
@@ -149,7 +155,7 @@ abstract class BaseGenerator
             $array = (array) $value;
             $assoc = $this->isAssoc($array);
             $keys = array_keys($array);
-            $nl = $this->nl;
+            $nl = $this->getNewLine();
             $opening = "[".($pretty? $nl : "");
             $closing = ($pretty? $nl : "")."]";
             $code = $opening;
@@ -168,7 +174,7 @@ abstract class BaseGenerator
             }
 
             $gen = new CodeGenerator;
-            $gen->addStatements($code);
+            $gen->addCode($code);
             $str = $gen->generateCode();
         } elseif($this->isEval($value)) {
             $str = $this->getCodeInsideEval($value);
@@ -177,6 +183,16 @@ abstract class BaseGenerator
         }
 
         return $str;
+    }
+
+    public function getNewLine()
+    {
+        return $this->nl;
+    }
+
+    public function setNewLine($nl)
+    {
+        $this->nl = $nl;
     }
 
     protected function isAssoc($value)

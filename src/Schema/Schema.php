@@ -16,6 +16,16 @@ class Schema extends AbstractSchema
     }
 
     /**
+     * Get extensions classes
+     *
+     * @return string
+     */
+    public function getExtensions()
+    {
+        return (array) $this->get('extensions');
+    }
+
+    /**
      * Get template directory
      *
      * @return string
