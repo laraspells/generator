@@ -146,19 +146,17 @@ class GenerateCommand extends SchemaBasedCommand
         $this->setGeneratorInstance(ControllerGenerator::class, $this->makeGenerator(ControllerGenerator::class));
         $this->setGeneratorInstance(ModelGenerator::class, $this->makeGenerator(ModelGenerator::class));
         $this->setGeneratorInstance(ViewListGenerator::class, $this->makeGenerator(ViewListGenerator::class, [
-            $this->getTemplate()->getStubContent('page-list.stub')
+            'stubContent' => $this->getTemplate()->getStubContent('page-list.stub')
         ]));
         $this->setGeneratorInstance(ViewDetailGenerator::class, $this->makeGenerator(ViewDetailGenerator::class, [
-            $this->getTemplate()->getStubContent('page-detail.stub')
+            'stubContent' => $this->getTemplate()->getStubContent('page-detail.stub')
         ]));
         $this->setGeneratorInstance(ViewCreateGenerator::class, $this->makeGenerator(ViewCreateGenerator::class, [
-            $this->getTemplate()->getStubContent('form-create.stub')
+            'stubContent' => $this->getTemplate()->getStubContent('form-create.stub')
         ]));
         $this->setGeneratorInstance(ViewEditGenerator::class, $this->makeGenerator(ViewEditGenerator::class, [
-            $this->getTemplate()->getStubContent('form-edit.stub')
+            'stubContent' => $this->getTemplate()->getStubContent('form-edit.stub')
         ]));
-
-        dd($this->getGeneratorViewList()->getContent());
     }
 
     /**

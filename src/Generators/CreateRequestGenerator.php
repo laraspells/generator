@@ -40,9 +40,8 @@ class CreateRequestGenerator extends ClassGenerator
             $docblock->addText("Determine if the user is authorized to make this request.");
             $docblock->setReturn('bool');
         });
-        $method->setCode(function($code) {
-            $code->addCode("return true;");
-        });
+
+        $method->appendCode("return true;");
     }
 
     protected function setMethodRules(MethodGenerator $method)
@@ -52,9 +51,8 @@ class CreateRequestGenerator extends ClassGenerator
             $docblock->addText("Get the validation rules that apply to the request.");
             $docblock->setReturn('array');
         });
-        $method->setCode(function($code) use ($rules) {
-            $code->addCode("return ".$this->phpify($rules, true).";");
-        });
+
+        $method->appendCode("return ".$this->phpify($rules, true).";");
     }
 
     protected function getRules()

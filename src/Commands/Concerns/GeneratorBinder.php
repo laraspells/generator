@@ -48,11 +48,7 @@ trait GeneratorBinder
     public function makeGenerator($class, array $params = [])
     {
         $this->validateBindableGenerator($class);
-        if ($params) {
-            return app()->makeWith($class, $params);
-        } else {
-            return app($class);
-        }
+        return app($class, $params);
     }
 
     /**

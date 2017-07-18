@@ -47,9 +47,8 @@ class RepositoryClassGenerator extends ClassGenerator
             $docblock->addText("Constructor");
             $docblock->addParam('model', $modelClass);
         });
-        $method->setCode(function($code) use ($modelClass) {
-            $code->addCode('parent::__construct($model);');
-        });
+
+        $method->appendCode('parent::__construct($model);');
     }
 
 }

@@ -2,6 +2,7 @@
 
 namespace LaraSpell\Generators;
 
+use LaraSpell\Schema\Field;
 use LaraSpell\Schema\Table;
 use LaraSpell\Stub;
 use LaraSpell\Traits\Concerns\TableUtils;
@@ -53,13 +54,11 @@ class ControllerGenerator extends ClassGenerator
         foreach($repositories as $varName => $repository) {
             $method->addArgument($varName, $repository);
         }
-        $method->setCode(function($code) use ($repositories) {
-            $codeSetRepositories = implode($this->getNewLine(), array_map(function($varName) {
-                return "\$this->{$varName} = \${$varName};";
-            }, array_keys($repositories)));
 
-            $code->addCode($codeSetRepositories, "set-repositories");
-        });
+        $codeSetRepositories = implode($this->getNewLine(), array_map(function($varName) {
+            return "\$this->{$varName} = \${$varName};";
+        }, array_keys($repositories)));
+        $method->appendCode($codeSetRepositories, "set-repositories");
     }
 
     protected function setMethodPageList(MethodGenerator $method)
@@ -91,25 +90,22 @@ class ControllerGenerator extends ClassGenerator
             ];
         }
 
-        $method->setCode(function($code) use ($data, $joins) {
-            $paginationOptions = [
-                'keyword' => 'eval("$keyword")'
-            ];
-            if (!empty($joins)) {
-                $paginationOptions['joins'] = $joins;
-            }
+        $paginationOptions = [
+            'keyword' => 'eval("$keyword")'
+        ];
+        if (!empty($joins)) {
+            $paginationOptions['joins'] = $joins;
+        }
+        $method->appendCode("
+            \$page = (int) \$request->get('page') ?: 1;
+            \$limit = (int) \$request->get('limit') ?: 10;
+            \$keyword = \$request->get('keyword');
 
-            $code->addCode("
-                \$page = (int) \$request->get('page') ?: 1;
-                \$limit = (int) \$request->get('limit') ?: 10;
-                \$keyword = \$request->get('keyword');
+            \$data['title'] = 'List {$data->label}';
+            \$data['pagination'] = \$this->{$data->repository->varname}->getPagination(\$page, \$limit, ".$this->phpify($paginationOptions, true).");
 
-                \$data['title'] = 'List {$data->label}';
-                \$data['pagination'] = \$this->{$data->repository->varname}->getPagination(\$page, \$limit, ".$this->phpify($paginationOptions, true).");
-
-                return view('{$data->view->page_list}', \$data);
-            ");
-        });
+            return view('{$data->view->page_list}', \$data);
+        ");
     }
 
     protected function setMethodPageDetail(MethodGenerator $method)
@@ -124,16 +120,14 @@ class ControllerGenerator extends ClassGenerator
             $docblock->setReturn(static::CLASS_RESPONSE);
         });
 
+        $view = $data->view->page_detail;
         $initModelCode = $this->getInitModelCode();
-        $method->setCode(function($code) use ($initModelCode, $data) {
-            $code->addCode($initModelCode);
-            $code->nl();
-            $view = $data->view->page_detail;
-            $code->addCode("\$data['title'] = 'Detail {$data->label}';");
-            $code->addCode("\$data['{$data->model_varname}'] = \${$data->model_varname};");
-            $code->nl();
-            $code->addCode("return view('{$view}', \$data);");
-        });
+        $method->appendCode($initModelCode);
+        $method->nl();
+        $method->appendCode("\$data['title'] = 'Detail {$data->label}';");
+        $method->appendCode("\$data['{$data->model_varname}'] = \${$data->model_varname};");
+        $method->nl();
+        $method->appendCode("return view('{$view}', \$data);");
     }
 
     protected function setMethodFormCreate(MethodGenerator $method)
@@ -146,33 +140,32 @@ class ControllerGenerator extends ClassGenerator
             $docblock->addParam('request', static::CLASS_REQUEST);
             $docblock->setReturn(static::CLASS_RESPONSE);
         });
-        $method->setCode(function($code) use ($data, $fieldsHasRelation) {
-            $code->addCode("\$data['title'] = 'Form Create {$data->label}';");
-            foreach($fieldsHasRelation as $field) {
-                $relation = $field->getRelation();
-                $varName = $relation['var_name'];
-                $colValue = $relation['col_value'];
-                $colLabel = $relation['col_label'];
-                $selectedColumns = $this->phpify([$colValue, $colLabel]);
-                $relatedTable = $this->getTableSchema()->getRootSchema()->getTable($relation['table']);
-                $relatedTableName = $relatedTable->getName();
-                $listVarname = camel_case($relatedTableName);
-                $repository = $this->getRepositoryPropertyName($relatedTable);
-                $code->nl();
-                $code->addCode("
-                    // Set {$varName}
-                    \${$listVarname} = \$this->{$repository}->all(".$selectedColumns.");
-                    \$data['{$varName}'] = array_map(function(\$record) {
-                        return [
-                            'value' => \$record['{$colValue}'],
-                            'label' => \$record['{$colLabel}']
-                        ];
-                    }, \${$listVarname});
-                ");
-            }
-            $code->nl();
-            $code->addCode("return view('{$data->view->form_create}', \$data);");
-        });
+
+        $method->appendCode("\$data['title'] = 'Form Create {$data->label}';");
+        foreach($fieldsHasRelation as $field) {
+            $relation = $field->getRelation();
+            $varName = $relation['var_name'];
+            $colValue = $relation['col_value'];
+            $colLabel = $relation['col_label'];
+            $selectedColumns = $this->phpify([$colValue, $colLabel]);
+            $relatedTable = $this->getTableSchema()->getRootSchema()->getTable($relation['table']);
+            $relatedTableName = $relatedTable->getName();
+            $listVarname = camel_case($relatedTableName);
+            $repository = $this->getRepositoryPropertyName($relatedTable);
+            $method->nl();
+            $method->appendCode("
+                // Set {$varName}
+                \${$listVarname} = \$this->{$repository}->all(".$selectedColumns.");
+                \$data['{$varName}'] = array_map(function(\$record) {
+                    return [
+                        'value' => \$record['{$colValue}'],
+                        'label' => \$record['{$colLabel}']
+                    ];
+                }, \${$listVarname});
+            ");
+        }
+        $method->nl();
+        $method->appendCode("return view('{$data->view->form_create}', \$data);");
     }
 
     protected function setMethodPostCreate(MethodGenerator $method)
@@ -185,42 +178,46 @@ class ControllerGenerator extends ClassGenerator
             $docblock->setReturn(static::CLASS_RESPONSE);
         });
 
-        $method->setCode(function($code) use ($data) {
-            $inputFiles = $this->getTableSchema()->getInputFileFields();
-            $code->addCode("
-                \$data = \$this->resolveFormInputs(\$request->all());
-            ");
-            $code->nl();
+        $inputFiles = $this->getTableSchema()->getInputFileFields();
+        $method->appendCode("
+            \$data = \$this->resolveFormInputs(\$request->all());
+        ");
+        $method->nl();
 
-            foreach($inputFiles as $field) {
-                $col = $field->getColumnName();
-                $varName = camel_case($col);
-                $path = $field->getUploadPath();
-                $disk = $field->getUploadDisk();
-                $code->addCode("
-                    // Uploading {$col}
-                    \${$varName} = \$request->file('{$col}');
-                    if (\${$varName}) {
-                        \$filename = \${$varName}->getClientOriginalName();
-                        \$path = '{$path}';
-                        \$data['{$col}'] = \${$varName}->storeAs(\$path, \$filename, '{$disk}');
-                    }
-                ");
-                $code->nl();
+        foreach($inputFiles as $field) {;
+            $method->appendCode($this->getUploadCode($field), "upload");
+            $method->nl();
+        }
+
+        $method->appendCode("
+            // Insert data
+            \${$data->model_varname} = \$this->{$data->repository->varname}->create(\$data);
+            if (!\${$data->model_varname}) {
+                \$message = 'Something went wrong when create {$data->label}';
+                return back()->with('danger', \$message);
             }
 
-            $code->addCode("
-                // Insert data
-                \${$data->model_varname} = \$this->{$data->repository->varname}->create(\$data);
-                if (!\${$data->model_varname}) {
-                    \$message = 'Something went wrong when create {$data->label}';
-                    return back()->with('danger', \$message);
-                }
+            \$message = '{$data->label} has been created!';
+            return redirect()->route('{$data->route->page_list}')->with('info', \$message);
+        ");
+    }
 
-                \$message = '{$data->label} has been created!';
-                return redirect()->route('{$data->route->page_list}')->with('info', \$message);
-            ");
-        });
+    protected function getUploadCode(Field $field)
+    {
+        $col = $field->getColumnName();
+        $varName = camel_case($col);
+        $path = $field->getUploadPath();
+        $disk = $field->getUploadDisk();
+
+        return "
+            // Uploading {$col}
+            \${$varName} = \$request->file('{$col}');
+            if (\${$varName}) {
+                \$filename = \${$varName}->getClientOriginalName();
+                \$path = '{$path}';
+                \$data['{$col}'] = \${$varName}->storeAs(\$path, \$filename, '{$disk}');
+            }
+        ";
     }
 
     protected function setMethodFormEdit(MethodGenerator $method)
@@ -237,37 +234,35 @@ class ControllerGenerator extends ClassGenerator
         });
 
         $initModelCode = $this->getInitModelCode();
-        $method->setCode(function($code) use ($initModelCode, $data, $fieldsHasRelation) {
-            $code->addCode($initModelCode);
-            $code->nl();
-            $view = $this->getTableSchema()->getRootSchema()->getView($data->model_varname.'.form-edit');
-            $code->addCode("\$data['title'] = 'Form Create {$data->label}';");
-            $code->addCode("\$data['{$data->model_varname}'] = \$this->resolveFormData(\${$data->model_varname});");
-            foreach($fieldsHasRelation as $field) {
-                $relation = $field->getRelation();
-                $varName = $relation['var_name'];
-                $colValue = $relation['col_value'];
-                $colLabel = $relation['col_label'];
-                $selectedColumns = $this->phpify([$colValue, $colLabel]);
-                $relatedTable = $this->getTableSchema()->getRootSchema()->getTable($relation['table']);
-                $relatedTableName = $relatedTable->getName();
-                $listVarname = camel_case($relatedTableName);
-                $repository = $this->getRepositoryPropertyName($relatedTable);
-                $code->nl();
-                $code->addCode("
-                    // Set {$varName}
-                    \${$listVarname} = \$this->{$repository}->all(".$selectedColumns.");
-                    \$data['{$varName}'] = array_map(function(\$record) {
-                        return [
-                            'value' => \$record['{$colValue}'],
-                            'label' => \$record['{$colLabel}']
-                        ];
-                    }, \${$listVarname});
-                ");
-            }
-            $code->nl();
-            $code->addCode("return view('{$view}', \$data);");
-        });
+        $method->appendCode($initModelCode);
+        $method->nl();
+        $view = $this->getTableSchema()->getRootSchema()->getView($data->model_varname.'.form-edit');
+        $method->appendCode("\$data['title'] = 'Form Create {$data->label}';");
+        $method->appendCode("\$data['{$data->model_varname}'] = \$this->resolveFormData(\${$data->model_varname});");
+        foreach($fieldsHasRelation as $field) {
+            $relation = $field->getRelation();
+            $varName = $relation['var_name'];
+            $colValue = $relation['col_value'];
+            $colLabel = $relation['col_label'];
+            $selectedColumns = $this->phpify([$colValue, $colLabel]);
+            $relatedTable = $this->getTableSchema()->getRootSchema()->getTable($relation['table']);
+            $relatedTableName = $relatedTable->getName();
+            $listVarname = camel_case($relatedTableName);
+            $repository = $this->getRepositoryPropertyName($relatedTable);
+            $method->nl();
+            $method->appendCode("
+                // Set {$varName}
+                \${$listVarname} = \$this->{$repository}->all(".$selectedColumns.");
+                \$data['{$varName}'] = array_map(function(\$record) {
+                    return [
+                        'value' => \$record['{$colValue}'],
+                        'label' => \$record['{$colLabel}']
+                    ];
+                }, \${$listVarname});
+            ");
+        }
+        $method->nl();
+        $method->appendCode("return view('{$view}', \$data);");
     }
 
     protected function setMethodPostEdit(MethodGenerator $method)
@@ -283,42 +278,41 @@ class ControllerGenerator extends ClassGenerator
         });
 
         $initModelCode = $this->getInitModelCode();
-        $method->setCode(function($code) use ($initModelCode, $data) {
-            $inputFiles = $this->getTableSchema()->getInputFileFields();
-            $code->addCode($initModelCode);
-            $code->nl();
-            $code->addCode("
-                \$data = \$this->resolveFormInputs(\$request->all());
-            ");
-            $code->nl();
-            foreach($inputFiles as $field) {
-                $col = $field->getColumnName();
-                $varName = camel_case($col);
-                $path = $field->getUploadPath();
-                $disk = $field->getUploadDisk();
-                $code->addCode("
-                    // Uploading {$col}
-                    \${$varName} = \$request->file('{$col}');
-                    if (\${$varName}) {
-                        \$filename = \${$varName}->getClientOriginalName();
-                        \$path = '{$path}';
-                        \$data['{$col}'] = \${$varName}->storeAs(\$path, \$filename, '{$disk}');
-                    }
-                ");
-                $code->nl();
-            }
-            $code->addCode("
-                // Update data
-                \$updated = \$this->{$data->repository->varname}->updateById(\${$data->primary_varname}, \$data);
-                if (!\$updated) {
-                    \$message = 'Something went wrong when update {$data->label}';
-                    return back()->with('danger', \$message);
-                }
 
-                \$message = '{$data->label} has been updated!';
-                return redirect()->route('{$data->route->page_list}')->with('info', \$message);
+        $inputFiles = $this->getTableSchema()->getInputFileFields();
+        $method->appendCode($initModelCode);
+        $method->nl();
+        $method->appendCode("
+            \$data = \$this->resolveFormInputs(\$request->all());
+        ");
+        $method->nl();
+        foreach($inputFiles as $field) {
+            $col = $field->getColumnName();
+            $varName = camel_case($col);
+            $path = $field->getUploadPath();
+            $disk = $field->getUploadDisk();
+            $method->appendCode("
+                // Uploading {$col}
+                \${$varName} = \$request->file('{$col}');
+                if (\${$varName}) {
+                    \$filename = \${$varName}->getClientOriginalName();
+                    \$path = '{$path}';
+                    \$data['{$col}'] = \${$varName}->storeAs(\$path, \$filename, '{$disk}');
+                }
             ");
-        });
+            $method->nl();
+        }
+        $method->appendCode("
+            // Update data
+            \$updated = \$this->{$data->repository->varname}->updateById(\${$data->primary_varname}, \$data);
+            if (!\$updated) {
+                \$message = 'Something went wrong when update {$data->label}';
+                return back()->with('danger', \$message);
+            }
+
+            \$message = '{$data->label} has been updated!';
+            return redirect()->route('{$data->route->page_list}')->with('info', \$message);
+        ");
     }
 
     protected function setMethodDelete(MethodGenerator $method)
@@ -334,21 +328,19 @@ class ControllerGenerator extends ClassGenerator
         });
 
         $initModelCode = $this->getInitModelCode();
-        $method->setCode(function($code) use ($initModelCode, $data) {
-            $code->addCode($initModelCode);
-            $code->nl();
-            $code->addCode("
-                // Delete data
-                \$deleted = \$this->{$data->repository->varname}->deleteById(\${$data->primary_varname});
-                if (!\$deleted) {
-                    \$message = 'Something went wrong when delete {$data->label}';
-                    return back()->with('danger', \$message);
-                }
+        $method->appendCode($initModelCode);
+        $method->nl();
+        $method->appendCode("
+            // Delete data
+            \$deleted = \$this->{$data->repository->varname}->deleteById(\${$data->primary_varname});
+            if (!\$deleted) {
+                \$message = 'Something went wrong when delete {$data->label}';
+                return back()->with('danger', \$message);
+            }
 
-                \$message = '{$data->label} has been deleted!';
-                return redirect()->route('{$data->route->page_list}')->with('info', \$message);
-            ");
-        });
+            \$message = '{$data->label} has been deleted!';
+            return redirect()->route('{$data->route->page_list}')->with('info', \$message);
+        ");
     }
 
     protected function setMethodFindOrFail(MethodGenerator $method)
@@ -381,27 +373,25 @@ class ControllerGenerator extends ClassGenerator
             $docblock->setReturn(static::CLASS_RESPONSE);
         });
 
-        $method->setCode(function($code) use ($data, $joins) {
-            if (!empty($joins)) {
-                $code->addCode("
-                    \${$data->model_varname} = \$this->{$data->repository->varname}->findById(\${$data->primary_varname}, [
-                        'joins' => ".$code->phpify($joins, true)."
-                    ]);
-                ");
-            } else {
-                $code->addCode("
-                    \${$data->model_varname} = \$this->{$data->repository->varname}->findById(\${$data->primary_varname});
-                ");
+        if (!empty($joins)) {
+            $method->appendCode("
+                \${$data->model_varname} = \$this->{$data->repository->varname}->findById(\${$data->primary_varname}, [
+                    'joins' => ".$method->phpify($joins, true)."
+                ]);
+            ");
+        } else {
+            $method->appendCode("
+                \${$data->model_varname} = \$this->{$data->repository->varname}->findById(\${$data->primary_varname});
+            ");
+        }
+
+        $method->appendCode("
+            if (!\${$data->model_varname}) {
+                return abort(404, '{$data->label} not found');
             }
 
-            $code->addCode("
-                if (!\${$data->model_varname}) {
-                    return abort(404, '{$data->label} not found');
-                }
-
-                return \${$data->model_varname};
-            ");
-        });
+            return \${$data->model_varname};
+        ");
     }
 
     protected function setMethodResolveFormInputs(MethodGenerator $method)
@@ -417,20 +407,18 @@ class ControllerGenerator extends ClassGenerator
         });
 
         $method->addArgument('inputs', 'array');
-        $method->setCode(function($code) use ($resolveableFields) {
-            foreach($resolveableFields as $field) {
-                $name = $field->getColumnName();
-                $inputResolver = (new Stub($field->getInputResolver()))->render([
-                    'value' => "\$inputs['{$name}']"
-                ]);
-                $code->addCode("
-                    // Resolve input {$name}
-                    \$inputs['{$name}'] = {$inputResolver};
-                ");
-                $code->nl();
-            }
-            $code->addCode("return \$inputs;");
-        });
+        foreach($resolveableFields as $field) {
+            $name = $field->getColumnName();
+            $inputResolver = (new Stub($field->getInputResolver()))->render([
+                'value' => "\$inputs['{$name}']"
+            ]);
+            $method->appendCode("
+                // Resolve input {$name}
+                \$inputs['{$name}'] = {$inputResolver};
+            ");
+            $method->nl();
+        }
+        $method->appendCode("return \$inputs;");
     }
 
     protected function setMethodResolveFormData(MethodGenerator $method)
@@ -446,20 +434,18 @@ class ControllerGenerator extends ClassGenerator
         });
 
         $method->addArgument('data', 'array');
-        $method->setCode(function($code) use ($resolveableFields) {
-            foreach($resolveableFields as $field) {
-                $name = $field->getColumnName();
-                $inputResolver = (new Stub($field->getDataResolver()))->render([
-                    'value' => "\$data['{$name}']"
-                ]);
-                $code->addCode("
-                    // Resolve input {$name}
-                    \$data['{$name}'] = {$inputResolver};
-                ");
-                $code->nl();
-            }
-            $code->addCode("return \$data;");
-        });
+        foreach($resolveableFields as $field) {
+            $name = $field->getColumnName();
+            $inputResolver = (new Stub($field->getDataResolver()))->render([
+                'value' => "\$data['{$name}']"
+            ]);
+            $method->appendCode("
+                // Resolve input {$name}
+                \$data['{$name}'] = {$inputResolver};
+            ");
+            $method->nl();
+        }
+        $method->appendCode("return \$data;");
     }
 
     protected function getInitModelCode()

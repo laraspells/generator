@@ -25,6 +25,7 @@ class MethodGenerator extends BaseGenerator
     {
         $this->name = $name;
         $this->setVisibility(static::VISIBILITY_PUBLIC);
+        $this->code = new CodeGenerator;
     }
 
     public function setName($name)
@@ -107,13 +108,6 @@ class MethodGenerator extends BaseGenerator
     public function getArguments()
     {
         return $this->arguments;
-    }
-
-    public function setCode(Closure $callback)
-    {
-        $this->code = new CodeGenerator;
-        $this->code->setIndent($this->getIndent());
-        $callback($this->code, $this);
     }
 
     public function getCode()
@@ -213,6 +207,11 @@ class MethodGenerator extends BaseGenerator
             $args[] = $arg;
         }
         return $args;
+    }
+
+    public function __call($method, array $args)
+    {
+        return call_user_func_array([$this->getCode(), $method], $args);
     }
 
 }

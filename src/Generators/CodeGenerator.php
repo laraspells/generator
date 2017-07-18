@@ -32,6 +32,11 @@ class CodeGenerator extends BaseGenerator
         ];
     }
 
+    public function appendCode($code, $label = null)
+    {
+        return $this->addCode($code, $label);
+    }
+
     public function prependCode($code, $label = null)
     {
         array_unshift($this->codes, [
@@ -40,7 +45,7 @@ class CodeGenerator extends BaseGenerator
         ]);
     }
 
-    public function addCodeBefore($findLabel, $code, $label = null)
+    public function insertCodeBefore($findLabel, $code, $label = null)
     {
         $codes = [];
         $codeData = [
@@ -56,7 +61,7 @@ class CodeGenerator extends BaseGenerator
         $this->codes = $codes;
     }
 
-    public function addCodeAfter($findLabel, $code, $label = null)
+    public function insertCodeAfter($findLabel, $code, $label = null)
     {
         $codes = [];
         $codeData = [

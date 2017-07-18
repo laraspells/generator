@@ -55,13 +55,11 @@ class MigrationGenerator extends ClassGenerator
             $docblock->addText('Run the migrations.');
         });
 
-        $method->setCode(function($code) use ($data, $columns) {
-            $code->addCode("
-                Schema::create('{$data->table_name}', function (Blueprint \$table) {
-                    ".implode("\n\r\t", $columns)."
-                });
-            ");
-        });
+        $method->appendCode("
+            Schema::create('{$data->table_name}', function (Blueprint \$table) {
+                ".implode("\n\r\t", $columns)."
+            });
+        ");
     }
 
     protected function setMethodDown(MethodGenerator $method)
@@ -71,11 +69,9 @@ class MigrationGenerator extends ClassGenerator
             $docblock->addText('Reverse the migrations.');
         });
 
-        $method->setCode(function($code) use ($data) {
-            $code->addCode("
-                Schema::dropIfExists('{$data->table_name}');
-            ");
-        });
+        $method->appendCode("
+            Schema::dropIfExists('{$data->table_name}');
+        ");
     }
 
     protected function getColumnDefinitions()

@@ -52,19 +52,19 @@ abstract class Extension
         // Do nothing
     }
 
-    public function generateView($filePath, $content)
+    public function putView($filePath, $content)
     {
         $filePath = $this->getSchema()->getViewPath($filePath);
         return $this->generateFile($filePath, $content);
     }
 
-    public function generateController($filePath, $content)
+    public function putController($filePath, $content)
     {
         $filePath = $this->getSchema()->getControllerPath($filePath);
         return $this->generateFile($filePath, $content);
     }
 
-    public function generateMigration($filePath, $content)
+    public function putMigration($filePath, $content)
     {
         if (!preg_match("/^\d{4}_\d{2}_\d{2}_\d{6}_/", $filePath)) {
             $filePath = date('Y_m_d_His').'_'.$filePath;
@@ -76,7 +76,7 @@ abstract class Extension
         return $this->generateFile($filePath, $content);
     }
 
-    public function generateModel($filePath, $content)
+    public function putModel($filePath, $content)
     {
         $filePath = $this->getSchema()->getModelPath($filePath);
         return $this->generateFile($filePath, $content);
