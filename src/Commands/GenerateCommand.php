@@ -12,8 +12,6 @@ use LaraSpell\Generators\CreateRequestGenerator;
 use LaraSpell\Generators\DocblockGenerator;
 use LaraSpell\Generators\MigrationGenerator;
 use LaraSpell\Generators\ModelGenerator;
-use LaraSpell\Generators\RepositoryClassGenerator;
-use LaraSpell\Generators\RepositoryInterfaceGenerator;
 use LaraSpell\Generators\RouteGenerator;
 use LaraSpell\Generators\ServiceProviderGenerator;
 use LaraSpell\Generators\UpdateRequestGenerator;
@@ -72,7 +70,6 @@ class GenerateCommand extends SchemaBasedCommand
 
     protected $router;
     protected $menu = [];
-    protected $repositories = [];
     protected $missingRoutes = [];
     protected $generatedFiles = [];
     protected $modifiedFiles = [];
@@ -125,7 +122,6 @@ class GenerateCommand extends SchemaBasedCommand
         // Generate or publish another files.
         $this->generateAddedRoutes();
         $this->persistConfigs();
-        // $this->generateBaseRepository();
         // $this->generateProvider();
         if (!$this->option('no-views')) {
             $this->publishViewFiles();
@@ -267,11 +263,8 @@ class GenerateCommand extends SchemaBasedCommand
         $this->generateCreateRequestForTable($table);
         $this->generateUpdateRequestForTable($table);
         $this->generateModelForTable($table);
-        $this->generateRepositoryInterfaceForTable($table);
-        $this->generateRepositoryClassForTable($table);
         $this->generateViews($table);
         $this->addCrudMissingRoutes($table);
-        $this->addConfigRepository($table->getRepositoryInterface(), $table->getRepositoryClass());
         $this->addConfigMenu($table->getRouteListName(), $table->getLabel(), ['icon' => $table->get('icon')]);
     }
 
@@ -336,31 +329,6 @@ class GenerateCommand extends SchemaBasedCommand
     {
         $filePath = $table->getModelPath();
         $content = $this->getGeneratorModel()->setTableSchema($table)->generateCode();
-        $this->generateFile($filePath, $content);
-    }
-
-    protected function generateRepositoryInterfaceForTable(Table $table)
-    {
-        $filePath = $table->getRepositoryInterfacePath();
-        $content = $this->runGenerator(RepositoryInterfaceGenerator::class);
-        $this->generateFile($filePath, $content);
-    }
-
-    protected function generateRepositoryClassForTable(Table $table)
-    {
-        $filePath = $table->getRepositoryClassPath();
-        $content = $this->runGenerator(RepositoryClassGenerator::class);
-        $this->generateFile($filePath, $content);
-    }
-
-    protected function generateBaseRepository()
-    {
-        $stub = new Stub(file_get_contents(__DIR__.'/../stubs/BaseRepository.php.stub'));
-        $filePath = $this->getSchema()->getRepositoryClassPath('BaseRepository.php');
-        $content = $stub->render([
-            'namespace' => $this->getSchema()->getRepositoryNamespace().'\\Eloquent',
-            'classname' => 'BaseRepository'
-        ]);
         $this->generateFile($filePath, $content);
     }
 

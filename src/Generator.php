@@ -9,8 +9,6 @@ use LaraSpell\Generators\ControllerGenerator;
 use LaraSpell\Generators\CreateRequestGenerator;
 use LaraSpell\Generators\MigrationGenerator;
 use LaraSpell\Generators\ModelGenerator;
-use LaraSpell\Generators\RepositoryClassGenerator;
-use LaraSpell\Generators\RepositoryInterfaceGenerator;
 use LaraSpell\Generators\UpdateRequestGenerator;
 use LaraSpell\Generators\ViewCreateGenerator;
 use LaraSpell\Generators\ViewDetailGenerator;
@@ -39,8 +37,6 @@ class Generator
     protected $generatorViewPageDetail      = 'LaraSpell\Generators\ViewDetailGenerator';
     protected $generatorViewFormCreate      = 'LaraSpell\Generators\ViewCreateGenerator';
     protected $generatorViewFormEdit        = 'LaraSpell\Generators\ViewEditGenerator';
-    protected $generatorRepositoryInterface = 'LaraSpell\Generators\RepositoryInterfaceGenerator';
-    protected $generatorRepositoryClass     = 'LaraSpell\Generators\RepositoryClassGenerator';
     protected $generatorServiceProvider     = 'LaraSpell\Generators\ServiceProviderGenerator';
 
     public function __construct($schemaFile)
@@ -131,7 +127,7 @@ class Generator
     {
         $generatorClass = $this->getGeneratorMigration();
         $generator = new $generatorClass($table);
-        return $generator->generateCode();        
+        return $generator->generateCode();
     }
 
     /**
@@ -166,7 +162,7 @@ class Generator
     {
         $generatorClass = $this->getGeneratorCreateRequest();
         $generator = new $generatorClass($table);
-        return $generator->generateCode();        
+        return $generator->generateCode();
     }
 
     /**
@@ -201,7 +197,7 @@ class Generator
     {
         $generatorClass = $this->getGeneratorUpdateRequest();
         $generator = new $generatorClass($table);
-        return $generator->generateCode();        
+        return $generator->generateCode();
     }
 
     /**
@@ -236,7 +232,7 @@ class Generator
     {
         $generatorClass = $this->getGeneratorController();
         $generator = new $generatorClass($table);
-        return $generator->generateCode();        
+        return $generator->generateCode();
     }
 
     /**
@@ -271,7 +267,7 @@ class Generator
     {
         $generatorClass = $this->getGeneratorModel();
         $generator = new $generatorClass($table);
-        return $generator->generateCode();        
+        return $generator->generateCode();
     }
 
     /**
@@ -306,7 +302,7 @@ class Generator
     {
         $generatorClass = $this->getGeneratorViewPageList();
         $generator = new $generatorClass($table, $this->getTemplate()->getStubContent('page-list.stub'));
-        return $generator->generateCode();        
+        return $generator->generateCode();
     }
 
     /**
@@ -341,7 +337,7 @@ class Generator
     {
         $generatorClass = $this->getGeneratorViewPageDetail();
         $generator = new $generatorClass($table, $this->getTemplate()->getStubContent('page-detail.stub'));
-        return $generator->generateCode();        
+        return $generator->generateCode();
     }
 
     /**
@@ -376,7 +372,7 @@ class Generator
     {
         $generatorClass = $this->getGeneratorViewFormCreate();
         $generator = new $generatorClass($table, $this->getTemplate()->getStubContent('form-create.stub'));
-        return $generator->generateCode();        
+        return $generator->generateCode();
     }
 
     /**
@@ -411,77 +407,7 @@ class Generator
     {
         $generatorClass = $this->getGeneratorViewFormEdit();
         $generator = new $generatorClass($table, $this->getTemplate()->getStubContent('form-edit.stub'));
-        return $generator->generateCode();        
-    }
-
-    /**
-     * Set generator RepositoryInterface
-     *
-     * @param string $class
-     * @return void
-     */
-    public function setGeneratorRepositoryInterface($class)
-    {
-        $this->assertClassOrSubClass($class, RepositoryInterfaceGenerator::class);
-        $this->generatorRepositoryInterface = $class;
-    }
-
-    /**
-     * Get Generator RepositoryInterface
-     *
-     * @return string
-     */
-    public function getGeneratorRepositoryInterface()
-    {
-        return $this->generatorRepositoryInterface;
-    }
-
-    /**
-     * Generate RepositoryInterface
-     *
-     * @param  LaraSpell\Schema\Table $table
-     * @return void
-     */
-    public function generateRepositoryInterface(Table $table)
-    {
-        $generatorClass = $this->getGeneratorRepositoryInterface();
-        $generator = new $generatorClass($table);
-        return $generator->generateCode();        
-    }
-
-    /**
-     * Set generator RepositoryClass
-     *
-     * @param string $class
-     * @return void
-     */
-    public function setGeneratorRepositoryClass($class)
-    {
-        $this->assertClassOrSubClass($class, RepositoryClassGenerator::class);
-        $this->generatorRepositoryClass = $class;
-    }
-
-    /**
-     * Get Generator RepositoryClass
-     *
-     * @return string
-     */
-    public function getGeneratorRepositoryClass()
-    {
-        return $this->generatorRepositoryClass;
-    }
-
-    /**
-     * Generate RepositoryClass
-     *
-     * @param  LaraSpell\Schema\Table $table
-     * @return void
-     */
-    public function generateRepositoryClass(Table $table)
-    {
-        $generatorClass = $this->getGeneratorRepositoryClass();
-        $generator = new $generatorClass($table);
-        return $generator->generateCode();        
+        return $generator->generateCode();
     }
 
     /**
@@ -516,27 +442,21 @@ class Generator
     {
         $generatorClass = $this->getGeneratorServiceProvider();
         $generator = new $generatorClass($this->getSchema());
-        return $generator->generateCode();        
+        return $generator->generateCode();
     }
 
     /**
      * Generate configuration code
      *
-     * @param  array $repositories
      * @param  array $menu
      * @return string
      */
-    public function generateConfig(array $repositories, array $menu)
+    public function generateConfig(array $menu)
     {
         $code = new CodeGenerator;
         $config = [
-            'repositories' => $repositories,
             'menu' => $menu
         ];
-
-        foreach($config['repositories'] as $interface => $class) {
-            $config['repositories'][$interface] = 'eval("\''.$class.'\'")';
-        }
 
         $configArray = $code->phpify($config, true);
         return "<?php\n\nreturn {$configArray};\n";

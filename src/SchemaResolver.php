@@ -80,9 +80,6 @@ class SchemaResolver implements SchemaResolverInterface
         data_fill($schema, 'model.path', 'app');
         data_fill($schema, 'model.namespace', 'App');
 
-        data_fill($schema, 'repository.path', 'app/Repositories');
-        data_fill($schema, 'repository.namespace', 'App\Repositories');
-
         data_fill($schema, 'view.path', 'resources/views');
         data_fill($schema, 'view.namespace', '');
 

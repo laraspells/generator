@@ -35,19 +35,6 @@ trait ConfigUtils
         return array_get($this->configs, $key);
     }
 
-    public function addConfigRepository($interface, $class, $update = false)
-    {
-        if (!isset($this->configs['repositories'])) {
-            $this->configs['repositories'] = [];
-        }
-
-        if (!$update AND isset($this->configs['repositories'][$interface])) {
-            return;
-        }
-
-        $this->configs['repositories'][$interface] = "eval(\"'{$class}'\")";
-    }
-
     public function addConfigMenu($route, $label, array $others = [], $update = false)
     {
         if (!isset($this->configs['menu'])) {

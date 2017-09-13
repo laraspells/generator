@@ -36,14 +36,6 @@ class ServiceProviderGenerator extends ClassGenerator
         $method->setDocblock(function($docblock) {
             $docblock->addText("Register the application services.");
         });
-
-        $method->appendCode("
-            // Binding repositories
-            \$repositories = config('{$configKey}.repositories') ?: [];
-            foreach(\$repositories as \$interface => \$class) {
-                \$this->app->bind(\$interface, \$class);
-            }
-        ");
     }
 
     protected function setMethodBoot(MethodGenerator $method)

@@ -9,8 +9,6 @@ use LaraSpell\Generators\ControllerGenerator;
 use LaraSpell\Generators\CreateRequestGenerator;
 use LaraSpell\Generators\MigrationGenerator;
 use LaraSpell\Generators\ModelGenerator;
-use LaraSpell\Generators\RepositoryClassGenerator;
-use LaraSpell\Generators\RepositoryInterfaceGenerator;
 use LaraSpell\Generators\RouteGenerator;
 use LaraSpell\Generators\ServiceProviderGenerator;
 use LaraSpell\Generators\UpdateRequestGenerator;
@@ -88,8 +86,6 @@ trait GeneratorBinder
             ControllerGenerator::class          => ControllerGenerator::class,
             MigrationGenerator::class           => MigrationGenerator::class,
             ModelGenerator::class               => ModelGenerator::class,
-            RepositoryClassGenerator::class     => RepositoryClassGenerator::class,
-            RepositoryInterfaceGenerator::class => RepositoryInterfaceGenerator::class,
             ServiceProviderGenerator::class     => ServiceProviderGenerator::class,
             CreateRequestGenerator::class       => CreateRequestGenerator::class,
             UpdateRequestGenerator::class       => UpdateRequestGenerator::class,

@@ -253,50 +253,6 @@ class Table extends AbstractSchema
     }
 
     /**
-     * Get repository interface file path
-     *
-     * @return string
-     */
-    public function getRepositoryInterfacePath()
-    {
-        return $this->getRootSchema()->getRepositoryInterfacePath($this->getRepositoryInterface(false).'.php');
-    }
-
-    /**
-     * Get repository interface file path
-     *
-     * @return string
-     */
-    public function getRepositoryClassPath()
-    {
-        return $this->getRootSchema()->getRepositoryClassPath($this->getRepositoryClass(false).'.php');
-    }
-
-    /**
-     * Get repository interface name
-     *
-     * @param boolean $namespace
-     * @return string
-     */
-    public function getRepositoryInterface($namespace = true)
-    {
-        $interface = ucfirst(camel_case($this->getSingularName())).'Repository';
-        return $namespace? $this->getRootSchema()->getRepositoryInterface($interface) : $interface;
-    }
-
-    /**
-     * Get repository class name
-     *
-     * @param boolean $namespace
-     * @return string
-     */
-    public function getRepositoryClass($namespace = true)
-    {
-        $class = ucfirst(camel_case($this->getSingularName())).'Repository';
-        return $namespace? $this->getRootSchema()->getRepositoryClass($class) : $class;
-    }
-
-    /**
      * Get menu icon
      *
      * @return string

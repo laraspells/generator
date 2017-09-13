@@ -28,10 +28,10 @@ class ControllerGenerator extends ClassGenerator
 
     protected function initClass()
     {
-        $repositories = $this->getRequiredRepositories();
-        foreach($repositories as $varName => $repository) {
+        $models = $this->getRequiredModels();
+        foreach($models as $varName => $model) {
             $label = ucfirst(snake_case($varName, ' '));
-            $this->addProperty($varName, $repository, 'protected', null, $label.' repository');
+            $this->addProperty($varName, $model, 'protected', null, $label.' model');
         }
         $this->setDocblock(function($docblock) {
             $authorName = $this->getTableSchema()->getRootSchema()->getAuthorName();
@@ -44,21 +44,21 @@ class ControllerGenerator extends ClassGenerator
 
     protected function setMethodConstruct(MethodGenerator $method)
     {
-        $repositories = $this->getRequiredRepositories();
-        $method->setDocblock(function($docblock) use ($repositories) {
+        $models = $this->getRequiredModels();
+        $method->setDocblock(function($docblock) use ($models) {
             $docblock->addText("Constructor");
-            foreach($repositories as $varName => $repository) {
-                $docblock->addParam($varName, $repository);
+            foreach($models as $varName => $model) {
+                $docblock->addParam($varName, $model);
             }
         });
-        foreach($repositories as $varName => $repository) {
-            $method->addArgument($varName, $repository);
+        foreach($models as $varName => $model) {
+            $method->addArgument($varName, $model);
         }
 
-        $codeSetRepositories = implode($this->getNewLine(), array_map(function($varName) {
+        $codeSetModels = implode($this->getNewLine(), array_map(function($varName) {
             return "\$this->{$varName} = \${$varName};";
-        }, array_keys($repositories)));
-        $method->appendCode($codeSetRepositories, "set-repositories");
+        }, array_keys($models)));
+        $method->appendCode($codeSetModels, "set-models");
     }
 
     protected function setMethodPageList(MethodGenerator $method)
@@ -102,7 +102,7 @@ class ControllerGenerator extends ClassGenerator
             \$keyword = \$request->get('keyword');
 
             \$data['title'] = 'List {$data->label}';
-            \$data['pagination'] = \$this->{$data->repository->varname}->getPagination(\$page, \$limit, ".$this->phpify($paginationOptions, true).");
+            \$data['pagination'] = \$this->{$data->model->varname}->getPagination(\$page, \$limit, ".$this->phpify($paginationOptions, true).");
 
             return view('{$data->view->page_list}', \$data);
         ");
@@ -150,12 +150,12 @@ class ControllerGenerator extends ClassGenerator
             $selectedColumns = $this->phpify([$colValue, $colLabel]);
             $relatedTable = $this->getTableSchema()->getRootSchema()->getTable($relation['table']);
             $relatedTableName = $relatedTable->getName();
+            $model = camel_case($relatedTable->getSingularName());
             $listVarname = camel_case($relatedTableName);
-            $repository = $this->getRepositoryPropertyName($relatedTable);
             $method->nl();
             $method->appendCode("
                 // Set {$varName}
-                \${$listVarname} = \$this->{$repository}->all(".$selectedColumns.");
+                \${$listVarname} = \$this->{$model}->all(".$selectedColumns.");
                 \$data['{$varName}'] = array_map(function(\$record) {
                     return [
                         'value' => \$record['{$colValue}'],
@@ -191,7 +191,7 @@ class ControllerGenerator extends ClassGenerator
 
         $method->appendCode("
             // Insert data
-            \${$data->model_varname} = \$this->{$data->repository->varname}->create(\$data);
+            \${$data->model_varname} = \$this->{$data->model->varname}->create(\$data);
             if (!\${$data->model_varname}) {
                 \$message = 'Something went wrong when create {$data->label}';
                 return back()->with('danger', \$message);
@@ -247,12 +247,12 @@ class ControllerGenerator extends ClassGenerator
             $selectedColumns = $this->phpify([$colValue, $colLabel]);
             $relatedTable = $this->getTableSchema()->getRootSchema()->getTable($relation['table']);
             $relatedTableName = $relatedTable->getName();
+            $model = camel_case($relatedTable->getSingularName());
             $listVarname = camel_case($relatedTableName);
-            $repository = $this->getRepositoryPropertyName($relatedTable);
             $method->nl();
             $method->appendCode("
                 // Set {$varName}
-                \${$listVarname} = \$this->{$repository}->all(".$selectedColumns.");
+                \${$listVarname} = \$this->{$model}->all(".$selectedColumns.");
                 \$data['{$varName}'] = array_map(function(\$record) {
                     return [
                         'value' => \$record['{$colValue}'],
@@ -304,7 +304,7 @@ class ControllerGenerator extends ClassGenerator
         }
         $method->appendCode("
             // Update data
-            \$updated = \$this->{$data->repository->varname}->updateById(\${$data->primary_varname}, \$data);
+            \$updated = \$this->{$data->model->varname}->updateById(\${$data->primary_varname}, \$data);
             if (!\$updated) {
                 \$message = 'Something went wrong when update {$data->label}';
                 return back()->with('danger', \$message);
@@ -332,7 +332,7 @@ class ControllerGenerator extends ClassGenerator
         $method->nl();
         $method->appendCode("
             // Delete data
-            \$deleted = \$this->{$data->repository->varname}->deleteById(\${$data->primary_varname});
+            \$deleted = \$this->{$data->model->varname}->deleteById(\${$data->primary_varname});
             if (!\$deleted) {
                 \$message = 'Something went wrong when delete {$data->label}';
                 return back()->with('danger', \$message);
@@ -375,13 +375,13 @@ class ControllerGenerator extends ClassGenerator
 
         if (!empty($joins)) {
             $method->appendCode("
-                \${$data->model_varname} = \$this->{$data->repository->varname}->findById(\${$data->primary_varname}, [
+                \${$data->model_varname} = \$this->{$data->model->varname}->findById(\${$data->primary_varname}, [
                     'joins' => ".$method->phpify($joins, true)."
                 ]);
             ");
         } else {
             $method->appendCode("
-                \${$data->model_varname} = \$this->{$data->repository->varname}->findById(\${$data->primary_varname});
+                \${$data->model_varname} = \$this->{$data->model->varname}->findById(\${$data->primary_varname});
             ");
         }
 
@@ -454,23 +454,23 @@ class ControllerGenerator extends ClassGenerator
         return "\${$data->model_varname} = \$this->findOrFail(\${$data->primary_varname});";
     }
 
-    protected function getRequiredRepositories()
+    protected function getRequiredModels()
     {
-        $repositories = [];
+        $models = [];
         $varName = camel_case($this->getTableSchema()->getSingularName());
-        $repositories[$varName] = $this->getTableSchema()->getRepositoryInterface();
+        $models[$varName] = $this->getTableSchema()->getModelClass();
         $relations = $this->getTableSchema()->getRelations();
         foreach($relations as $relation) {
             $table = $relation['table'];
             $tableSchema = $this->getTableSchema()->getRootSchema()->getTable($table);
-            $repositoryInterface = $tableSchema->getRepositoryInterface();
-            $varName = $this->getRepositoryPropertyName($tableSchema);
-            if (!in_array($repositoryInterface, $repositories)) {
-                $repositories[$varName] = $repositoryInterface;
+            $modelClass = $tableSchema->getModelClass();
+            $varName = camel_case($tableSchema->getSingularName());
+            if (!in_array($modelClass, $models)) {
+                $models[$varName] = $modelClass;
             }
         }
 
-        return $repositories;
+        return $models;
     }
 
     protected function getInputableFieldsHasRelation()
@@ -478,11 +478,6 @@ class ControllerGenerator extends ClassGenerator
         return array_filter($this->getTableSchema()->getFields(), function($field) {
             return !empty($field->getRelation()) AND $field->hasInput();
         });
-    }
-
-    protected function getRepositoryPropertyName(Table $table)
-    {
-        return camel_case($table->getSingularName());
     }
 
 }

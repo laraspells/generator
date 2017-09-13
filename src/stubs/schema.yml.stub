@@ -18,9 +18,6 @@ request:
 model:
   path: app/Models
   namespace: App\Models
-repository:
-  path: app/Repositories
-  namespace: App\Repositories
 view:
   path: resources/views
   namespace: ""

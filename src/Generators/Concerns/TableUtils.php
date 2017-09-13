@@ -64,21 +64,13 @@ trait TableUtils
                     'class' => $schema->getModelClass(false),
                     'class_with_namespace' => $schema->getModelClass(true),
                     'file' => $schema->getModelPath(),
+                    'varname' => camel_case($schema->getSingularName())
                 ],
                 'controller' => [
                     'namespace' => $schema->getRootSchema()->getControllerNamespace(),
                     'class' => $schema->getControllerClass(false),
                     'class_with_namespace' => $schema->getControllerClass(true),
                     'file' => $schema->getControllerPath(),
-                ],
-                'repository' => [
-                    'class' => $schema->getRepositoryClass(false),
-                    'class_with_namespace' => $schema->getRepositoryClass(true),
-                    'interface' => $schema->getRepositoryInterface(false),
-                    'interface_with_namespace' => $schema->getRepositoryInterface(true),
-                    'file_class' => $schema->getRepositoryClassPath(),
-                    'file_interface' => $schema->getRepositoryInterfacePath(),
-                    'varname' => camel_case($schema->getSingularName()),
                 ],
                 'view' => [
                     'page_list' => $schema->getViewListName(),
