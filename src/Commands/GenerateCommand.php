@@ -409,9 +409,10 @@ class GenerateCommand extends SchemaBasedCommand
     protected function publishPublicFiles()
     {
         $this->addTemplatePublicFiles('');
+        $publicDir = "public";
         $publicFiles = $this->getAddedPublicFiles();
         foreach($publicFiles as $to => $from) {
-            $this->copyFile($from, $to);
+            $this->copyFile($from, $publicDir.'/'.$to);
         }
     }
 

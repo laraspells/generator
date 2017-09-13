@@ -4,6 +4,7 @@ namespace LaraSpell\Commands\Concerns;
 
 use Closure;
 use InvalidArgumentException;
+use LaraSpell\Generators\DocblockGenerator;
 use LaraSpell\Generators\RouteGenerator;
 use LaraSpell\Schema\Table;
 use UnexpectedValueException;

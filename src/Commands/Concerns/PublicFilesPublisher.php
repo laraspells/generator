@@ -21,10 +21,11 @@ trait PublicFilesPublisher
 
     public function getAddedTemplatePublicFiles()
     {
-        $templatePublicDir = $this->getTemplate()->getFolderPublic();
+        $template = $this->getTemplate();
+        $templatePublicPath = $template->getDirectory().'/'.$template->getFolderPublic();
         $templatePublicFiles = [];
         foreach($this->templatePublicFiles as $publicFile) {
-            $to = trim(substr($publicFile, strlen($templatePublicDir)), "/");
+            $to = trim(str_replace($templatePublicPath, "", $publicFile), '/');
             $templatePublicFiles[$to] = $publicFile;
         }
         return $templatePublicFiles;
