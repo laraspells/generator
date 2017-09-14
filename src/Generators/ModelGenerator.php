@@ -19,6 +19,10 @@ class ModelGenerator extends ClassGenerator
         parent::__construct($tableSchema->getModelClass());
         $this->tableSchema = $tableSchema;
         $this->initClass();
+        $relations = $this->getTableSchema()->getRelations();
+        foreach($relations as $relation) {
+            $this->addRelationMethod($relation['table'], $relation['type'], $relation['key_from'], $relation['key_to']);
+        }
     }
 
     protected function initClass()
@@ -43,6 +47,40 @@ class ModelGenerator extends ClassGenerator
             $docblock->addAnnotation("author", "{$authorName} <{$authorEmail}>");
             $docblock->addAnnotation("created", date('r'));
         });
+    }
+
+    protected function addRelationMethod($table, $type, $keyFrom, $keyTo)
+    {
+        $relatedTable = $this->getTableSchema()->getRootSchema()->getTable($table);
+        $modelClass = $relatedTable->getModelClass(false);
+        if ($modelClass == $this->getTableSchema()->getModelClass(false)) {
+            $modelClass = "static";
+        }
+
+        $isHasOne = in_array($type, ['has-one']);
+        if ($isHasOne) {
+            $from = preg_replace("/(^id_|_id$)/", "", $keyFrom);
+            $methodName = camel_case($from);
+        } else {
+            $methodName = camel_case($relatedTable->getName());
+        }
+
+        $method = $this->addMethod($methodName);
+        $relationMethod = camel_case($type);
+        $returnClass = "Illuminate\\Database\\Eloquent\\Relations\\".ucfirst($relationMethod);
+
+        $method->setDocblock(function($docblock) use ($table, $returnClass) {
+            $docblock->addText("Relation to table '{$table}'");
+            $docblock->setReturn($returnClass);
+        });
+
+        $relationParams = [];
+        $relationParams[] = $modelClass.'::class';
+        $relationParams[] = "'{$keyTo}'";
+        $relationParams[] = "'{$keyFrom}'";
+        $relationParams = implode(", ", $relationParams);
+
+        $method->addCode("return \$this->{$relationMethod}({$relationParams});");
     }
 
 }

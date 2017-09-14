@@ -429,7 +429,7 @@ class SchemaResolver implements SchemaResolverInterface
                     if (!$this->tableHasRelation($tableSchema, $otherTableName, $relation['key_to'], $relation['key_from'])) {
                         $relations[] = [
                             'table' => $otherTableName,
-                            'type' => 'belongs-to',
+                            'type' => ($relation['type'] == 'has-one')? 'has-many' : 'has-one',
                             'key_from' => $relation['key_to'],
                             'key_to' => $relation['key_from']
                         ];
