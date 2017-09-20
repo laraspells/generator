@@ -24,6 +24,7 @@ class ControllerGenerator extends ClassGenerator
         $this->useClass(static::CLASS_REQUEST);
         $this->initClass();
         $this->addMethodsFromReflection();
+        $this->addMethodsFormOptions();
     }
 
     protected function initClass()
@@ -97,12 +98,13 @@ class ControllerGenerator extends ClassGenerator
             $paginationOptions['joins'] = $joins;
         }
         $method->appendCode("
-            \$page = (int) \$request->get('page') ?: 1;
             \$limit = (int) \$request->get('limit') ?: 10;
             \$keyword = \$request->get('keyword');
 
+            \$query = \$this->{$data->model->varname};
+
             \$data['title'] = 'List {$data->label}';
-            \$data['pagination'] = \$this->{$data->model->varname}->getPagination(\$page, \$limit, ".$this->phpify($paginationOptions, true).");
+            \$data['pagination'] = \$query->paginate(\$limit);
 
             return view('{$data->view->page_list}', \$data);
         ");
@@ -145,24 +147,8 @@ class ControllerGenerator extends ClassGenerator
         foreach($fieldsHasRelation as $field) {
             $relation = $field->getRelation();
             $varName = $relation['var_name'];
-            $colValue = $relation['col_value'];
-            $colLabel = $relation['col_label'];
-            $selectedColumns = $this->phpify([$colValue, $colLabel]);
-            $relatedTable = $this->getTableSchema()->getRootSchema()->getTable($relation['table']);
-            $relatedTableName = $relatedTable->getName();
-            $model = camel_case($relatedTable->getSingularName());
-            $listVarname = camel_case($relatedTableName);
-            $method->nl();
-            $method->appendCode("
-                // Set {$varName}
-                \${$listVarname} = \$this->{$model}->all(".$selectedColumns.");
-                \$data['{$varName}'] = array_map(function(\$record) {
-                    return [
-                        'value' => \$record['{$colValue}'],
-                        'label' => \$record['{$colLabel}']
-                    ];
-                }, \${$listVarname});
-            ");
+            $methodName = 'get'.ucfirst(camel_case($varName));
+            $method->appendCode("\$data['{$varName}'] = \$this->{$methodName}();");
         }
         $method->nl();
         $method->appendCode("return view('{$data->view->form_create}', \$data);");
@@ -238,28 +224,12 @@ class ControllerGenerator extends ClassGenerator
         $method->nl();
         $view = $this->getTableSchema()->getRootSchema()->getView($data->model_varname.'.form-edit');
         $method->appendCode("\$data['title'] = 'Form Create {$data->label}';");
-        $method->appendCode("\$data['{$data->model_varname}'] = \$this->resolveFormData(\${$data->model_varname});");
+        $method->appendCode("\$data['{$data->model_varname}'] = \$this->resolveFormData(\${$data->model_varname}->toArray());");
         foreach($fieldsHasRelation as $field) {
             $relation = $field->getRelation();
             $varName = $relation['var_name'];
-            $colValue = $relation['col_value'];
-            $colLabel = $relation['col_label'];
-            $selectedColumns = $this->phpify([$colValue, $colLabel]);
-            $relatedTable = $this->getTableSchema()->getRootSchema()->getTable($relation['table']);
-            $relatedTableName = $relatedTable->getName();
-            $model = camel_case($relatedTable->getSingularName());
-            $listVarname = camel_case($relatedTableName);
-            $method->nl();
-            $method->appendCode("
-                // Set {$varName}
-                \${$listVarname} = \$this->{$model}->all(".$selectedColumns.");
-                \$data['{$varName}'] = array_map(function(\$record) {
-                    return [
-                        'value' => \$record['{$colValue}'],
-                        'label' => \$record['{$colLabel}']
-                    ];
-                }, \${$listVarname});
-            ");
+            $methodName = 'get'.ucfirst(camel_case($varName));
+            $method->appendCode("\$data['{$varName}'] = \$this->{$methodName}();");
         }
         $method->nl();
         $method->appendCode("return view('{$view}', \$data);");
@@ -304,7 +274,8 @@ class ControllerGenerator extends ClassGenerator
         }
         $method->appendCode("
             // Update data
-            \$updated = \$this->{$data->model->varname}->updateById(\${$data->primary_varname}, \$data);
+            \$product->fill(\$data);
+            \$updated = \$product->save();
             if (!\$updated) {
                 \$message = 'Something went wrong when update {$data->label}';
                 return back()->with('danger', \$message);
@@ -375,13 +346,11 @@ class ControllerGenerator extends ClassGenerator
 
         if (!empty($joins)) {
             $method->appendCode("
-                \${$data->model_varname} = \$this->{$data->model->varname}->findById(\${$data->primary_varname}, [
-                    'joins' => ".$method->phpify($joins, true)."
-                ]);
+                \${$data->model_varname} = \$this->{$data->model->varname}->find(\${$data->primary_varname});
             ");
         } else {
             $method->appendCode("
-                \${$data->model_varname} = \$this->{$data->model->varname}->findById(\${$data->primary_varname});
+                \${$data->model_varname} = \$this->{$data->model->varname}->find(\${$data->primary_varname});
             ");
         }
 
@@ -396,6 +365,7 @@ class ControllerGenerator extends ClassGenerator
 
     protected function setMethodResolveFormInputs(MethodGenerator $method)
     {
+        $method->setVisibility('protected');
         $resolveableFields = array_filter($this->getTableSchema()->getFields(), function($field) {
             return $field->hasInput() AND !empty($field->getInputResolver());
         });
@@ -423,6 +393,7 @@ class ControllerGenerator extends ClassGenerator
 
     protected function setMethodResolveFormData(MethodGenerator $method)
     {
+        $method->setVisibility('protected');
         $resolveableFields = array_filter($this->getTableSchema()->getFields(), function($field) {
             return $field->hasInput() AND !empty($field->getDataResolver());
         });
@@ -446,6 +417,35 @@ class ControllerGenerator extends ClassGenerator
             $method->nl();
         }
         $method->appendCode("return \$data;");
+    }
+
+    protected function addMethodsFormOptions()
+    {
+        $fieldsHasRelation = $this->getInputableFieldsHasRelation();
+        foreach($fieldsHasRelation as $field) {
+            $relation = $field->getRelation();
+            $varName = $relation['var_name'];
+            $methodName = 'get'.ucfirst(camel_case($varName));
+            $colValue = $relation['col_value'];
+            $colLabel = $relation['col_label'];
+            $relatedTable = $this->getTableSchema()->getRootSchema()->getTable($relation['table']);
+            $relatedTableName = $relatedTable->getName();
+            $model = camel_case($relatedTable->getSingularName());
+            $listVarname = camel_case($relatedTableName);
+
+            $method = $this->addMethod($methodName);
+            $method->setVisibility('protected');
+            $method->setDocblock(function($docblock) use ($varName) {
+                $docblock->addText('Get '.$varName);
+                $docblock->setReturn('array');
+            });
+            $method->appendCode("
+                return \$this->{$model}
+                ->select(['{$colValue} as value', '{$colLabel} as label'])
+                ->get()
+                ->toArray();
+            ");
+        }
     }
 
     protected function getInitModelCode()
