@@ -1,4 +1,4 @@
-LaraSpell - Laravel CRUD Generator for 'Sorcerers'
+LaraSpells - Laravel CRUD Generator for 'Sorcerers'
 ========================================================
 
 LaraSpell is Laravel CRUD generator that generate laravel code. 
@@ -19,10 +19,10 @@ And all you need to customize it is just some PHP and Laravel knowledges.
 
 ## Installation
 
-Run composer command below to install `laraspell/generator`:
+Run composer command below to install `laraspells/generator`:
 
 ```
-composer require "laraspell/generator"
+composer require "laraspells/generator"
 ```
 
 Now open `config/app.php`, add `LaraSpells\LaraSpellServiceProvider::class` to 'providers' section.
@@ -60,7 +60,7 @@ Now you can use it by adding generated service provider to your `config/app.php`
 ```yml
 ---
 name: Schema Name                                   # Schema name (for now it's just for information, not used to generate anything)
-template: vendor/laraspell/generator/template       # Template directory
+template: vendor/laraspells/generator/template       # Template directory
 author: 
   name: Author Name                                 # Author name (used for generated PHP classes)
   email: author@email.example                       # Author email

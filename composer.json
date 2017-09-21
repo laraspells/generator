@@ -1,5 +1,5 @@
 {
-    "name": "laraspell/generator",
+    "name": "laraspells/generator",
     "description": "Laravel Crud Generator",
     "type": "library",
     "license": "MIT",

@@ -23,7 +23,7 @@ class MakeSchemaCommand extends Command
      *
      * @var string
      */
-    protected $description = 'Generate laraspell schema file';
+    protected $description = 'Generate laraspells schema file';
 
     /**
      * Execute the console command.
