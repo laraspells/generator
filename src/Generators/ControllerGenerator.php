@@ -65,38 +65,14 @@ class ControllerGenerator extends ClassGenerator
     protected function setMethodPageList(MethodGenerator $method)
     {
         $data = $this->getTableData();
+        $recordsVarName = $data->table_name;
         $method->addArgument('request', static::CLASS_REQUEST);
         $method->setDocblock(function($docblock) use ($data) {
             $docblock->addText("Display list {$data->table_name}");
             $docblock->addParam('request', static::CLASS_REQUEST);
             $docblock->setReturn(static::CLASS_RESPONSE);
         });
-        $joins = [];
-        $inputableFieldsHasRelation = $this->getInputableFieldsHasRelation();
-        foreach($inputableFieldsHasRelation as $field) {
-            $relation = $field->getRelation();
-            $relatedTable = $this->getTableSchema()->getRootSchema()->getTable($relation['table']);
-            $tableVarname = $relatedTable->getSingularName();
-            $colLabel = $relation['col_label'];
-            $colLabelAlias = $relation['col_alias'];
 
-            $joins[] = [
-                'table' => $relation['table'],
-                'type' => 'left',
-                'key_from' => $relation['key_from'],
-                'key_to' => $relation['key_to'],
-                'selects' => [
-                    $colLabelAlias? $colLabel.' as '.$colLabelAlias : $colLabel
-                ],
-            ];
-        }
-
-        $paginationOptions = [
-            'keyword' => 'eval("$keyword")'
-        ];
-        if (!empty($joins)) {
-            $paginationOptions['joins'] = $joins;
-        }
         $method->appendCode("
             \$limit = (int) \$request->get('limit') ?: 10;
             \$keyword = \$request->get('keyword');
@@ -104,7 +80,7 @@ class ControllerGenerator extends ClassGenerator
             \$query = \$this->{$data->model->varname};
 
             \$data['title'] = 'List {$data->label}';
-            \$data['pagination'] = \$query->paginate(\$limit);
+            \$data['{$recordsVarName}'] = \$query->paginate(\$limit);
 
             return view('{$data->view->page_list}', \$data);
         ");
@@ -222,7 +198,7 @@ class ControllerGenerator extends ClassGenerator
         $initModelCode = $this->getInitModelCode();
         $method->appendCode($initModelCode);
         $method->nl();
-        $view = $this->getTableSchema()->getRootSchema()->getView($data->model_varname.'.form-edit');
+        $view = $data->view->form_edit;
         $method->appendCode("\$data['title'] = 'Form Create {$data->label}';");
         $method->appendCode("\$data['{$data->model_varname}'] = \$this->resolveFormData(\${$data->model_varname}->toArray());");
         foreach($fieldsHasRelation as $field) {
@@ -274,8 +250,8 @@ class ControllerGenerator extends ClassGenerator
         }
         $method->appendCode("
             // Update data
-            \$product->fill(\$data);
-            \$updated = \$product->save();
+            \${$data->model_varname}->fill(\$data);
+            \$updated = \${$data->model_varname}->save();
             if (!\$updated) {
                 \$message = 'Something went wrong when update {$data->label}';
                 return back()->with('danger', \$message);
@@ -303,7 +279,7 @@ class ControllerGenerator extends ClassGenerator
         $method->nl();
         $method->appendCode("
             // Delete data
-            \$deleted = \$this->{$data->model->varname}->deleteById(\${$data->primary_varname});
+            \$deleted = \${$data->model_varname}->delete();
             if (!\$deleted) {
                 \$message = 'Something went wrong when delete {$data->label}';
                 return back()->with('danger', \$message);

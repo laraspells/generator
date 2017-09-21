@@ -39,6 +39,7 @@ class ViewListGenerator extends ViewGenerator
     {
         $tableId = $this->getTableId();
         $tableData = $this->getTableData();
+        $recordsVarName = $tableData->table_name;
         $inputableFields = $this->tableSchema->getInputableFields();
         $theads = [];
         $bodys = [];
@@ -73,9 +74,9 @@ class ViewListGenerator extends ViewGenerator
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach($pagination[\'items\'] as $i => $'.$tableData->model_varname.')
+                    @foreach($'.$recordsVarName.' as $i => $'.$tableData->model_varname.')
                     <tr>
-                        <td class="text-center column-number">{{ $pagination[\'from\'] + $i }}</td>
+                        <td class="text-center column-number">{{ $'.$recordsVarName.'->firstItem() + $i }}</td>
                         '.implode("\n", $tbodys).'
                         <td width="200" class="text-center column-action">
                             <a class="btn btn-sm btn-edit btn-default" href="{{ route(\''.$tableData->route->page_detail.'\', [$'.$tableData->model_varname.'[\''.$tableData->primary_key.'\']]) }}">Show</a>
@@ -93,16 +94,10 @@ class ViewListGenerator extends ViewGenerator
 
     protected function generateHtmlPagination()
     {
+        $tableData = $this->getTableData();
+        $recordsVarName = $tableData->table_name;
         $code = $this->makeCodeGenerator();
-        $code->addCode('
-            <ul class="pagination">
-                @foreach($pagination[\'links\'] as $link)
-                <li class="{{ $link[\'page\'] == $pagination[\'page\']? \'active\' : \'\' }}">
-                    <a href="{{ $link[\'url\'] }}">{{ $link[\'label\'] }}</a>
-                </li>
-                @endforeach
-            </ul>
-        ');
+        $code->addCode('{!! $'.$recordsVarName.'->links() !!}');
 
         return $code->generateCode();
     }
