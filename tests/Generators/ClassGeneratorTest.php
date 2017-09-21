@@ -1,7 +1,7 @@
 <?php
 
 use PHPUnit\Framework\TestCase;
-use LaraSpell\Generators\ClassGenerator;
+use LaraSpells\Generators\ClassGenerator;
 
 class ClassGeneratorTest extends TestCase
 {

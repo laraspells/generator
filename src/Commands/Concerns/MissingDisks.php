@@ -1,8 +1,8 @@
 <?php
 
-namespace LaraSpell\Commands\Concerns;
+namespace LaraSpells\Commands\Concerns;
 
-use LaraSpell\Generators\CodeGenerator;
+use LaraSpells\Generators\CodeGenerator;
 
 trait MissingDisks
 {

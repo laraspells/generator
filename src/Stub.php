@@ -1,6 +1,6 @@
 <?php
 
-namespace LaraSpell;
+namespace LaraSpells;
 
 use InvalidArgumentException;
 
@@ -16,7 +16,7 @@ class Stub
         $this->content = $content;
         $this->data = $data;
     }
-    
+
     public function getData()
     {
         return $this->data;

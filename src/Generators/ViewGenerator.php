@@ -1,9 +1,9 @@
 <?php
 
-namespace LaraSpell\Generators;
+namespace LaraSpells\Generators;
 
-use LaraSpell\Schema\Table;
-use LaraSpell\Stub;
+use LaraSpells\Schema\Table;
+use LaraSpells\Stub;
 
 class ViewGenerator extends BaseGenerator
 {

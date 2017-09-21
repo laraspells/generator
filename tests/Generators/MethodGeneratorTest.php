@@ -1,7 +1,7 @@
 <?php
 
 use PHPUnit\Framework\TestCase;
-use LaraSpell\Generators\MethodGenerator;
+use LaraSpells\Generators\MethodGenerator;
 
 class MethodGeneratorTest extends TestCase
 {

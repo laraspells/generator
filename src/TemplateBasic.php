@@ -1,8 +1,8 @@
 <?php
 
-namespace LaraSpell;
+namespace LaraSpells;
 
-use LaraSpell\Commands\SchemaBasedCommand;
+use LaraSpells\Commands\SchemaBasedCommand;
 
 class TemplateBasic extends Template
 {

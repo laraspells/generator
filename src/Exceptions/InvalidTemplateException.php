@@ -1,10 +1,10 @@
 <?php
 
-namespace LaraSpell\Exceptions;
+namespace LaraSpells\Exceptions;
 
 use UnexpectedValueException;
 
-class InvalidTemplateException extends UnexpectedValueException 
+class InvalidTemplateException extends UnexpectedValueException
 {
-    
+
 }

@@ -1,6 +1,6 @@
 <?php
 
-namespace LaraSpell\Generators;
+namespace LaraSpells\Generators;
 
 class DocblockGenerator extends BaseGenerator
 {
@@ -125,7 +125,7 @@ class DocblockGenerator extends BaseGenerator
                     $line++;
                     $lines[$line] = $word;
                 } else {
-                    $lines[$line] .= ' '.$word;           
+                    $lines[$line] .= ' '.$word;
                 }
             }
         }

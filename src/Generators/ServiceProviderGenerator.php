@@ -1,8 +1,8 @@
 <?php
 
-namespace LaraSpell\Generators;
+namespace LaraSpells\Generators;
 
-use LaraSpell\Schema\Schema;
+use LaraSpells\Schema\Schema;
 
 class ServiceProviderGenerator extends ClassGenerator
 {

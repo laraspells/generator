@@ -1,6 +1,6 @@
 <?php
 
-namespace LaraSpell;
+namespace LaraSpells;
 
 interface SchemaResolverInterface
 {

@@ -1,15 +1,15 @@
 <?php
 
-namespace LaraSpell\Commands\Concerns;
+namespace LaraSpells\Commands\Concerns;
 
 use Closure;
 use InvalidArgumentException;
-use LaraSpell\Generators\DocblockGenerator;
-use LaraSpell\Generators\RouteGenerator;
-use LaraSpell\Schema\Table;
+use LaraSpells\Generators\DocblockGenerator;
+use LaraSpells\Generators\RouteGenerator;
+use LaraSpells\Schema\Table;
 use UnexpectedValueException;
 
-trait Routeutils
+trait RouteUtils
 {
 
     /**
@@ -39,7 +39,7 @@ trait Routeutils
     /**
      * Add CRUD missing routes
      *
-     * @param  LaraSpell\Schema\Table $table
+     * @param  LaraSpells\Schema\Table $table
      * @param  bool $withNamespace
      * @return array
      */

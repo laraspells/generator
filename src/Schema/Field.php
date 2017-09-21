@@ -1,6 +1,6 @@
 <?php
 
-namespace LaraSpell\Schema;
+namespace LaraSpells\Schema;
 
 class Field extends AbstractSchema
 {
@@ -27,7 +27,7 @@ class Field extends AbstractSchema
     /**
      * Get table schema
      *
-     * @return LaraSpell\Schema\Table
+     * @return LaraSpells\Schema\Table
      */
     public function getTable()
     {
@@ -37,7 +37,7 @@ class Field extends AbstractSchema
     /**
      * Set table schema
      *
-     * @param LaraSpell\Schema\Table $table
+     * @param LaraSpells\Schema\Table $table
      */
     public function setTable(Table $table)
     {

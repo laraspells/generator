@@ -1,11 +1,11 @@
 <?php
 
-namespace LaraSpell;
+namespace LaraSpells;
 
 use Exception;
-use LaraSpell\Commands\SchemaBasedCommand;
-use LaraSpell\Exceptions\InvalidSchemaException;
-use LaraSpell\Schema\Table;
+use LaraSpells\Commands\SchemaBasedCommand;
+use LaraSpells\Exceptions\InvalidSchemaException;
+use LaraSpells\Schema\Table;
 
 abstract class Extension
 {

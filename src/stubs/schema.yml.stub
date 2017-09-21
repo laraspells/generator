@@ -1,6 +1,6 @@
 ---
 name: {? filename_camel ?}
-template: LaraSpell\TemplateBasic
+template: LaraSpells\TemplateBasic
 author:
   name: Author Name
   email: author@email.example

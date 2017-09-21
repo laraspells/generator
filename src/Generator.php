@@ -1,21 +1,21 @@
 <?php
 
-namespace LaraSpell;
+namespace LaraSpells;
 
 use InvalidArgumentException;
-use LaraSpell\Exceptions\InvalidSchemaException;
-use LaraSpell\Generators\CodeGenerator;
-use LaraSpell\Generators\ControllerGenerator;
-use LaraSpell\Generators\CreateRequestGenerator;
-use LaraSpell\Generators\MigrationGenerator;
-use LaraSpell\Generators\ModelGenerator;
-use LaraSpell\Generators\UpdateRequestGenerator;
-use LaraSpell\Generators\ViewCreateGenerator;
-use LaraSpell\Generators\ViewDetailGenerator;
-use LaraSpell\Generators\ViewEditGenerator;
-use LaraSpell\Generators\ViewListGenerator;
-use LaraSpell\Schema\Schema;
-use LaraSpell\Schema\Table;
+use LaraSpells\Exceptions\InvalidSchemaException;
+use LaraSpells\Generators\CodeGenerator;
+use LaraSpells\Generators\ControllerGenerator;
+use LaraSpells\Generators\CreateRequestGenerator;
+use LaraSpells\Generators\MigrationGenerator;
+use LaraSpells\Generators\ModelGenerator;
+use LaraSpells\Generators\UpdateRequestGenerator;
+use LaraSpells\Generators\ViewCreateGenerator;
+use LaraSpells\Generators\ViewDetailGenerator;
+use LaraSpells\Generators\ViewEditGenerator;
+use LaraSpells\Generators\ViewListGenerator;
+use LaraSpells\Schema\Schema;
+use LaraSpells\Schema\Table;
 use Symfony\Component\Yaml\Yaml;
 
 class Generator
@@ -28,16 +28,16 @@ class Generator
     protected $schema;
     protected $schemaFile;
 
-    protected $generatorMigration           = 'LaraSpell\Generators\MigrationGenerator';
-    protected $generatorController          = 'LaraSpell\Generators\ControllerGenerator';
-    protected $generatorCreateRequest       = 'LaraSpell\Generators\CreateRequestGenerator';
-    protected $generatorUpdateRequest       = 'LaraSpell\Generators\UpdateRequestGenerator';
-    protected $generatorModel               = 'LaraSpell\Generators\ModelGenerator';
-    protected $generatorViewPageList        = 'LaraSpell\Generators\ViewListGenerator';
-    protected $generatorViewPageDetail      = 'LaraSpell\Generators\ViewDetailGenerator';
-    protected $generatorViewFormCreate      = 'LaraSpell\Generators\ViewCreateGenerator';
-    protected $generatorViewFormEdit        = 'LaraSpell\Generators\ViewEditGenerator';
-    protected $generatorServiceProvider     = 'LaraSpell\Generators\ServiceProviderGenerator';
+    protected $generatorMigration           = 'LaraSpells\Generators\MigrationGenerator';
+    protected $generatorController          = 'LaraSpells\Generators\ControllerGenerator';
+    protected $generatorCreateRequest       = 'LaraSpells\Generators\CreateRequestGenerator';
+    protected $generatorUpdateRequest       = 'LaraSpells\Generators\UpdateRequestGenerator';
+    protected $generatorModel               = 'LaraSpells\Generators\ModelGenerator';
+    protected $generatorViewPageList        = 'LaraSpells\Generators\ViewListGenerator';
+    protected $generatorViewPageDetail      = 'LaraSpells\Generators\ViewDetailGenerator';
+    protected $generatorViewFormCreate      = 'LaraSpells\Generators\ViewCreateGenerator';
+    protected $generatorViewFormEdit        = 'LaraSpells\Generators\ViewEditGenerator';
+    protected $generatorServiceProvider     = 'LaraSpells\Generators\ServiceProviderGenerator';
 
     public function __construct($schemaFile)
     {
@@ -57,7 +57,7 @@ class Generator
     /**
      * Set schema resolver
      *
-     * @param  LaraSpell\SchemaResolver $resolver
+     * @param  LaraSpells\SchemaResolver $resolver
      * @return void
      */
     public function setSchemaResolver(SchemaResolver $resolver)
@@ -68,7 +68,7 @@ class Generator
     /**
      * Get schema resolver instance
      *
-     * @return LaraSpell\SchemaResolver
+     * @return LaraSpells\SchemaResolver
      */
     public function getSchemaResolver()
     {
@@ -78,7 +78,7 @@ class Generator
     /**
      * Get schema instance
      *
-     * @return LaraSpell\Schema\Schema
+     * @return LaraSpells\Schema\Schema
      */
     public function getSchema()
     {
@@ -88,7 +88,7 @@ class Generator
     /**
      * Get template instance
      *
-     * @return LaraSpell\Template
+     * @return LaraSpells\Template
      */
     public function getTemplate()
     {
@@ -120,7 +120,7 @@ class Generator
     /**
      * Generate Migration
      *
-     * @param  LaraSpell\Schema\Table $table
+     * @param  LaraSpells\Schema\Table $table
      * @return void
      */
     public function generateMigration(Table $table)
@@ -155,7 +155,7 @@ class Generator
     /**
      * Generate CreateRequest
      *
-     * @param  LaraSpell\Schema\Table $table
+     * @param  LaraSpells\Schema\Table $table
      * @return void
      */
     public function generateCreateRequest(Table $table)
@@ -190,7 +190,7 @@ class Generator
     /**
      * Generate UpdateRequest
      *
-     * @param  LaraSpell\Schema\Table $table
+     * @param  LaraSpells\Schema\Table $table
      * @return void
      */
     public function generateUpdateRequest(Table $table)
@@ -225,7 +225,7 @@ class Generator
     /**
      * Generate Controller
      *
-     * @param  LaraSpell\Schema\Table $table
+     * @param  LaraSpells\Schema\Table $table
      * @return void
      */
     public function generateController(Table $table)
@@ -260,7 +260,7 @@ class Generator
     /**
      * Generate Model
      *
-     * @param  LaraSpell\Schema\Table $table
+     * @param  LaraSpells\Schema\Table $table
      * @return void
      */
     public function generateModel(Table $table)
@@ -295,7 +295,7 @@ class Generator
     /**
      * Generate ViewPageList
      *
-     * @param  LaraSpell\Schema\Table $table
+     * @param  LaraSpells\Schema\Table $table
      * @return void
      */
     public function generateViewPageList(Table $table)
@@ -330,7 +330,7 @@ class Generator
     /**
      * Generate ViewPageDetail
      *
-     * @param  LaraSpell\Schema\Table $table
+     * @param  LaraSpells\Schema\Table $table
      * @return void
      */
     public function generateViewPageDetail(Table $table)
@@ -365,7 +365,7 @@ class Generator
     /**
      * Generate ViewFormCreate
      *
-     * @param  LaraSpell\Schema\Table $table
+     * @param  LaraSpells\Schema\Table $table
      * @return void
      */
     public function generateViewFormCreate(Table $table)
@@ -400,7 +400,7 @@ class Generator
     /**
      * Generate ViewFormEdit
      *
-     * @param  LaraSpell\Schema\Table $table
+     * @param  LaraSpells\Schema\Table $table
      * @return void
      */
     public function generateViewFormEdit(Table $table)
@@ -435,7 +435,7 @@ class Generator
     /**
      * Generate ServiceProvider
      *
-     * @param  LaraSpell\Schema\Table $table
+     * @param  LaraSpells\Schema\Table $table
      * @return void
      */
     public function generateServiceProvider()

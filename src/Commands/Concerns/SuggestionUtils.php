@@ -1,8 +1,8 @@
 <?php
 
-namespace LaraSpell\Commands\Concerns;
+namespace LaraSpells\Commands\Concerns;
 
-use LaraSpell\Schema\Table;
+use LaraSpells\Schema\Table;
 
 trait SuggestionUtils
 {

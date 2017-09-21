@@ -1,10 +1,10 @@
 <?php
 
-namespace LaraSpell\Generators;
+namespace LaraSpells\Generators;
 
-use LaraSpell\Schema\Field;
-use LaraSpell\Schema\Table;
-use LaraSpell\Traits\Concerns\TableUtils;
+use LaraSpells\Schema\Field;
+use LaraSpells\Schema\Table;
+use LaraSpells\Traits\Concerns\TableUtils;
 
 class MigrationGenerator extends ClassGenerator
 {

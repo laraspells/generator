@@ -1,9 +1,9 @@
 <?php
 
-namespace LaraSpell;
+namespace LaraSpells;
 
 use InvalidArgumentException;
-use LaraSpell\Exceptions\InvalidTemplateException;
+use LaraSpells\Exceptions\InvalidTemplateException;
 use ReflectionClass;
 
 abstract class Template extends Extension

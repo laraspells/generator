@@ -1,9 +1,9 @@
 <?php
 
-namespace LaraSpell\Generators;
+namespace LaraSpells\Generators;
 
-use LaraSpell\Schema\Table;
-use LaraSpell\Traits\Concerns\TableUtils;
+use LaraSpells\Schema\Table;
+use LaraSpells\Traits\Concerns\TableUtils;
 
 class ModelGenerator extends ClassGenerator
 {

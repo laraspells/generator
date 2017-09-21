@@ -1,22 +1,22 @@
 <?php
 
-namespace LaraSpell\Commands\Concerns;
+namespace LaraSpells\Commands\Concerns;
 
 use InvalidArgumentException;
-use LaraSpell\Generators\BaseGenerator;
-use LaraSpell\Generators\ClassGenerator;
-use LaraSpell\Generators\ControllerGenerator;
-use LaraSpell\Generators\CreateRequestGenerator;
-use LaraSpell\Generators\MigrationGenerator;
-use LaraSpell\Generators\ModelGenerator;
-use LaraSpell\Generators\RouteGenerator;
-use LaraSpell\Generators\ServiceProviderGenerator;
-use LaraSpell\Generators\UpdateRequestGenerator;
-use LaraSpell\Generators\ViewCreateGenerator;
-use LaraSpell\Generators\ViewDetailGenerator;
-use LaraSpell\Generators\ViewEditGenerator;
-use LaraSpell\Generators\ViewListGenerator;
-use LaraSpell\Template;
+use LaraSpells\Generators\BaseGenerator;
+use LaraSpells\Generators\ClassGenerator;
+use LaraSpells\Generators\ControllerGenerator;
+use LaraSpells\Generators\CreateRequestGenerator;
+use LaraSpells\Generators\MigrationGenerator;
+use LaraSpells\Generators\ModelGenerator;
+use LaraSpells\Generators\RouteGenerator;
+use LaraSpells\Generators\ServiceProviderGenerator;
+use LaraSpells\Generators\UpdateRequestGenerator;
+use LaraSpells\Generators\ViewCreateGenerator;
+use LaraSpells\Generators\ViewDetailGenerator;
+use LaraSpells\Generators\ViewEditGenerator;
+use LaraSpells\Generators\ViewListGenerator;
+use LaraSpells\Template;
 
 trait GeneratorBinder
 {
@@ -41,7 +41,7 @@ trait GeneratorBinder
      *
      * @param  string $class
      * @param  array $params
-     * @return LaraSpell\Generators\BaseGenerator
+     * @return LaraSpells\Generators\BaseGenerator
      */
     public function makeGenerator($class, array $params = [])
     {

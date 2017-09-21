@@ -1,29 +1,29 @@
 <?php
 
-namespace LaraSpell\Commands;
+namespace LaraSpells\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Routing\Router;
-use LaraSpell\Exceptions\InvalidTemplateException;
-use LaraSpell\Generator;
-use LaraSpell\Generators\CodeGenerator;
-use LaraSpell\Generators\ControllerGenerator;
-use LaraSpell\Generators\CreateRequestGenerator;
-use LaraSpell\Generators\DocblockGenerator;
-use LaraSpell\Generators\MigrationGenerator;
-use LaraSpell\Generators\ModelGenerator;
-use LaraSpell\Generators\RouteGenerator;
-use LaraSpell\Generators\ServiceProviderGenerator;
-use LaraSpell\Generators\UpdateRequestGenerator;
-use LaraSpell\Generators\ViewCreateGenerator;
-use LaraSpell\Generators\ViewDetailGenerator;
-use LaraSpell\Generators\ViewEditGenerator;
-use LaraSpell\Generators\ViewListGenerator;
-use LaraSpell\Schema\Schema;
-use LaraSpell\Schema\Table;
-use LaraSpell\Stub;
-use LaraSpell\Template;
-use LaraSpell\Traits\TemplateUtil;
+use LaraSpells\Exceptions\InvalidTemplateException;
+use LaraSpells\Generator;
+use LaraSpells\Generators\CodeGenerator;
+use LaraSpells\Generators\ControllerGenerator;
+use LaraSpells\Generators\CreateRequestGenerator;
+use LaraSpells\Generators\DocblockGenerator;
+use LaraSpells\Generators\MigrationGenerator;
+use LaraSpells\Generators\ModelGenerator;
+use LaraSpells\Generators\RouteGenerator;
+use LaraSpells\Generators\ServiceProviderGenerator;
+use LaraSpells\Generators\UpdateRequestGenerator;
+use LaraSpells\Generators\ViewCreateGenerator;
+use LaraSpells\Generators\ViewDetailGenerator;
+use LaraSpells\Generators\ViewEditGenerator;
+use LaraSpells\Generators\ViewListGenerator;
+use LaraSpells\Schema\Schema;
+use LaraSpells\Schema\Table;
+use LaraSpells\Stub;
+use LaraSpells\Template;
+use LaraSpells\Traits\TemplateUtil;
 use Symfony\Component\Yaml\Yaml;
 
 class GenerateCommand extends SchemaBasedCommand
@@ -190,7 +190,7 @@ class GenerateCommand extends SchemaBasedCommand
     /**
      * Get tables to generate
      *
-     * @return array of LaraSpell\Schema\Table
+     * @return array of LaraSpells\Schema\Table
      */
     protected function getTablesToGenerate()
     {
@@ -248,7 +248,7 @@ class GenerateCommand extends SchemaBasedCommand
     /**
      * Generate CRUD for specific table
      *
-     * @param  LaraSpell\Schema\Table $table
+     * @param  LaraSpells\Schema\Table $table
      * @return void
      */
     protected function generateCrudForTable(Table $table)

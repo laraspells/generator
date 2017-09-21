@@ -1,7 +1,7 @@
 <?php
 
 use PHPUnit\Framework\TestCase;
-use LaraSpell\Generators\InterfaceGenerator;
+use LaraSpells\Generators\InterfaceGenerator;
 
 class InterfaceGeneratorTest extends TestCase
 {
@@ -24,7 +24,7 @@ class InterfaceGeneratorTest extends TestCase
         });
         $foo->addArgument('a');
         $foo->addArgument('b', 'array', []);
-        
+
         $bar = $generator->addMethod('bar');
         $bar->setStatic(true);
         $bar->setVisibility('protected');
@@ -35,7 +35,7 @@ class InterfaceGeneratorTest extends TestCase
         });
         $bar->addArgument('a', 'Illuminate\Http\Request');
         $bar->addArgument('b', 'Closure', null);
-        
+
         $result = $generator->generateCode();
         $assert = file_get_contents(__DIR__.'/../src/results/interface.txt');
         $this->assertEquals($result, $assert);

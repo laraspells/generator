@@ -11,7 +11,7 @@
     ],
     "autoload": {
         "psr-4": {
-            "LaraSpell\\": "src"
+            "LaraSpells\\": "src"
         }
     },
     "require": {

@@ -1,9 +1,9 @@
 <?php
 
-namespace LaraSpell\Generators;
+namespace LaraSpells\Generators;
 
-use LaraSpell\Stub;
-use LaraSpell\Traits\Concerns\TableUtils;
+use LaraSpells\Stub;
+use LaraSpells\Traits\Concerns\TableUtils;
 
 class ViewEditGenerator extends ViewCreateGenerator
 {

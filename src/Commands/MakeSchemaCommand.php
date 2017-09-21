@@ -1,9 +1,9 @@
 <?php
 
-namespace LaraSpell\Commands;
+namespace LaraSpells\Commands;
 
 use Illuminate\Console\Command;
-use LaraSpell\Stub;
+use LaraSpells\Stub;
 use Symfony\Component\Yaml\Yaml;
 
 class MakeSchemaCommand extends Command
@@ -14,7 +14,7 @@ class MakeSchemaCommand extends Command
      * @var string
      */
     protected $signature = '
-        spell:make 
+        spell:make
         {file : Schema (yml) output file}
     ';
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace LaraSpell\Schema;
+namespace LaraSpells\Schema;
 
 class Table extends AbstractSchema
 {
@@ -19,7 +19,7 @@ class Table extends AbstractSchema
     /**
      * Get root schema
      *
-     * @return LaraSpell\Schema\Schema
+     * @return LaraSpells\Schema\Schema
      */
     public function getRootSchema()
     {
@@ -29,7 +29,7 @@ class Table extends AbstractSchema
     /**
      * Set root schema
      *
-     * @param LaraSpell\Schema\Schema $rootSchema
+     * @param LaraSpells\Schema\Schema $rootSchema
      */
     public function setRootSchema(Schema $rootSchema)
     {
@@ -39,7 +39,7 @@ class Table extends AbstractSchema
     /**
      * Get crud fields
      *
-     * @return array of LaraSpell\Schema\Field
+     * @return array of LaraSpells\Schema\Field
      */
     public function getFields()
     {
@@ -49,7 +49,7 @@ class Table extends AbstractSchema
     /**
      * Get field schema
      *
-     * @return LaraSpell\Schema\Field
+     * @return LaraSpells\Schema\Field
      */
     public function getField($colname)
     {
@@ -88,7 +88,7 @@ class Table extends AbstractSchema
     /**
      * Get primary field
      *
-     * @return LaraSpell\Schema\Field|null
+     * @return LaraSpells\Schema\Field|null
      */
     public function getPrimaryField()
     {
