@@ -37,6 +37,16 @@ class Table extends AbstractSchema
     }
 
     /**
+     * Determine if table has it's own CRUD or not
+     *
+     * @return bool
+     */
+    public function hasCrud()
+    {
+        return $this->get('crud') === true;
+    }
+
+    /**
      * Get crud fields
      *
      * @return array of LaraSpells\Schema\Field

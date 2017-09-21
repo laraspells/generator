@@ -111,10 +111,19 @@ class GenerateCommand extends SchemaBasedCommand
         if (!$this->option('no-cruds')) {
             foreach($this->getTablesToGenerate() as $table) {
                 $this->reinitializeCrudGenerators($table);
-                // Run generator
-                $this->applyHook(self::HOOK_BEFORE_EACH_CRUD, [$table]);
-                $this->generateCrudForTable($table);
-                $this->applyHook(self::HOOK_AFTER_EACH_CRUD, [$table]);
+
+                // Generate create table migration
+                $migration = !$this->option('no-migration');
+                if ($migration) {
+                    $this->generateMigrationForTable($table);
+                }
+
+                // Generate CRUD
+                if ($table->hasCrud()) {
+                    $this->applyHook(self::HOOK_BEFORE_EACH_CRUD, [$table]);
+                    $this->generateCrudForTable($table);
+                    $this->applyHook(self::HOOK_AFTER_EACH_CRUD, [$table]);
+                }
             }
         }
         $this->applyHook(self::HOOK_AFTER_GENERATE_CRUDS, [$tables]);
@@ -255,10 +264,6 @@ class GenerateCommand extends SchemaBasedCommand
     {
         app()->instance(Table::class, $table);
 
-        $migration = !$this->option('no-migration');
-        if ($migration) {
-            $this->generateMigrationForTable($table);
-        }
         $this->generateControllerForTable($table);
         $this->generateCreateRequestForTable($table);
         $this->generateUpdateRequestForTable($table);

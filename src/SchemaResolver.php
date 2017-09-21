@@ -112,6 +112,8 @@ class SchemaResolver implements SchemaResolverInterface
     {
         $this->validateTableSchema($tableName, $tableSchema);
 
+        data_fill($tableSchema, 'crud', true);
+
         // Resolve singular and plural name
         $tableNameIsSingular = false;
         if (isset($tableSchema['singular'])) {
