@@ -139,6 +139,9 @@ class MethodGenerator extends BaseGenerator
         // Docblock lines
         $docblock = $this->getDocblock();
         if ($docblock) {
+            if (!$docblock->getReturn()) {
+                $docblock->setReturn('void');
+            }
             $lines = array_merge($lines, $docblock->generateLines());
         }
 

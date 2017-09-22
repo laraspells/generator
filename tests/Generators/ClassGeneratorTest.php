@@ -35,14 +35,12 @@ class ClassGeneratorTest extends TestCase
         });
         $foo->addArgument('a');
         $foo->addArgument('b', 'array', []);
-        $foo->setCode(function($code) {
-            $code->addStatements("
-                return array_filter(\$b, function(\$value) use (\$a) {
-                    \$a = preg_quote(\$a);
-                    return (bool) preg_match(\"/{\$a}/i\", \$value);
-                });
-            ");
-        });
+        $foo->addCode("
+            return array_filter(\$b, function(\$value) use (\$a) {
+                \$a = preg_quote(\$a);
+                return (bool) preg_match(\"/{\$a}/i\", \$value);
+            });
+        ");
 
         $bar = $generator->addMethod('bar');
         $bar->setStatic(true);
@@ -54,19 +52,16 @@ class ClassGeneratorTest extends TestCase
         });
         $bar->addArgument('a', 'Illuminate\Http\Request');
         $bar->addArgument('b', 'Closure', null);
-        $bar->setCode(function($code) {
-            $code->addStatements("
-                \$a->validate([
-                    'x' => 'required|numeric',
-                    'y' => 'required'
-                ]);
+        $bar->addCode("
+            \$a->validate([
+                'x' => 'required|numeric',
+                'y' => 'required'
+            ]);
 
-                if (\$b) {
-                    \$b(\$a);
-                }
-            ");
-        });
-
+            if (\$b) {
+                \$b(\$a);
+            }
+        ");
 
         $result = $generator->generateCode();
         $assert = file_get_contents(__DIR__.'/../src/results/class.txt');

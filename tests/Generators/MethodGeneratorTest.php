@@ -12,22 +12,20 @@ class MethodGeneratorTest extends TestCase
         $generator->addArgument('a');
         $generator->addArgument('b', 'array');
         $generator->addArgument('c', 'Closure', null);
-        $generator->setCode(function($code) {
-            $code->addStatements("
-                \$array = [
-                    'a' => 1,
-                    'b' => 2,
-                    'c' => [
-                        'c1' => 3,
-                        'c2' => 4
-                    ]
-                ];
+        $generator->addCode("
+            \$array = [
+                'a' => 1,
+                'b' => 2,
+                'c' => [
+                    'c1' => 3,
+                    'c2' => 4
+                ]
+            ];
 
-                \$fn = function() {
-                    return \"value\";
-                };
-            ");
-        });
+            \$fn = function() {
+                return \"value\";
+            };
+        ");
 
         $this->generator = $generator;
     }
