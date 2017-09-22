@@ -1,8 +1,8 @@
 <?php
 
-namespace LaraSpells\Schema;
+namespace LaraSpells\Generator\Schema;
 
-use LaraSpells\SchemaResolverInterface;
+use LaraSpells\Generator\SchemaResolverInterface;
 
 class Schema extends AbstractSchema
 {
@@ -68,7 +68,7 @@ class Schema extends AbstractSchema
     /**
      * Get table schemas
      *
-     * @return array of LaraSpells\Schema\Table
+     * @return array of LaraSpells\Generator\Schema\Table
      */
     public function getTables()
     {
@@ -78,7 +78,7 @@ class Schema extends AbstractSchema
     /**
      * Get table schema by table name
      *
-     * @return LaraSpells\Schema\Table
+     * @return LaraSpells\Generator\Schema\Table
      */
     public function getTable($tableName)
     {

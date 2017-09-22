@@ -25,7 +25,7 @@ Run composer command below to install `laraspells/generator`:
 composer require "laraspells/generator"
 ```
 
-Now open `config/app.php`, add `LaraSpells\LaraSpellServiceProvider::class` to 'providers' section.
+Now open `config/app.php`, add `LaraSpells\Generator\LaraSpellServiceProvider::class` to 'providers' section.
 
 ## Quickstart
 

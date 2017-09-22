@@ -1,6 +1,6 @@
 <?php
 
-namespace LaraSpells\Exceptions;
+namespace LaraSpells\Generator\Exceptions;
 
 use UnexpectedValueException;
 

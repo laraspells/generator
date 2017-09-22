@@ -1,7 +1,7 @@
 <?php
 
 use PHPUnit\Framework\TestCase;
-use LaraSpells\Generators\InterfaceGenerator;
+use LaraSpells\Generator\Generators\InterfaceGenerator;
 
 class InterfaceGeneratorTest extends TestCase
 {

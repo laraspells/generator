@@ -1,6 +1,6 @@
 <?php
 
-namespace LaraSpells\Generators;
+namespace LaraSpells\Generator\Generators;
 
 use Closure;
 use ReflectionClass;
@@ -194,7 +194,7 @@ class ClassGenerator extends BaseGenerator
      * Add new method
      *
      * @param   string $method
-     * @return  LaraSpells\Generators\MethodGenerator
+     * @return  LaraSpells\Generator\Generators\MethodGenerator
      */
     public function addMethod($method)
     {
@@ -219,7 +219,7 @@ class ClassGenerator extends BaseGenerator
      * Get method by name
      *
      * @param  string $method
-     * @return null|LaraSpells\Generators\MethodGenerator
+     * @return null|LaraSpells\Generator\Generators\MethodGenerator
      */
     public function getMethod($method)
     {

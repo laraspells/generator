@@ -1,6 +1,6 @@
 <?php
 
-namespace LaraSpells\Commands\Concerns;
+namespace LaraSpells\Generator\Commands\Concerns;
 
 trait MigrationUtils
 {

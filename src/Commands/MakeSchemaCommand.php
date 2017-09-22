@@ -1,9 +1,9 @@
 <?php
 
-namespace LaraSpells\Commands;
+namespace LaraSpells\Generator\Commands;
 
 use Illuminate\Console\Command;
-use LaraSpells\Stub;
+use LaraSpells\Generator\Stub;
 use Symfony\Component\Yaml\Yaml;
 
 class MakeSchemaCommand extends Command

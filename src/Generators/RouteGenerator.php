@@ -1,6 +1,6 @@
 <?php
 
-namespace LaraSpells\Generators;
+namespace LaraSpells\Generator\Generators;
 
 use Closure;
 
@@ -34,7 +34,7 @@ class RouteGenerator extends BaseGenerator
     /**
      * Set route parent
      *
-     * @param  LaraSpells\Generators\RouteGenerator $parent
+     * @param  LaraSpells\Generator\Generators\RouteGenerator $parent
      * @return void
      */
     public function setParent(RouteGenerator $parent)

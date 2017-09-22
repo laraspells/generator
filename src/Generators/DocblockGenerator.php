@@ -1,6 +1,6 @@
 <?php
 
-namespace LaraSpells\Generators;
+namespace LaraSpells\Generator\Generators;
 
 class DocblockGenerator extends BaseGenerator
 {

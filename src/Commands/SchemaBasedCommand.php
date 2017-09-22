@@ -1,16 +1,16 @@
 <?php
 
-namespace LaraSpells\Commands;
+namespace LaraSpells\Generator\Commands;
 
 use Closure;
 use Illuminate\Console\Command;
 use Illuminate\Routing\Router;
 use InvalidArgumentException;
-use LaraSpells\Exceptions\InvalidSchemaException;
-use LaraSpells\Extension;
-use LaraSpells\SchemaResolver;
-use LaraSpells\Schema\Schema;
-use LaraSpells\Template;
+use LaraSpells\Generator\Exceptions\InvalidSchemaException;
+use LaraSpells\Generator\Extension;
+use LaraSpells\Generator\SchemaResolver;
+use LaraSpells\Generator\Schema\Schema;
+use LaraSpells\Generator\Template;
 use Symfony\Component\Yaml\Yaml;
 
 abstract class SchemaBasedCommand extends Command
@@ -81,7 +81,7 @@ abstract class SchemaBasedCommand extends Command
     /**
      * Get schema instance
      *
-     * @return null|LaraSpells\Schema\Schema
+     * @return null|LaraSpells\Generator\Schema\Schema
      */
     protected function getSchema()
     {
@@ -139,7 +139,7 @@ abstract class SchemaBasedCommand extends Command
     /**
      * Get template instance
      *
-     * @return null|LaraSpells\Template
+     * @return null|LaraSpells\Generator\Template
      */
     public function getTemplate()
     {

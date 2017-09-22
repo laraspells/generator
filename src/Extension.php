@@ -1,11 +1,11 @@
 <?php
 
-namespace LaraSpells;
+namespace LaraSpells\Generator;
 
 use Exception;
-use LaraSpells\Commands\SchemaBasedCommand;
-use LaraSpells\Exceptions\InvalidSchemaException;
-use LaraSpells\Schema\Table;
+use LaraSpells\Generator\Commands\SchemaBasedCommand;
+use LaraSpells\Generator\Exceptions\InvalidSchemaException;
+use LaraSpells\Generator\Schema\Table;
 
 abstract class Extension
 {

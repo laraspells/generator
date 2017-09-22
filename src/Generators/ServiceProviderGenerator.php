@@ -1,8 +1,8 @@
 <?php
 
-namespace LaraSpells\Generators;
+namespace LaraSpells\Generator\Generators;
 
-use LaraSpells\Schema\Schema;
+use LaraSpells\Generator\Schema\Schema;
 
 class ServiceProviderGenerator extends ClassGenerator
 {

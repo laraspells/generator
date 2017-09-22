@@ -1,6 +1,6 @@
 <?php
 
-namespace LaraSpells;
+namespace LaraSpells\Generator;
 
 use InvalidArgumentException;
 

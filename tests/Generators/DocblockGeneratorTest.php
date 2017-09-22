@@ -1,7 +1,7 @@
 <?php
 
 use PHPUnit\Framework\TestCase;
-use LaraSpells\Generators\DocblockGenerator;
+use LaraSpells\Generator\Generators\DocblockGenerator;
 
 class DocblockGeneratorTest extends TestCase
 {

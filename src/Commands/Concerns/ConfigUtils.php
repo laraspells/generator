@@ -1,8 +1,8 @@
 <?php
 
-namespace LaraSpells\Commands\Concerns;
+namespace LaraSpells\Generator\Commands\Concerns;
 
-use LaraSpells\Generators\CodeGenerator;
+use LaraSpells\Generator\Generators\CodeGenerator;
 
 trait ConfigUtils
 {

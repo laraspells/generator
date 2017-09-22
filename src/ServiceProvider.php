@@ -1,13 +1,13 @@
 <?php
 
-namespace LaraSpells;
+namespace LaraSpells\Generator;
 
 use Blade;
-use Illuminate\Support\ServiceProvider;
-use LaraSpells\Commands\GenerateCommand;
-use LaraSpells\Commands\MakeSchemaCommand;
+use Illuminate\Support\ServiceProvider as BaseServiceProvider;
+use LaraSpells\Generator\Commands\GenerateCommand;
+use LaraSpells\Generator\Commands\MakeSchemaCommand;
 
-class LaraSpellsServiceProvider extends ServiceProvider
+class ServiceProvider extends BaseServiceProvider
 {
     /**
      * Bootstrap the application services.

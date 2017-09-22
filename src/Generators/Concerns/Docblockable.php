@@ -1,9 +1,9 @@
 <?php
 
-namespace LaraSpells\Generators\Concerns;
+namespace LaraSpells\Generator\Generators\Concerns;
 
 use Closure;
-use LaraSpells\Generators\DocblockGenerator;
+use LaraSpells\Generator\Generators\DocblockGenerator;
 
 trait Docblockable
 {
@@ -25,7 +25,7 @@ trait Docblockable
     /**
      * Get class docblock.
      *
-     * @return null|LaraSpells\Generators\DocblockGenerator
+     * @return null|LaraSpells\Generator\Generators\DocblockGenerator
      */
     public function getDocblock()
     {

@@ -1,12 +1,12 @@
 <?php
 
-namespace LaraSpells\Commands\Concerns;
+namespace LaraSpells\Generator\Commands\Concerns;
 
 use Closure;
 use InvalidArgumentException;
-use LaraSpells\Generators\DocblockGenerator;
-use LaraSpells\Generators\RouteGenerator;
-use LaraSpells\Schema\Table;
+use LaraSpells\Generator\Generators\DocblockGenerator;
+use LaraSpells\Generator\Generators\RouteGenerator;
+use LaraSpells\Generator\Schema\Table;
 use UnexpectedValueException;
 
 trait RouteUtils
@@ -39,7 +39,7 @@ trait RouteUtils
     /**
      * Add CRUD missing routes
      *
-     * @param  LaraSpells\Schema\Table $table
+     * @param  LaraSpells\Generator\Schema\Table $table
      * @param  bool $withNamespace
      * @return array
      */

@@ -1,6 +1,6 @@
 <?php
 
-namespace LaraSpells\Generators;
+namespace LaraSpells\Generator\Generators;
 
 use Closure;
 

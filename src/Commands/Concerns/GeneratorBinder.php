@@ -1,22 +1,22 @@
 <?php
 
-namespace LaraSpells\Commands\Concerns;
+namespace LaraSpells\Generator\Commands\Concerns;
 
 use InvalidArgumentException;
-use LaraSpells\Generators\BaseGenerator;
-use LaraSpells\Generators\ClassGenerator;
-use LaraSpells\Generators\ControllerGenerator;
-use LaraSpells\Generators\CreateRequestGenerator;
-use LaraSpells\Generators\MigrationGenerator;
-use LaraSpells\Generators\ModelGenerator;
-use LaraSpells\Generators\RouteGenerator;
-use LaraSpells\Generators\ServiceProviderGenerator;
-use LaraSpells\Generators\UpdateRequestGenerator;
-use LaraSpells\Generators\ViewCreateGenerator;
-use LaraSpells\Generators\ViewDetailGenerator;
-use LaraSpells\Generators\ViewEditGenerator;
-use LaraSpells\Generators\ViewListGenerator;
-use LaraSpells\Template;
+use LaraSpells\Generator\Generators\BaseGenerator;
+use LaraSpells\Generator\Generators\ClassGenerator;
+use LaraSpells\Generator\Generators\ControllerGenerator;
+use LaraSpells\Generator\Generators\CreateRequestGenerator;
+use LaraSpells\Generator\Generators\MigrationGenerator;
+use LaraSpells\Generator\Generators\ModelGenerator;
+use LaraSpells\Generator\Generators\RouteGenerator;
+use LaraSpells\Generator\Generators\ServiceProviderGenerator;
+use LaraSpells\Generator\Generators\UpdateRequestGenerator;
+use LaraSpells\Generator\Generators\ViewCreateGenerator;
+use LaraSpells\Generator\Generators\ViewDetailGenerator;
+use LaraSpells\Generator\Generators\ViewEditGenerator;
+use LaraSpells\Generator\Generators\ViewListGenerator;
+use LaraSpells\Generator\Template;
 
 trait GeneratorBinder
 {
@@ -41,7 +41,7 @@ trait GeneratorBinder
      *
      * @param  string $class
      * @param  array $params
-     * @return LaraSpells\Generators\BaseGenerator
+     * @return LaraSpells\Generator\Generators\BaseGenerator
      */
     public function makeGenerator($class, array $params = [])
     {

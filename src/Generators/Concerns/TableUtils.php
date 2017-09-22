@@ -1,8 +1,8 @@
 <?php
 
-namespace LaraSpells\Generators\Concerns;
+namespace LaraSpells\Generator\Generators\Concerns;
 
-use LaraSpells\Schema\Table;
+use LaraSpells\Generator\Schema\Table;
 
 trait TableUtils
 {
@@ -13,7 +13,7 @@ trait TableUtils
     /**
      * Set table schema.
      *
-     * @param  LaraSpells\Schema\Table $tableSchema
+     * @param  LaraSpells\Generator\Schema\Table $tableSchema
      * @return void
      */
     public function setTableSchema(Table $tableSchema)
@@ -25,7 +25,7 @@ trait TableUtils
     /**
      * Get table schema.
      *
-     * @return null|LaraSpells\Schema\Table
+     * @return null|LaraSpells\Generator\Schema\Table
      */
     public function getTableSchema()
     {

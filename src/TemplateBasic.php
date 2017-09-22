@@ -1,8 +1,8 @@
 <?php
 
-namespace LaraSpells;
+namespace LaraSpells\Generator;
 
-use LaraSpells\Commands\SchemaBasedCommand;
+use LaraSpells\Generator\Commands\SchemaBasedCommand;
 
 class TemplateBasic extends Template
 {

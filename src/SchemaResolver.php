@@ -1,9 +1,9 @@
 <?php
 
-namespace LaraSpells;
+namespace LaraSpells\Generator;
 
-use LaraSpells\Exceptions\InvalidSchemaException;
-use LaraSpells\Schema\Field;
+use LaraSpells\Generator\Exceptions\InvalidSchemaException;
+use LaraSpells\Generator\Schema\Field;
 
 class SchemaResolver implements SchemaResolverInterface
 {
