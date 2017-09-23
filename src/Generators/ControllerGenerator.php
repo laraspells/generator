@@ -66,6 +66,8 @@ class ControllerGenerator extends ClassGenerator
     {
         $data = $this->getTableData();
         $recordsVarName = $data->table_name;
+        $searchables = $this->getTableSchema()->getSearchableFields();
+
         $method->addArgument('request', static::CLASS_REQUEST);
         $method->setDocblock(function($docblock) use ($data) {
             $docblock->addText("Display list {$data->table_name}");
@@ -76,9 +78,31 @@ class ControllerGenerator extends ClassGenerator
         $method->appendCode("
             \$limit = (int) \$request->get('limit') ?: 10;
             \$keyword = \$request->get('keyword');
+        ", "preparation");
 
-            \$query = \$this->{$data->model->varname};
+        $method->nl();
 
+        $method->appendCode("\$query = \$this->{$data->model->varname}->query();", "initialize-query");
+
+        if (count($searchables)) {
+            $searchQuery = [];
+            foreach(array_values($searchables) as $i => $field) {
+                $column = $field->getColumnName();
+                $queryMethod = ($i == 0) ? "where" : "orWhere";
+                $searchQuery[] = "\$query->{$queryMethod}('{$column}', 'like', \"%{\$keyword}%\");";
+            }
+            $searchQuery = implode("\n", $searchQuery);
+            $method->appendCode("
+                if (\$keyword) {
+                    \$query->where(function(\$query) use (\$keyword) {
+                        {$searchQuery}
+                    });
+                }
+            ");
+            $method->nl();
+        }
+
+        $method->appendCode("
             \$data['title'] = 'List {$data->label}';
             \$data['{$recordsVarName}'] = \$query->paginate(\$limit);
 
