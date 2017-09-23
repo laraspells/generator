@@ -122,7 +122,7 @@ trait RouteUtils
         if (!$this->hasRouteNamed($crudRouteNames['page_detail'])) {
             $missingRoutes[] = [
                 'method' => 'get',
-                'path' => '{'.$pk.'}',
+                'path' => 'view/{'.$pk.'}',
                 'uses' => $crudController.'@pageDetail',
                 'name' => $resolveName($crudRouteNames['page_detail'])
             ];
