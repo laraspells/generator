@@ -4,7 +4,9 @@ namespace LaraSpells\Generator\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Routing\Router;
+use InvalidArgumentException;
 use LaraSpells\Generator\Exceptions\InvalidTemplateException;
+use LaraSpells\Generator\Extension;
 use LaraSpells\Generator\Generator;
 use LaraSpells\Generator\Generators\CodeGenerator;
 use LaraSpells\Generator\Generators\ControllerGenerator;
@@ -145,7 +147,7 @@ class GenerateCommand extends SchemaBasedCommand
         $this->applyHook(self::HOOK_END);
     }
 
-    protected function reinitializeCrudGenerators(Table $table)
+    public function reinitializeCrudGenerators(Table $table)
     {
         app()->instance(Table::class, $table);
         $this->setGeneratorInstance(ControllerGenerator::class, $this->makeGenerator(ControllerGenerator::class));
@@ -201,7 +203,7 @@ class GenerateCommand extends SchemaBasedCommand
      *
      * @return array of LaraSpells\Generator\Schema\Table
      */
-    protected function getTablesToGenerate()
+    public function getTablesToGenerate()
     {
         $specificTable = $this->option('table');
         if ($specificTable) {
@@ -235,7 +237,7 @@ class GenerateCommand extends SchemaBasedCommand
      *
      * @return void
      */
-    protected function showResult()
+    public function showResult()
     {
         // Show info count affected files
         print(PHP_EOL);
@@ -260,7 +262,7 @@ class GenerateCommand extends SchemaBasedCommand
      * @param  LaraSpells\Generator\Schema\Table $table
      * @return void
      */
-    protected function generateCrudForTable(Table $table)
+    public function generateCrudForTable(Table $table)
     {
         app()->instance(Table::class, $table);
 
@@ -278,7 +280,7 @@ class GenerateCommand extends SchemaBasedCommand
      *
      * @return void
      */
-    protected function generateMigrationForTable(Table $table)
+    public function generateMigrationForTable(Table $table)
     {
         $existingMigrationFile = $this->getExistingMigrationFile($table->getName());
         $filePath = $table->getMigrationPath();
@@ -309,35 +311,35 @@ class GenerateCommand extends SchemaBasedCommand
         }
     }
 
-    protected function generateControllerForTable(Table $table)
+    public function generateControllerForTable(Table $table)
     {
         $filePath = $table->getControllerPath();
         $content = $this->getGeneratorController()->setTableSchema($table)->generateCode();
         $this->generateFile($filePath, $content);
     }
 
-    protected function generateCreateRequestForTable(Table $table)
+    public function generateCreateRequestForTable(Table $table)
     {
         $filePath = $table->getCreateRequestPath();
         $content = $this->runGenerator(CreateRequestGenerator::class);
         $this->generateFile($filePath, $content);
     }
 
-    protected function generateUpdateRequestForTable(Table $table)
+    public function generateUpdateRequestForTable(Table $table)
     {
         $filePath = $table->getUpdateRequestPath();
         $content = $this->runGenerator(UpdateRequestGenerator::class);
         $this->generateFile($filePath, $content);
     }
 
-    protected function generateModelForTable(Table $table)
+    public function generateModelForTable(Table $table)
     {
         $filePath = $table->getModelPath();
         $content = $this->getGeneratorModel()->setTableSchema($table)->generateCode();
         $this->generateFile($filePath, $content);
     }
 
-    protected function generateViews(Table $table)
+    public function generateViews(Table $table)
     {
         $views = [
             $table->getViewListPath() => $this->getGeneratorViewList()->generateCode(),
@@ -351,14 +353,14 @@ class GenerateCommand extends SchemaBasedCommand
         }
     }
 
-    protected function generateProvider()
+    public function generateProvider()
     {
         $filePath = $this->getSchema()->getServiceProviderPath();
         $content = $this->runGenerator(ServiceProviderGenerator::class);
         $this->generateFile($filePath, $content);
     }
 
-    protected function publishViewFiles()
+    public function publishViewFiles()
     {
         $template = $this->getTemplate();
         $viewPath = $this->getSchema()->getViewpath();
@@ -379,7 +381,7 @@ class GenerateCommand extends SchemaBasedCommand
         }
     }
 
-    protected function publishPublicFiles()
+    public function publishPublicFiles()
     {
         $this->addTemplatePublicFiles('');
         $publicDir = "public";
@@ -389,7 +391,7 @@ class GenerateCommand extends SchemaBasedCommand
         }
     }
 
-    protected function checkShouldWrite($file, $question = null, $defaultValue = false)
+    public function checkShouldWrite($file, $question = null, $defaultValue = false)
     {
         if ($this->option('replace-all')) {
             return true;
@@ -407,7 +409,7 @@ class GenerateCommand extends SchemaBasedCommand
         }
     }
 
-    protected function generateFile($filePath, $content)
+    public function generateFile($filePath, $content)
     {
         $fileExists = $this->hasFile($filePath);
         $shouldWrite = $this->checkShouldWrite($filePath);
