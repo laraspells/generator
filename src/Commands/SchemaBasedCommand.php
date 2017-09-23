@@ -36,7 +36,7 @@ abstract class SchemaBasedCommand extends Command
      * @param  string $schemaFile
      * @return void
      */
-    protected function initializeSchema($schemaFile)
+    public function initializeSchema($schemaFile)
     {
         if (!ends_with($schemaFile, '.yml')) {
             $schemaFile .= '.yml';
@@ -73,7 +73,7 @@ abstract class SchemaBasedCommand extends Command
      *
      * @return string
      */
-    protected function getSchemaFile()
+    public function getSchemaFile()
     {
         return $this->schemaFile;
     }
@@ -83,7 +83,7 @@ abstract class SchemaBasedCommand extends Command
      *
      * @return null|LaraSpells\Generator\Schema\Schema
      */
-    protected function getSchema()
+    public function getSchema()
     {
         return $this->schema;
     }
@@ -94,7 +94,7 @@ abstract class SchemaBasedCommand extends Command
      * @param  array $arraySchema
      * @return void
      */
-    protected function initializeTemplate(array $arraySchema)
+    public function initializeTemplate(array $arraySchema)
     {
         if (!isset($arraySchema['template'])) {
             throw new InvalidSchemaException("Schema must have 'template' key.");
@@ -108,7 +108,7 @@ abstract class SchemaBasedCommand extends Command
         $this->validateTemplate($template);
     }
 
-    protected function validateTemplate(Template $template)
+    public function validateTemplate(Template $template)
     {
         $folderStub = $template->getFolderStub();
         $folderView = $template->getFolderView();
@@ -167,7 +167,7 @@ abstract class SchemaBasedCommand extends Command
      * @param  string $key
      * @return array
      */
-    protected function getHooks($key)
+    public function getHooks($key)
     {
         return isset($this->hooks[$key])? $this->hooks[$key] : [];
     }
@@ -179,7 +179,7 @@ abstract class SchemaBasedCommand extends Command
      * @param  array $params
      * @return void
      */
-    protected function applyHook($key, array $params = [])
+    public function applyHook($key, array $params = [])
     {
         foreach($this->getHooks($key) as $hook) {
             call_user_func_array($hook, $params);

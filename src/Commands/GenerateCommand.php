@@ -102,7 +102,9 @@ class GenerateCommand extends SchemaBasedCommand
         $schemaFile = $this->argument('schema');
         // Initialize template and schema.
         $this->initializeSchema($schemaFile);
+
         // Register schema extensions.
+        $this->registerExtension($this->getTemplate());
         foreach($this->getSchema()->getExtensions() as $extension) {
             $this->registerExtension($extension);
         }
@@ -176,16 +178,23 @@ class GenerateCommand extends SchemaBasedCommand
      */
     public function registerExtension($extension)
     {
-        if (!is_subclass_of($extension, Extension::class)) {
-            throw new InvalidArgumentException("Extension '{$extension}' must be subclass of '".Extension::class."'.");
+        if (is_string($extension)) {
+            if (!is_subclass_of($extension, Extension::class)) {
+                throw new InvalidArgumentException("Extension '{$extension}' must be subclass of '".Extension::class."'.");
+            }
+            $extension = app($extension);
         }
 
-        $extension = app($extension);
+        if (false === $extension instanceof Extension) {
+            throw new InvalidArgumentException("Extension is not valid extension.");
+        }
+
         $extension->register();
         $this->hook(self::HOOK_BEFORE_GENERATE_CRUDS, [$extension, 'beforeGenerateCruds']);
         $this->hook(self::HOOK_AFTER_GENERATE_CRUDS, [$extension, 'afterGenerateCruds']);
         $this->hook(self::HOOK_BEFORE_EACH_CRUD, [$extension, 'beforeGenerateEachCrud']);
         $this->hook(self::HOOK_AFTER_EACH_CRUD, [$extension, 'afterGenerateEachCrud']);
+        $this->hook(self::HOOK_BEFORE_REPORTS, [$extension, 'beforeReports']);
         $this->hook(self::HOOK_END, [$extension, 'onEnd']);
         $this->extensions[] = $extension;
     }

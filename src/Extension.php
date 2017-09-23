@@ -47,6 +47,11 @@ abstract class Extension
         // Do nothing
     }
 
+    public function beforeReports()
+    {
+        // Do nothing
+    }
+
     public function onEnd()
     {
         // Do nothing
