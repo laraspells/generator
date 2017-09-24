@@ -7,429 +7,237 @@ use Closure;
 class RouteGenerator extends BaseGenerator
 {
 
-    const TYPE_ROUTE = 'route';
-    const TYPE_GROUP = 'group';
+    protected $method = '';
 
-    protected $level;
+    protected $path = '';
 
-    protected $parent;
+    protected $uses = '';
 
-    protected $routes = [];
+    protected $group;
 
-    protected $middleware = '';
+    protected $wheres = [];
 
-    protected $namespace = '';
+    protected $options = [];
 
-    protected $prefix = '';
-
-    protected $name = '';
-
-    protected $domain;
-
-    public function __construct($level = 0)
+    public function __construct($method, $path, $uses, array $options = [], RouteGroupGenerator $group = null)
     {
-        $this->level = $level;
+        $this->method = $method;
+        $this->path = $path;
+        $this->uses = $uses;
+        $this->group = $group;
+        $this->options = $options;
     }
 
     /**
-     * Set route parent
+     * Get route group
      *
-     * @param  LaraSpells\Generator\Generators\RouteGenerator $parent
+     * @return RouteGroupGenerator
+     */
+    public function getGroup()
+    {
+        return $this->group;
+    }
+
+    /**
+     * Set Route Middleware
+     *
+     * @param string $middleware
      * @return void
      */
-    public function setParent(RouteGenerator $parent)
+    public function setMiddleware($middleware)
     {
-        $this->parent = $parent;
+        $this->setOption('middleware', $middleware);
+        return $this;
     }
 
     /**
-     * Add new route.
-     *
-     * @param  string $method
-     * @param  string $path
-     * @param  string $uses
-     * @param  array $options
-     * @return void
-     */
-    public function addRoute($method, $path, $uses, array $options = [])
-    {
-        if (isset($options['name'])) {
-            $options['name'] = $this->combineName($this->getName(), $options['name']);
-        }
-
-        if (isset($options['middleware'])) {
-            $options['middleware'] = $this->combineMiddleware($this->getMiddleware(), $options['middleware']);
-        }
-
-        $this->register(self::TYPE_ROUTE, [
-            'method' => $method,
-            'path' => $this->combinePath($this->getPrefix(), $path),
-            'uses' => $this->combineNamespace($this->getNamespace(), $uses),
-            'options' => array_merge([
-                'middleware' => null,
-                'name' => null
-            ], $options)
-        ]);
-    }
-
-    /**
-     * Add new group
-     *
-     * @param  array $options
-     * @param  Closure $callback
-     * @return RouteGenerator child group
-     */
-    public function addGroup(array $options = [], Closure $callback)
-    {
-        $options = array_merge([
-            'middleware' => null,
-            'prefix' => null,
-            'domain' => null,
-            'namespace' => null,
-            'name' => null,
-        ], $options);
-
-        $routes = new static($this->level + 1);
-        $routes->setParent($this);
-        $routes->setMiddleware($options['middleware']);
-        $routes->setPrefix($options['prefix']);
-        $routes->setDomain($options['domain']);
-        $routes->setName($options['name']);
-        $routes->setNamespace($options['namespace']);
-        $callback($routes);
-
-        $this->register(self::TYPE_GROUP, [
-            'options' => $options,
-            'routes' => $routes
-        ]);
-
-        return $routes;
-    }
-
-    /**
-     * Check this generator is root generator.
-     *
-     * @return bool
-     */
-    public function isRoot()
-    {
-        return false === (bool) $this->getParent();
-    }
-
-    /**
-     * Get parent route generator.
-     *
-     * @return mixed
-     */
-    public function getParent()
-    {
-        return $this->parent;
-    }
-
-    /**
-     * Get registered routes (and groups)
-     *
-     * @return array
-     */
-    public function getRoutes()
-    {
-        return $this->routes;
-    }
-
-    /**
-     * Get all routes including route in groups
-     *
-     * @return array
-     */
-    public function getAllRoutes()
-    {
-        $routes = [];
-        foreach($this->getRoutes() as $route) {
-            if (self::TYPE_GROUP == $route['type']) {
-                $routes = array_merge($routes, $route['routes']->getAllRoutes());
-            } else {
-                $routes[] = $route;
-            }
-        }
-        return $routes;
-    }
-
-    /**
-     * Get count routes including route in groups
-     *
-     * @return int
-     */
-    public function getCountRoutes()
-    {
-        return count($this->getAllRoutes());
-    }
-
-    /**
-     * Check route by name
-     *
-     * @return bool
-     */
-    public function hasRouteNamed($name)
-    {
-        foreach($this->getAllRoutes() as $route) {
-            $routeName = array_get($route, 'options.name');
-            if ($routeName == $name) return true;
-        }
-        return false;
-    }
-
-    /**
-     * Get level.
-     *
-     * @return int
-     */
-    public function getLevel()
-    {
-        return $this->level;
-    }
-
-    /**
-     * Get middleware.
+     * Get Route Middleware
      *
      * @return string
      */
     public function getMiddleware()
     {
-        return $this->middleware;
+        return $this->getOption('middleware');
     }
 
     /**
-     * Get controller namespace
+     * Set Route Name
      *
-     * @return string
+     * @param string $name
+     * @return void
      */
-    public function getNamespace()
+    public function setName($name)
     {
-        return $this->namespace;
+        $this->setOption('name', $name);
+        return $this;
     }
 
     /**
-     * Get route name
+     * Get Route Name
      *
      * @return string
      */
     public function getName()
     {
-        return $this->name;
+        return $this->getOption('name');
     }
 
     /**
-     * Get path prefix
+     * Get route full name
      *
      * @return string
      */
-    public function getPrefix()
+    public function getFullName()
     {
-        return $this->prefix;
+        $group = $this->getGroup();
+        return $group ? $group->getFullName() . $this->getName() : $this->getName();
     }
 
     /**
-     * Get domain
+     * Set Route Path
+     *
+     * @param string $path
+     * @return void
+     */
+    public function setPath($path)
+    {
+        $this->path = $path;
+        return $this;
+    }
+
+    /**
+     * Get Route Path
      *
      * @return string
      */
-    public function getDomain()
+    public function getPath()
     {
-        return $this->domain;
+        return $this->path;
     }
 
     /**
-     * Set Middleware.
+     * Set Route Uses
      *
-     * @param  string $middleware
+     * @param string $uses
      * @return void
      */
-    public function setMiddleware($middleware)
+    public function setUses($uses)
     {
-        $parent = $this->getParent();
-        if ($parent AND !$parent->isRoot()) {
-            $parentMiddleware = $parent->getMiddleware();
-            $middleware = $this->combineMiddlewares($middleware, $parentMiddleware);
-        }
-        $this->middleware = $middleware;
+        $this->uses = $uses;
+        return $this;
     }
 
     /**
-     * Set Namespace.
+     * Get Route Uses
      *
-     * @param  string $namespace
-     * @return void
+     * @return string
      */
-    public function setNamespace($namespace)
+    public function getUses()
     {
-        $namespace = trim($namespace, "\\");
-        $parent = $this->getParent();
-        if ($parent AND !$parent->isRoot() AND $parentNamespace = $parent->getNamespace()) {
-            $namespace = $this->combineNamespace($parentNamespace, $namespace);
-        }
-        $this->namespace = $namespace;
+        return $this->uses;
     }
 
     /**
-     * Set Name.
+     * Set Route Method
      *
-     * @param  string $namespace
+     * @param string $method
      * @return void
      */
-    public function setName($name)
+    public function setMethod($method)
     {
-        $parent = $this->getParent();
-        if ($parent AND !$parent->isRoot() AND $parentName = $parent->getName()) {
-            $name = $this->combineName($parentName, $name);
-        }
-        $this->name = $name;
+        $this->method = $method;
+        return $this;
     }
 
     /**
-     * Set Prefix.
+     * Get Route Method
      *
-     * @param  string $prefix
-     * @return void
+     * @return string
      */
-    public function setPrefix($prefix)
+    public function getMethod()
     {
-        $parent = $this->getParent();
-        if ($parent AND !$parent->isRoot() AND $parentPrefix = $parent->getPrefix()) {
-            $prefix = $this->combinePath($parentPrefix, $prefix);
-        }
-        $this->prefix = $prefix;
+        return $this->method;
     }
 
     /**
-     * Set Domain.
+     * Add route where
      *
-     * @param  string $domain
+     * @param string $key
      * @return void
      */
-    public function setDomain($domain)
+    public function where($key, $regex)
     {
-        $parent = $this->getParent();
-        if ($parent AND !$parent->isRoot() AND $parent->getDomain() == $domain) {
-            return;
-        }
-        $this->domain = $domain;
+        $this->wheres[$key] = $regex;
     }
 
     /**
-     * generateLines
+     * Get route wheres
      *
+     * @return array
+     */
+    public function getWheres()
+    {
+        return $this->wheres;
+    }
+
+    /**
+     * Get Route Option
+     *
+     * @param string $key
+     * @return mixed
+     */
+    public function getOption($key)
+    {
+        return isset($this->options[$key]) ? $this->options[$key] : null;
+    }
+
+    /**
+     * Set Route Option
+     *
+     * @param string $key
+     * @param mixed $value
      * @return void
      */
+    public function setOption($key, $value)
+    {
+        $this->options[$key] = $value;
+        return $this;
+    }
+
     public function generateLines()
     {
-        $routes = $this->getRoutes();
-        $count = count($routes);
-        $code = new CodeGenerator;
-        foreach($routes as $i => $route) {
-            $code->nl();
-            switch($route['type']) {
-                case self::TYPE_GROUP: $this->writeGroup($route, $code); break;
-                case self::TYPE_ROUTE: $this->writeRoute($route, $code); break;
-            }
-            if ($i == $count - 1) {
-                $code->nl();
-            }
+        $method = camel_case(strtolower($this->getMethod()));
+        $path = $this->getPath();
+        $uses = $this->getUses();
+        $name = $this->getName();
+        $wheres = $this->getWheres();
+        $middleware = $this->getMiddleware();
+
+        $chains = [];
+        if ($name) $chains[] = "name('{$name}')";
+        if ($middleware) $chains[] = "middleware('{$middleware}')";
+        foreach($wheres as $key => $regex) {
+            $chains[] = "where('{$key}', '{$regex}')";
         }
-        return $this->applyIndents($code->generateLines(), $this->getLevel());
-    }
-
-    protected function writeRoute($route, CodeGenerator $code)
-    {
-        $options = $route['options'];
-        $method = strtolower($route['method']);
-        $uses = $this->dissolveNamespace($this->getNamespace(), $route['uses']);
-        $path = $this->dissolvePath($this->getPrefix(), $route['path']);
-        $chain = [];
-
-        if ($options['middleware']) {
-            $middleware = $this->dissolveMiddleware($this->getMiddleware(), $options['middleware']);
-            $chain[] = "middleware('{$middleware}')";
+        $chains = implode("->", $chains);
+        if ($chains) {
+            $chains = "->" . $chains;
         }
 
-        $chain[] = "{$method}('{$path}', '{$uses}')";
+        return $this->applyIndents([
+            "Route::{$method}('{$path}', '{$uses}'){$chains};"
+        ], $this->getCountIndent());
+    }
 
-        if ($options['name']) {
-            $name = $this->dissolveName($this->getName(), $options['name']);
-            $chain[] = "name('{$name}')";
+    protected function getCountIndent()
+    {
+        $countIndent = 0;
+        $group = $this->getGroup();
+        while ($group) {
+            $countIndent++;
+            $group = $group->getGroup();
         }
-
-        $code->addCode("Route::".implode("->", $chain).";");
+        return $countIndent;
     }
-
-    protected function writeGroup($route, CodeGenerator $code)
-    {
-        $options = $route['options'];
-        $chain = [];
-        if ($options['name']) $chain[] = "name('{$options['name']}')";
-        if ($options['domain']) $chain[] = "domain('{$options['domain']}')";
-        if ($options['prefix']) $chain[] = "prefix('{$options['prefix']}')";
-        if ($options['namespace']) $chain[] = "namespace('{$options['namespace']}')";
-        if ($options['middleware']) $chain[] = "middleware('{$options['middleware']}')";
-
-        $routes = $route['routes']->generateCode();
-        $chain[] = "group(function() {
-            {$routes}
-        })";
-
-        $code->addCode("Route::".implode("->", $chain).";");
-    }
-
-    protected function register($type, array $params = [])
-    {
-        $this->routes[] = array_merge($params, [
-            'type' => $type
-        ]);
-    }
-
-    protected function combineMiddlewares($a, $b)
-    {
-        $a = explode("|", $a);
-        $b = explode("|", $b);
-        return implode("|", array_unique(array_merge($a, $b)));
-    }
-
-    protected function combineNamespace($a, $b)
-    {
-        return trim($a, "\\")."\\".trim($b, "\\");
-    }
-
-    protected function combineName($a, $b)
-    {
-        return $a.$b;
-    }
-
-    protected function combinePath($a, $b)
-    {
-        return trim($a, "/")."/".trim($b, "/");
-    }
-
-    protected function dissolveNamespace($a, $b)
-    {
-        return trim(substr($b, strlen($a)), "\\");
-    }
-
-    protected function dissolvePath($a, $b)
-    {
-        return trim(substr($b, strlen($a)), "/");
-    }
-
-    protected function dissolveMiddleware($a, $b)
-    {
-        $a = explode("|", $a);
-        $b = explode("|", $b);
-        $diffs = array_diff($b, $a);
-        return implode("|", $diffs);
-    }
-
-    protected function dissolveName($a, $b)
-    {
-        return substr($b, strlen($a));
-    }
-
 
 }
