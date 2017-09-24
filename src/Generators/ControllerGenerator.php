@@ -65,7 +65,6 @@ class ControllerGenerator extends ClassGenerator
     protected function setMethodPageList(MethodGenerator $method)
     {
         $data = $this->getTableData();
-        $recordsVarName = $data->table_name;
         $searchables = $this->getTableSchema()->getSearchableFields();
 
         $method->addArgument('request', static::CLASS_REQUEST);
@@ -104,7 +103,7 @@ class ControllerGenerator extends ClassGenerator
 
         $method->appendCode("
             \$data['title'] = 'List {$data->label}';
-            \$data['{$recordsVarName}'] = \$query->paginate(\$limit);
+            \$data['pagination'] = \$query->paginate(\$limit);
 
             return view('{$data->view->page_list}', \$data);
         ");
