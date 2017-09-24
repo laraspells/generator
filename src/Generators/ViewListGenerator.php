@@ -62,6 +62,8 @@ class ViewListGenerator extends ViewGenerator
             $tbodys[] = "<td class='column-{$col}'>{$tableCode}</td>";
         }
 
+        $countColumns = count($tbodys) + 2;
+
         $code = $this->makeCodeGenerator();
         $code->addCode('
             <table id="'.$tableId.'" class="table table-bordered table-striped table-hover">
@@ -73,6 +75,13 @@ class ViewListGenerator extends ViewGenerator
                     </tr>
                 </thead>
                 <tbody>
+                    @if(!$pagination->count())
+                    <tr>
+                        <td colspan="'.$countColumns.'" class="text-center">
+                            Records empty.
+                        </td>
+                    </tr>
+                    @endif
                     @foreach($pagination->items() as $i => $'.$tableData->model_varname.')
                     <tr>
                         <td class="text-center column-number">{{ $pagination->firstItem() + $i }}</td>
