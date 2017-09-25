@@ -140,6 +140,11 @@ class GenerateCommand extends SchemaBasedCommand
         // $this->generateProvider();
         if (!$this->option('no-views')) {
             $this->publishViewFiles();
+            $viewNamespace = $this->getSchema()->getViewNamespace();
+            if ($viewNamespace AND !$this->hasViewNamespace($viewNamespace)) {
+                $viewPath = $this->getSchema()->getViewPath();
+                $this->suggestAddViewNamespace($viewNamespace, $viewPath);
+            }
         }
         if (!$this->option('no-public')) {
             $this->publishPublicFiles();
@@ -473,6 +478,21 @@ class GenerateCommand extends SchemaBasedCommand
                 mkdir($directory);
             }
         }
+    }
+
+    public function hasViewNamespace($namespace)
+    {
+        $viewHints = view()->getFinder()->getHints();
+        return isset($viewHints[$namespace]);
+    }
+
+    public function suggestAddViewNamespace($namespace, $path)
+    {
+        $this->addSuggestion(implode("\n", [
+            "Open 'app/Providers/AppServiceProvider.php',",
+            "and put line below into 'register' method:",
+            "view()->addNamespace('{$namespace}', base_path('{$path}'));"
+        ]));
     }
 
     public function appendFile($path, $content)
