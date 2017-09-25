@@ -20,6 +20,7 @@
   <link href="{{ asset('admin-template/css/ie10-viewport-bug-workaround.css') }}" rel="stylesheet">
 
   <!-- Custom styles for this template -->
+  <link href="{{ asset('css/app.css') }}" rel="stylesheet">
   <link href="{{ asset('admin-template/css/style.css') }}" rel="stylesheet">
 
   <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
@@ -29,7 +30,7 @@
   <![endif]-->
 </head>
 <body>
-  <nav class="navbar navbar-default navbar-fixed-top">
+  <nav class="navbar navbar-default navbar-static-top">
     <div class="container">
     <div class="navbar-header">
       <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">

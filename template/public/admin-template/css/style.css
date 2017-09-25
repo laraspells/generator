@@ -1,5 +1,5 @@
-body {
-  padding-top: 50px;
+.navbar {
+	margin: 0px;
 }
 
 .alert-message {
@@ -14,7 +14,6 @@ body {
 	width: 100%;
 	float: left;
 	padding: 15px 0px;
-	border-bottom: 1px solid #ddd;
 	margin-bottom: 15px;
 }
 
@@ -25,5 +24,16 @@ body {
 }
 
 .pagination {
-	margin-top: 0px;
+	margin: 0px;
+}
+
+.page-content {
+	width: 100%;
+	padding: 15px;
+	background: white;
+	border: 1px solid #ddd;
+	border-radius: 3px;
+	box-sizing: border-box;
+	float: left;
+	margin-bottom: 15px;
 }
