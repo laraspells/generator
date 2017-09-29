@@ -233,8 +233,9 @@ class SchemaResolver implements SchemaResolverInterface
             if (method_exists($this, $tableCodeResolver)) {
                 $fieldSchema['table_code'] = $this->{$tableCodeResolver}($fieldSchema);
             }
-        } else {
-            data_fill($fieldSchema, 'table_code', '{{ ${? varname ?}[\'{? column ?}\'] }}');
+        } elseif (!isset($fieldSchema['table_code'])) {
+            $fieldValueAccess = $this->getFieldValueAccess($fieldSchema);
+            data_fill($fieldSchema, 'table_code', '{{ '.$fieldValueAccess.' }}');
         }
 
         // Get read field code
@@ -529,30 +530,56 @@ class SchemaResolver implements SchemaResolverInterface
 
     protected function getTableDisplayLink(array $fieldSchema)
     {
+        $fieldValueAccess = $this->getFieldValueAccess($fieldSchema);
         return '
-            <a target="_blank" href="{{ Storage::disk(\'{? disk ?}\')->url(${? varname ?}[\'{? column ?}\']) }}">{{ ${? varname ?}[\'{? column ?}\'] }}</a>
+            <a target="_blank" href="{{ Storage::disk(\'{? disk ?}\')->url('.$fieldValueAccess.') }}">{{ '.$fieldValueAccess.' }}</a>
         ';
     }
 
     protected function getTableDisplayImage(array $fieldSchema)
     {
+        $fieldValueAccess = $this->getFieldValueAccess($fieldSchema);
         return '
-            <img src="{{ Storage::disk(\'{? disk ?}\')->url(${? varname ?}[\'{? column ?}\']) }}" style="max-height:100px;width:auto;"/>
+            <img src="{{ Storage::disk(\'{? disk ?}\')->url('.$fieldValueAccess.') }}" style="max-height:100px;width:auto;"/>
         ';
     }
 
     protected function getTableDisplayImageLink(array $fieldSchema)
     {
+        $fieldValueAccess = $this->getFieldValueAccess($fieldSchema);
         return '
-            <a target="_blank" href="{{ Storage::disk(\'{? disk ?}\')->url(${? varname ?}[\'{? column ?}\']) }}">
-                <img src="{{ Storage::disk(\'{? disk ?}\')->url(${? varname ?}[\'{? column ?}\']) }}" style="max-height:100px;width:auto;"/>
+            <a target="_blank" href="{{ Storage::disk(\'{? disk ?}\')->url('.$fieldValueAccess.') }}">
+                <img src="{{ Storage::disk(\'{? disk ?}\')->url('.$fieldValueAccess.') }}" style="max-height:100px;width:auto;"/>
             </a>
         ';
     }
 
     protected function getTableDisplayHtml(array $fieldSchema)
     {
-        return '{!! ${? varname ?}[\'{? column ?}\'] !!}';
+        $fieldValueAccess = $this->getFieldValueAccess($fieldSchema);
+        return '{!! '.$fieldValueAccess.' !!}';
+    }
+
+    protected function getFieldValueAccess(array $fieldSchema)
+    {
+        if (isset($fieldSchema['relation'])) {
+            $type = $fieldSchema['relation']['type'];
+            $keyFrom = $fieldSchema['relation']['key_from'];
+            $relatedTableName = $fieldSchema['relation']['table'];
+            $colLabel = $fieldSchema['relation']['col_label'];
+
+            $isHasOne = in_array($type, ['has-one']);
+            if ($isHasOne) {
+                $from = preg_replace("/(^id_|_id$)/", "", $keyFrom);
+                $methodName = camel_case($from);
+            } else {
+                $methodName = camel_case($relatedTableName);
+            }
+
+            return '${? varname ?}->'.$methodName.'->'.$colLabel;
+        } else {
+            return '${? varname ?}->{? column ?}';
+        }
     }
 
 }

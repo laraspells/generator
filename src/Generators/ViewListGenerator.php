@@ -87,9 +87,9 @@ class ViewListGenerator extends ViewGenerator
                         <td class="text-center column-number">{{ $pagination->firstItem() + $i }}</td>
                         '.implode("\n", $tbodys).'
                         <td width="200" class="text-center column-action">
-                            <a class="btn btn-sm btn-edit btn-default" href="{{ route(\''.$tableData->route->page_detail.'\', [$'.$tableData->model_varname.'[\''.$tableData->primary_key.'\']]) }}">Show</a>
-                            <a class="btn btn-sm btn-edit btn-primary" href="{{ route(\''.$tableData->route->form_edit.'\', [$'.$tableData->model_varname.'[\''.$tableData->primary_key.'\']]) }}">Edit</a>
-                            <a class="btn btn-sm btn-delete btn-danger" href="{{ route(\''.$tableData->route->delete.'\', [$'.$tableData->model_varname.'[\''.$tableData->primary_key.'\']]) }}">Delete</a>
+                            <a class="btn btn-sm btn-edit btn-default" href="{{ route(\''.$tableData->route->page_detail.'\', [$'.$tableData->model_varname.'->getKey()]) }}">Show</a>
+                            <a class="btn btn-sm btn-edit btn-primary" href="{{ route(\''.$tableData->route->form_edit.'\', [$'.$tableData->model_varname.'->getKey()]) }}">Edit</a>
+                            <a class="btn btn-sm btn-delete btn-danger" href="{{ route(\''.$tableData->route->delete.'\', [$'.$tableData->model_varname.'->getKey()]) }}">Delete</a>
                         </td>
                     </tr>
                     @endforeach
