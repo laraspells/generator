@@ -10,8 +10,6 @@ class UpdateRequestGenerator extends CreateRequestGenerator
 
     use Concerns\TableUtils;
 
-    protected $tableSchema;
-
     public function __construct(Table $tableSchema)
     {
         $this->setClassName($tableSchema->getUpdateRequestClass());

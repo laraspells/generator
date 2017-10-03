@@ -9,11 +9,6 @@ class ViewCreateGenerator extends ViewGenerator
 {
     use Concerns\TableUtils;
 
-    protected function getTableSchema()
-    {
-        return $this->tableSchema;
-    }
-
     public function getData()
     {
         $data = parent::getData();

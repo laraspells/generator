@@ -12,8 +12,6 @@ class ModelGenerator extends ClassGenerator
 
     const CLASS_MODEL = 'Illuminate\Database\Eloquent\Model';
 
-    protected $tableSchema;
-
     public function __construct(Table $tableSchema)
     {
         parent::__construct($tableSchema->getModelClass());

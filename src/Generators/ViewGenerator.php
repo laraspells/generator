@@ -3,14 +3,14 @@
 namespace LaraSpells\Generator\Generators;
 
 use LaraSpells\Generator\Schema\Table;
+use LaraSpells\Generator\Traits\Concerns\TableUtils;
 use LaraSpells\Generator\Stub;
 
 class ViewGenerator extends BaseGenerator
 {
+    use Concerns\TableUtils;
 
     protected $content = "";
-
-    protected $tableSchema;
 
     public function __construct(Table $tableSchema, $stubContent = '')
     {

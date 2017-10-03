@@ -7,12 +7,8 @@ use LaraSpells\Generator\Traits\Concerns\TableUtils;
 
 class ViewEditGenerator extends ViewCreateGenerator
 {
-    use Concerns\TableUtils;
 
-    protected function getTableSchema()
-    {
-        return $this->tableSchema;
-    }
+    use Concerns\TableUtils;
 
     public function getData()
     {

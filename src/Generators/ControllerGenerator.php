@@ -14,8 +14,6 @@ class ControllerGenerator extends ClassGenerator
     const CLASS_REQUEST = 'Illuminate\Http\Request';
     const CLASS_RESPONSE = 'Illuminate\Http\Response';
 
-    protected $tableSchema;
-
     public function __construct(Table $tableSchema)
     {
         parent::__construct($tableSchema->getControllerClass());

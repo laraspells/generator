@@ -10,8 +10,6 @@ class MigrationGenerator extends ClassGenerator
 {
     use Concerns\TableUtils;
 
-    protected $tableSchema;
-
     public function __construct(Table $tableSchema)
     {
         parent::__construct($tableSchema->getMigrationClass());
