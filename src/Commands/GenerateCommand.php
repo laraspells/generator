@@ -124,6 +124,8 @@ class GenerateCommand extends SchemaBasedCommand
                     $this->generateMigrationForTable($table);
                 }
 
+                $this->generateModelForTable($table);
+
                 // Generate CRUD
                 if ($table->hasCrud()) {
                     $this->generateCrudForTable($table);
@@ -285,7 +287,6 @@ class GenerateCommand extends SchemaBasedCommand
         $this->generateControllerForTable($table);
         $this->generateCreateRequestForTable($table);
         $this->generateUpdateRequestForTable($table);
-        $this->generateModelForTable($table);
         $this->generateViews($table);
         $this->addCrudMissingRoutes($table);
         $this->addConfigMenu($table->getRouteListName(), $table->getLabel(), ['icon' => $table->get('icon')]);
