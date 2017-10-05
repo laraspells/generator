@@ -223,13 +223,19 @@ class GenerateCommand extends SchemaBasedCommand
      */
     public function getTablesToGenerate()
     {
-        $specificTable = $this->option('table');
-        if ($specificTable) {
-            $table = $this->getSchema()->getTable($specificTable);
-            if (!$table) {
-                throw new \InvalidArgumentException("Table '{$specificTable}' is not defined in schema");
+        $specificTables = $this->option('table');
+        if ($specificTables) {
+            $tables = [];
+            $specificTables = explode(',', $specificTables);
+
+            foreach ($specificTables as $table) {
+                $table = trim($table);
+                $tableSchema = $this->getSchema()->getTable($table);
+                if (!$tableSchema) {
+                    throw new \InvalidArgumentException("Table '{$table}' is not defined in schema");
+                }
+                $tables[] = $tableSchema;
             }
-            $tables = [$table];
         } else {
             $tables = $this->getSchema()->getTables();
         }
