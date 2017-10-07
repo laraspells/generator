@@ -114,9 +114,9 @@ class GenerateCommand extends SchemaBasedCommand
         $this->applyHook(self::HOOK_BEFORE_GENERATE_CRUDS, [$tables]);
         if (!$this->option('no-cruds')) {
             foreach($this->getTablesToGenerate() as $table) {
-                $this->applyHook(self::HOOK_BEFORE_EACH_CRUD, [$table]);
-
                 $this->reinitializeCrudGenerators($table);
+
+                $this->applyHook(self::HOOK_BEFORE_EACH_CRUD, [$table]);
 
                 // Generate create table migration
                 $migration = !$this->option('no-migration');
