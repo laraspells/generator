@@ -173,7 +173,7 @@ class MethodGenerator extends BaseGenerator
                     $lines[] = $indent.$arg;
                 }
             }
-            $lines[] = ") ".($isFromInterface OR $abstract? '' : '{'); // opening method
+            $lines[] = ") ".(($isFromInterface OR $abstract)? '' : '{'); // opening method
         } else {
             $lines[] = $methodDefinition."(".implode(", ", $arguments).")";
             if (!$abstract AND !$isFromInterface) {

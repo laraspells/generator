@@ -124,6 +124,8 @@ class GenerateCommand extends SchemaBasedCommand
                     $this->generateMigrationForTable($table);
                 }
 
+                $this->generateModelForTable($table);
+
                 // Generate CRUD
                 if ($table->hasCrud()) {
                     $this->generateCrudForTable($table);
@@ -221,13 +223,19 @@ class GenerateCommand extends SchemaBasedCommand
      */
     public function getTablesToGenerate()
     {
-        $specificTable = $this->option('table');
-        if ($specificTable) {
-            $table = $this->getSchema()->getTable($specificTable);
-            if (!$table) {
-                throw new \InvalidArgumentException("Table '{$specificTable}' is not defined in schema");
+        $specificTables = $this->option('table');
+        if ($specificTables) {
+            $tables = [];
+            $specificTables = explode(',', $specificTables);
+
+            foreach ($specificTables as $table) {
+                $table = trim($table);
+                $tableSchema = $this->getSchema()->getTable($table);
+                if (!$tableSchema) {
+                    throw new \InvalidArgumentException("Table '{$table}' is not defined in schema");
+                }
+                $tables[] = $tableSchema;
             }
-            $tables = [$table];
         } else {
             $tables = $this->getSchema()->getTables();
         }
@@ -285,7 +293,6 @@ class GenerateCommand extends SchemaBasedCommand
         $this->generateControllerForTable($table);
         $this->generateCreateRequestForTable($table);
         $this->generateUpdateRequestForTable($table);
-        $this->generateModelForTable($table);
         $this->generateViews($table);
         $this->addCrudMissingRoutes($table);
         $this->addConfigMenu($table->getRouteListName(), $table->getLabel(), ['icon' => $table->get('icon')]);
