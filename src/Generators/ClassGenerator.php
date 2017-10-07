@@ -205,6 +205,19 @@ class ClassGenerator extends BaseGenerator
     }
 
     /**
+     * Remove method
+     *
+     * @param  string $method
+     * @return null
+     */
+    public function removeMethod($method)
+    {
+        if (isset($this->methods[$method])) {
+            unset($this->methods[$method]);
+        }
+    }
+
+    /**
      * Check if class has given method
      *
      * @param  string $method
