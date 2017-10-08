@@ -57,6 +57,7 @@ class GenerateCommand extends SchemaBasedCommand
         {--askme : Ask before generate existing files}
         {--no-migration : Generate without migration}
         {--no-cruds : Generate without cruds}
+        {--no-config : Generate without create/replace config file}
         {--no-public : Generate without publish template public files}
         {--no-views : Generate without publish template view files}
         {--silent : Generate without showing affected files}
@@ -138,7 +139,11 @@ class GenerateCommand extends SchemaBasedCommand
 
         // Generate or publish another files.
         $this->generateAddedRoutes();
-        $this->persistConfigs();
+
+        if (!$this->option('no-config')) {
+            $this->persistConfigs();
+        }
+
         // $this->generateProvider();
         if (!$this->option('no-views')) {
             $this->publishViewFiles();
