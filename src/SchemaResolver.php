@@ -56,6 +56,7 @@ class SchemaResolver implements SchemaResolverInterface
         'select-multiple',
         'checkbox',
         'radio',
+        'date',
     ];
 
     public function resolve(array $schema)
