@@ -62,6 +62,7 @@ class GenerateCommand extends SchemaBasedCommand
         {--no-views : Generate without publish template view files}
         {--silent : Generate without showing affected files}
         {--t|table= : Generate specific table}
+        {--T|tag= : Generate specific tags}
     ';
 
     /**
@@ -229,6 +230,8 @@ class GenerateCommand extends SchemaBasedCommand
     public function getTablesToGenerate()
     {
         $specificTables = $this->option('table');
+        $specificTags = $this->option('tag');
+
         if ($specificTables) {
             $tables = [];
             $specificTables = explode(',', $specificTables);
@@ -240,6 +243,18 @@ class GenerateCommand extends SchemaBasedCommand
                     throw new \InvalidArgumentException("Table '{$table}' is not defined in schema");
                 }
                 $tables[] = $tableSchema;
+            }
+        } elseif ($specificTags) {
+            $tables = [];
+            $tags = array_map(function($tag) {
+                return trim($tag);
+            }, explode(',', $specificTags));
+
+            foreach ($this->getSchema()->getTables() as $table) {
+                $tableTags = (array) ($table->get('tags') ?: []);
+                if (count(array_intersect($tableTags, $tags))) {
+                    $tables[] = $table;
+                }
             }
         } else {
             $tables = $this->getSchema()->getTables();
