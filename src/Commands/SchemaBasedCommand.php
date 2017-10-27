@@ -213,9 +213,11 @@ abstract class SchemaBasedCommand extends Command
         foreach ($schema as $key => $value) {
             if ($key === $keyword) {
 
-                $file = $value;
-                if ($basedir) $file = $basedir.'/'.$file;
-                $schema = array_merge($schema, $this->loadSchema($file));
+                $files = (array) $value;
+                foreach ($files as $file) {
+                    if ($basedir) $file = $basedir.'/'.$file;
+                    $schema = array_merge($schema, $this->loadSchema($file));
+                }
                 unset($schema[$keyword]);
 
             } elseif (is_string($value) && starts_with($value, $keyword.':')) {
