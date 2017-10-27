@@ -12,6 +12,7 @@ use LaraSpells\Generator\SchemaResolver;
 use LaraSpells\Generator\Schema\Schema;
 use LaraSpells\Generator\Template;
 use Symfony\Component\Yaml\Yaml;
+use Exception;
 
 abstract class SchemaBasedCommand extends Command
 {
@@ -38,19 +39,10 @@ abstract class SchemaBasedCommand extends Command
      */
     public function initializeSchema($schemaFile)
     {
-        if (!ends_with($schemaFile, '.yml')) {
-            $schemaFile .= '.yml';
-        }
-
-        $schemaFile;
-        if (!is_file($schemaFile)) {
-            throw new InvalidArgumentException("Schema file '{$schemaFile}' not found.");
-        }
         $this->schemaFile = $schemaFile;
 
         // Parse schema yml file
-        $schemaFileContent = file_get_contents($schemaFile);
-        $arraySchema = Yaml::parse($schemaFileContent);
+        $arraySchema = $this->resolveExtendsSchema($this->loadSchema($schemaFile));
         $this->originalSchema = $arraySchema;
 
         // Initialize Template
@@ -184,6 +176,98 @@ abstract class SchemaBasedCommand extends Command
         foreach($this->getHooks($key) as $hook) {
             call_user_func_array($hook, $params);
         }
+    }
+
+    /**
+     * Load schema file
+     *
+     * @param array $schema
+     * @return array
+     */
+    protected function loadSchema($filepath)
+    {
+        if (!ends_with($filepath, '.yml')) {
+            $filepath .= '.yml';
+        }
+
+        if (!is_file($filepath)) {
+            throw new Exception("Schema file '{$filepath}' not found.");
+        }
+
+        $filepath = realpath($filepath);
+
+        $content = file_get_contents($filepath);
+        $arraySchema = Yaml::parse($content);
+        return $this->resolveIncludesSchema($arraySchema, dirname($filepath));
+    }
+
+    /**
+     * Resolve @include(s)
+     *
+     * @param array $schema
+     * @return array
+     */
+    protected function resolveIncludesSchema(array $schema, $basedir = '')
+    {
+        $keyword = '+include';
+        foreach ($schema as $key => $value) {
+            if ($key === $keyword) {
+
+                $file = $value;
+                if ($basedir) $file = $basedir.'/'.$file;
+                $schema = array_merge($schema, $this->loadSchema($file));
+                unset($schema[$keyword]);
+
+            } elseif (is_string($value) && starts_with($value, $keyword.':')) {
+
+                $file = substr($value, strlen($keyword.':'));
+                if ($basedir) $file = $basedir.'/'.$file;
+                $schema[$key] = $this->loadSchema($file);
+
+            } elseif(is_array($value)) {
+
+                $schema[$key] = $this->resolveIncludesSchema($value, $basedir);
+
+            }
+        }
+        return $schema;
+    }
+
+    /**
+     * Resolve @extends from array schema
+     *
+     * @param array $schema
+     * @return array
+     */
+    protected function resolveExtendsSchema(array $schema, array $root = null)
+    {
+        if (!$root) {
+            $root = $schema;
+        }
+
+        $keyword = '+extends';
+        foreach ($schema as $key => $value) {
+            if ($key === $keyword) {
+                $extends = (array) $value;
+                foreach ($extends as $extendPath) {
+                    if (!array_has($root, $extendPath)) {
+                        throw new InvalidSchemaException("Cannot extend '{$extendPath}'. Key '{$extendPath}' is not defined in your schema.");
+                    }
+
+                    $valuesToExtend = array_get($root, $extendPath);
+                    if (!is_array($valuesToExtend)) {
+                        throw new InvalidSchemaException("Cannot extend '{$extendPath}'. Value of '{$extendPath}' is not an array.");
+                    }
+
+                    $schema = array_merge($valuesToExtend, $schema);
+                }
+                unset($schema[$keyword]);
+            } elseif (is_array($value)) {
+                $schema[$key] = $this->resolveExtendsSchema($value, $root);
+            }
+        }
+
+        return $schema;
     }
 
 }
