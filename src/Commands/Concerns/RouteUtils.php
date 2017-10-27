@@ -153,6 +153,7 @@ trait RouteUtils
             'name' => $routeCrudName,
             'prefix' => $routeCrudPrefix
         ]);
+
         foreach($missingRoutes as $route) {
             $group->addRoute($route['method'], $route['path'], $route['uses'], [
                 'name' => $route['name']

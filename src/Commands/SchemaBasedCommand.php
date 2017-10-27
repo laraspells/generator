@@ -216,7 +216,7 @@ abstract class SchemaBasedCommand extends Command
                 $files = (array) $value;
                 foreach ($files as $file) {
                     if ($basedir) $file = $basedir.'/'.$file;
-                    $schema = array_merge($schema, $this->loadSchema($file));
+                    $schema = array_merge_recursive($this->loadSchema($file), $schema);
                 }
                 unset($schema[$keyword]);
 
@@ -261,7 +261,7 @@ abstract class SchemaBasedCommand extends Command
                         throw new InvalidSchemaException("Cannot extend '{$extendPath}'. Value of '{$extendPath}' is not an array.");
                     }
 
-                    $schema = array_merge($valuesToExtend, $schema);
+                    $schema = array_merge_recursive($valuesToExtend, $schema);
                 }
                 unset($schema[$keyword]);
             } elseif (is_array($value)) {

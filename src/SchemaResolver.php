@@ -97,7 +97,7 @@ class SchemaResolver implements SchemaResolverInterface
         // Resolve tables
         $tables = array_get($schema, 'tables') ?: [];
         foreach($tables as $table => $tableSchema) {
-            $schema['tables'][$table] = $this->resolveTableSchema($table, $tableSchema);
+            $schema['tables'][$table] = $this->resolveTableSchema($table, $tableSchema, $schema);
         }
 
         $schema['tables'] = $this->resolveTablesRelations($schema['tables']);
@@ -111,11 +111,27 @@ class SchemaResolver implements SchemaResolverInterface
      * @param  array $tableSchema
      * @return array
      */
-    protected function resolveTableSchema($tableName, array $tableSchema)
+    protected function resolveTableSchema($tableName, array $tableSchema, array $rootSchema)
     {
         $this->validateTableSchema($tableName, $tableSchema);
 
         data_fill($tableSchema, 'crud', true);
+
+        // Fill controller path and namespace
+        data_fill($tableSchema, 'controller.path', $rootSchema['controller']['path']);
+        data_fill($tableSchema, 'controller.namespace', $rootSchema['controller']['namespace']);
+
+        // Fill request path and namespace
+        data_fill($tableSchema, 'request.path', $rootSchema['request']['path']);
+        data_fill($tableSchema, 'request.namespace', $rootSchema['request']['namespace']);
+
+        // Fill model path and namespace
+        data_fill($tableSchema, 'model.path', $rootSchema['model']['path']);
+        data_fill($tableSchema, 'model.namespace', $rootSchema['model']['namespace']);
+
+        // Fill view path and namespace
+        data_fill($tableSchema, 'view.path', $rootSchema['view']['path']);
+        data_fill($tableSchema, 'view.namespace', $rootSchema['view']['namespace']);
 
         // Resolve singular and plural name
         $tableNameIsSingular = false;
