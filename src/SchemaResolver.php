@@ -133,6 +133,11 @@ class SchemaResolver implements SchemaResolverInterface
         data_fill($tableSchema, 'view.path', $rootSchema['view']['path']);
         data_fill($tableSchema, 'view.namespace', $rootSchema['view']['namespace']);
 
+        // Fill route data
+        data_fill($tableSchema, 'route.name', $rootSchema['route']['name']);
+        data_fill($tableSchema, 'route.file', $rootSchema['route']['file']);
+        data_fill($tableSchema, 'route.prefix', $rootSchema['route']['prefix']);
+
         // Resolve singular and plural name
         $tableNameIsSingular = false;
         if (isset($tableSchema['singular'])) {
