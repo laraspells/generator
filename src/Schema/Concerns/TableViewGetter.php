@@ -5,6 +5,11 @@ namespace LaraSpells\Generator\Schema\Concerns;
 trait TableViewGetter
 {
 
+    public function getViewBaseDirectory()
+    {
+        return $this->get('view.base_dir') ?: '';
+    }
+
     public function getViewDirectory()
     {
         return $this->get('view.directory') ?: str_singular($this->getName());
@@ -26,7 +31,8 @@ trait TableViewGetter
     public function getViewName($view)
     {
         $dir = $this->getViewDirectory();
-        $view = "{$dir}.{$view}";
+        $baseDir = $this->getViewBaseDirectory();
+        $view = $baseDir ? "{$baseDir}.{$dir}.{$view}" : "{$dir}.{$view}";
         $namespace = $this->getViewNamespace();
         return $namespace? $namespace.'::'.$view : $view;
     }

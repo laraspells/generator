@@ -6,6 +6,16 @@ trait TableModelGetter
 {
 
     /**
+     * Get model namespace
+     *
+     * @return string
+     */
+    public function getModelNamespace()
+    {
+        return $this->get('model.namespace');
+    }
+
+    /**
      * Get model file path
      *
      * @return string
@@ -23,11 +33,12 @@ trait TableModelGetter
      * @param boolean $namespace
      * @return string
      */
-    public function getModelClass($namespace = true)
+    public function getModelClass($includeNamespace = true)
     {
         $table = $this->getName();
+        $namespace = $this->getModelNamespace();
         $model = $this->get('model.class') ?: ucfirst(camel_case($this->getSingularName()));
-        return $namespace? $this->getRootSchema()->getModelClass($model) : $model;
+        return $includeNamespace? $namespace.'\\'.$model : $model;
     }
 
 }

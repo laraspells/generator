@@ -6,6 +6,16 @@ trait TableControllerGetter
 {
 
     /**
+     * Get controller namespace
+     *
+     * @return string
+     */
+    public function getControllerNamespace()
+    {
+        return $this->get('controller.namespace');
+    }
+
+    /**
      * Get controller filepath
      *
      * @return string
@@ -23,11 +33,12 @@ trait TableControllerGetter
      * @param boolean $namespace
      * @return string
      */
-    public function getControllerClass($namespace = true)
+    public function getControllerClass($includeNamespace = true)
     {
         $table = $this->getName();
+        $namespace = $this->getControllerNamespace();
         $controller = $this->get('controller.class') ?: ucfirst(camel_case($this->getSingularName())).'Controller';
-        return $namespace? $this->getRootSchema()->getControllerClass($controller) : $controller;
+        return $includeNamespace? $namespace.'\\'.$controller : $controller;
     }
 
 }

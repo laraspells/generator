@@ -74,24 +74,13 @@ class SchemaResolver implements SchemaResolverInterface
     {
         $this->validateRootSchema($schema);
 
-        data_fill($schema, 'controller.path', 'app/Http/Controllers');
-        data_fill($schema, 'controller.namespace', 'App\Http\Controllers');
-
-        data_fill($schema, 'request.path', 'app/Http/Requests');
-        data_fill($schema, 'request.namespace', 'App\Http\Requests');
-
-        data_fill($schema, 'model.path', 'app');
-        data_fill($schema, 'model.namespace', 'App');
-
-        data_fill($schema, 'view.path', 'resources/views');
-        data_fill($schema, 'view.namespace', '');
-
-        data_fill($schema, 'route.file', 'routes/web.php');
-        data_fill($schema, 'route.name', 'admin::');
-        data_fill($schema, 'route.prefix', 'admin');
+        $this->fillControllerSchema($schema);
+        $this->fillRequestSchema($schema);
+        $this->fillModelSchema($schema);
+        $this->fillViewSchema($schema);
+        $this->fillRouteSchema($schema);
 
         data_fill($schema, 'migration.path', 'database/migrations');
-
         data_fill($schema, 'config_file', 'admin');
 
         // Resolve tables
@@ -103,6 +92,63 @@ class SchemaResolver implements SchemaResolverInterface
         $schema['tables'] = $this->resolveTablesRelations($schema['tables']);
 
         return $schema;
+    }
+
+    /**
+     * Fill Controller Schema
+     *
+     * @param array &$schema
+     */
+    protected function fillControllerSchema(array &$schema)
+    {
+        data_fill($schema, 'controller.path', 'app/Http/Controllers');
+        data_fill($schema, 'controller.namespace', 'App\Http\Controllers');
+    }
+
+    /**
+     * Fill Request Schema
+     *
+     * @param array &$schema
+     */
+    protected function fillRequestSchema(array &$schema)
+    {
+        data_fill($schema, 'request.path', 'app/Http/Requests');
+        data_fill($schema, 'request.namespace', 'App\Http\Requests');
+    }
+
+    /**
+     * Fill Model Schema
+     *
+     * @param array &$schema
+     */
+    protected function fillModelSchema(array &$schema)
+    {
+        data_fill($schema, 'model.path', 'app');
+        data_fill($schema, 'model.namespace', 'App');
+    }
+
+    /**
+     * Fill View Schema
+     *
+     * @param array &$schema
+     */
+    protected function fillViewSchema(array &$schema)
+    {
+        data_fill($schema, 'view.path', 'resources/views');
+        data_fill($schema, 'view.namespace', '');
+    }
+
+    /**
+     * Fill route schema
+     *
+     * @param array &$schema
+     */
+    protected function fillRouteSchema(array &$schema)
+    {
+        data_fill($schema, 'route.file', 'routes/web.php');
+        data_fill($schema, 'route.name', 'admin::');
+        data_fill($schema, 'route.prefix', 'admin');
+        data_fill($schema, 'route.base_namespace', 'App\Http\Controllers');
     }
 
     /**
@@ -134,9 +180,11 @@ class SchemaResolver implements SchemaResolverInterface
         data_fill($tableSchema, 'view.namespace', $rootSchema['view']['namespace']);
 
         // Fill route data
-        data_fill($tableSchema, 'route.name', $rootSchema['route']['name']);
-        data_fill($tableSchema, 'route.file', $rootSchema['route']['file']);
-        data_fill($tableSchema, 'route.prefix', $rootSchema['route']['prefix']);
+        if (isset($tableSchema['route'])) {
+            $tableSchema['route'] = Util::mergeRecursive($rootSchema['route'], $tableSchema['route']);
+        } else {
+            $tableSchema['route'] = $rootSchema['route'];
+        }
 
         // Resolve singular and plural name
         $tableNameIsSingular = false;

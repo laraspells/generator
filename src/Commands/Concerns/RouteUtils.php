@@ -14,35 +14,38 @@ trait RouteUtils
 {
 
     /**
-     * Route generator collector
+     * List of route collector instances
      */
-    protected $routeCollector;
+    protected $routeCollectors = [];
 
-    /**
-     * Route crud group
+    /*
+     * Get default route file
      */
-    protected $routeCrud;
+    public function getDefaultRouteFile()
+    {
+        return $this->getSchema()->get('route.file');
+    }
 
     /**
      * Get Route Collector
      */
-    public function getRouteCollector()
+    public function getRouteCollector($routeFile = null)
     {
-        if (!$this->routeCollector) {
-            $this->initRouteGenerator();
+        if (!$routeFile) $routeFile = $this->getDefaultRouteFile();
+
+        if (!isset($this->routeCollectors[$routeFile])) {
+            $this->setRouteCollector($routeFile, new RouteGeneratorCollector);
         }
-        return $this->routeCollector;
+
+        return $this->routeCollectors[$routeFile];
     }
 
     /**
-     * Get Route CRUD
+     * Add Route Collector
      */
-    public function getRouteCrud()
+    public function setRouteCollector($routeFile, RouteGeneratorCollector $routeCollector)
     {
-        if (!$this->routeCrud) {
-            $this->initRouteGenerator();
-        }
-        return $this->routeCrud;
+        $this->routeCollectors[$routeFile] = $routeCollector;
     }
 
     /**
@@ -66,10 +69,16 @@ trait RouteUtils
     {
         $rootSchema = $table->getRootSchema();
         $pk = $table->getPrimaryColumn();
+
+        $routeFile = $table->getRouteFile();
+        $routeNamespace = $table->getRouteNamespace();
+        $routeDomain = $table->getRouteDomain();
+        $routeMiddleware = $table->getRouteMiddleware();
         $routeBaseName = $table->getRouteName('', true);        // e.g: "blog::posts."
-        $routeCrudName = $table->getRouteName('', false);       // e.g: "posts."
+        $routeCrudName = $table->getRouteName('', true);       // e.g: "posts."
         $routeCrudPrefix = $table->getRoutePrefix();            // e.g: "posts"
         $crudController = $table->getControllerClass(false);    // e.g: "PostController"
+
         $missingRoutes = [];
         $crudRouteNames = [
             'list' => $table->getRouteListName(true),               // e.g: "blog::posts.page-list"
@@ -151,12 +160,17 @@ trait RouteUtils
 
         $group = $this->addRouteGroup([
             'name' => $routeCrudName,
-            'prefix' => $routeCrudPrefix
+            'prefix' => $routeCrudPrefix,
+            'namespace' => $routeNamespace,
+            'domain' => $routeDomain,
+            'middleware' => $routeMiddleware,
+            'file' => $routeFile,
         ]);
 
         foreach($missingRoutes as $route) {
             $group->addRoute($route['method'], $route['path'], $route['uses'], [
-                'name' => $route['name']
+                'name' => $route['name'],
+                'file' => $routeFile
             ]);
         }
     }
@@ -175,52 +189,44 @@ trait RouteUtils
 
     public function addRoute($method, $path, $uses, array $options = [])
     {
-        return $this->getRouteCrud()->addRoute($method, $path, $uses, $options);
+        $options = array_merge(['file' => $this->getDefaultRouteFile()], $options);
+        return $this->getRouteCollector($options['file'])->addRoute($method, $path, $uses, $options);
     }
 
     public function addRouteGroup(array $options = [])
     {
-        return $this->getRouteCrud()->addRoutegroup($options);
+        $options = array_merge(['file' => $this->getDefaultRouteFile()], $options);
+        return $this->getRouteCollector($options['file'])->addRoutegroup($options);
     }
 
-    protected function initRouteGenerator()
+    protected function countAddedRoutes($routeFile = null)
     {
-        $schema = $this->getSchema();
-        $this->routeCollector = new RouteGeneratorCollector;
-        $this->routeCrud = $this->getRouteCollector()->addRouteGroup([
-            'namespace' => $schema->getRouteNamespace(),
-            'name' => $schema->getRouteName() ?: null,
-            'prefix' => $schema->getRoutePrefix() ?: null,
-            'middleware' => $schema->getRouteMiddleware() ?: null,
-            'domain' => $schema->getRouteDomain() ?: null
-        ]);
-    }
-
-    protected function countAddedRoutes()
-    {
-        return count($this->getRouteCollector()->getRoutes());
+        if (!$routeFile) $routeFile = $this->getDefaultRouteFile();
+        return count($this->getRouteCollector($routeFile)->getRoutes());
     }
 
     protected function generateAddedRoutes()
     {
-        if ($this->countAddedRoutes() > 0) {
-            $docblock = new DocblockGenerator;
-            $authorName = $this->getSchema()->getAuthorName();
-            $authorEmail = $this->getSchema()->getAuthorEmail();
-            $codeRoutes = implode("\n\n", array_filter(array_map(function($route) {
-                return $route->generateCode();
-            }, $this->getRouteCollector()->getRoutes()), function($code) {
-                return strlen(trim($code)) > 0;
-            }));
+        foreach ($this->routeCollectors as $routeFile => $routeCollector) {
+            if ($this->countAddedRoutes($routeFile) > 0) {
+                $docblock = new DocblockGenerator;
+                $authorName = $this->getSchema()->getAuthorName();
+                $authorEmail = $this->getSchema()->getAuthorEmail();
+                $codeRoutes = implode("\n\n", array_filter(array_map(function($route) {
+                    return $route->generateCode();
+                }, $this->getRouteCollector($routeFile)->getRoutes()), function($code) {
+                    return strlen(trim($code)) > 0;
+                }));
 
-            if (trim($codeRoutes)) {
-                $docblock->addText("Generated by LaraSpell");
-                $docblock->addAnnotation("author", "{$authorName}<{$authorEmail}>");
-                $docblock->addAnnotation("added", date('Y-m-d H:i'));
-                $this->writeOrAppendRouteFile("\n\n".$docblock->generateCode());
+                if (trim($codeRoutes)) {
+                    $docblock->addText("Generated by LaraSpell");
+                    $docblock->addAnnotation("author", "{$authorName}<{$authorEmail}>");
+                    $docblock->addAnnotation("added", date('Y-m-d H:i'));
+                    $this->writeOrAppendRouteFile($routeFile, "\n\n".$docblock->generateCode());
+                }
+
+                $this->writeOrAppendRouteFile($routeFile, "\n".$codeRoutes);
             }
-
-            $this->writeOrAppendRouteFile("\n".$codeRoutes);
         }
     }
 
@@ -230,15 +236,14 @@ trait RouteUtils
      * @param  string $code
      * @return void
      */
-    protected function writeOrAppendRouteFile($code)
+    protected function writeOrAppendRouteFile($routeFile, $code)
     {
-        $routeFile = $this->getSchema()->getRouteFile();
         $routeFileExists = $this->hasFile($routeFile);
 
         if ($routeFileExists) {
             return $this->appendFile($routeFile, $code);
         } else {
-            return $this->writeFile($routeFile, "<?php\n\n".$code);
+            return $this->writeFile($routeFile, "<?php".$code);
         }
     }
 

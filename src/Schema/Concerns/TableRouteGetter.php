@@ -4,6 +4,41 @@ namespace LaraSpells\Generator\Schema\Concerns;
 
 trait TableRouteGetter
 {
+    public function getRouteFile()
+    {
+        return $this->get('route.file');
+    }
+
+    public function getRouteDomain()
+    {
+        return $this->get('route.domain');
+    }
+
+    public function getRouteMiddleware()
+    {
+        return $this->get('route.middleware');
+    }
+
+    public function getRouteNamespace($resolve = true)
+    {
+        $namespace = $this->get('route.namespace');
+
+        if ($resolve) {
+            $baseNamespace = $this->getRouteBaseNamespace();
+            if (starts_with($namespace, $baseNamespace)) {
+                return trim(str_replace($baseNamespace, '', $namespace), '/');
+            } else {
+                return trim($namespace, '/');
+            }
+        } else {
+            return trim($namespace, '/');
+        }
+    }
+
+    public function getRouteBaseNamespace()
+    {
+        return $this->get('route.base_namespace');
+    }
 
     public function getRouteName($action = '', $includeNamespace = true)
     {
