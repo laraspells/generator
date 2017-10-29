@@ -293,6 +293,10 @@ class GenerateCommand extends SchemaBasedCommand
         $this->info("> {$countAddeds} ".($countAddeds > 1? 'files addeds.' : 'file added.'));
         $this->info("> {$countModifieds} ".($countModifieds > 1? 'files overwriteds' : 'file overwrited'));
 
+        if (count($this->generatedMigrations)) {
+            $this->addSuggestion("Run 'php artisan migrate'.");
+        }
+
         // Show suggestions
         if ($missingDisksSuggestion = $this->getMissingDisksSuggestion()) {
             $this->addSuggestion($missingDisksSuggestion);

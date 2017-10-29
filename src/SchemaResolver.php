@@ -74,30 +74,19 @@ class SchemaResolver implements SchemaResolverInterface
     {
         $this->validateRootSchema($schema);
 
-        data_fill($schema, 'controller.path', 'app/Http/Controllers');
-        data_fill($schema, 'controller.namespace', 'App\Http\Controllers');
-
-        data_fill($schema, 'request.path', 'app/Http/Requests');
-        data_fill($schema, 'request.namespace', 'App\Http\Requests');
-
-        data_fill($schema, 'model.path', 'app');
-        data_fill($schema, 'model.namespace', 'App');
-
-        data_fill($schema, 'view.path', 'resources/views');
-        data_fill($schema, 'view.namespace', '');
-
-        data_fill($schema, 'route.file', 'routes/web.php');
-        data_fill($schema, 'route.name', 'admin::');
-        data_fill($schema, 'route.prefix', 'admin');
+        $this->fillControllerSchema($schema);
+        $this->fillRequestSchema($schema);
+        $this->fillModelSchema($schema);
+        $this->fillViewSchema($schema);
+        $this->fillRouteSchema($schema);
 
         data_fill($schema, 'migration.path', 'database/migrations');
-
         data_fill($schema, 'config_file', 'admin');
 
         // Resolve tables
         $tables = array_get($schema, 'tables') ?: [];
         foreach($tables as $table => $tableSchema) {
-            $schema['tables'][$table] = $this->resolveTableSchema($table, $tableSchema);
+            $schema['tables'][$table] = $this->resolveTableSchema($table, $tableSchema, $schema);
         }
 
         $schema['tables'] = $this->resolveTablesRelations($schema['tables']);
@@ -106,16 +95,96 @@ class SchemaResolver implements SchemaResolverInterface
     }
 
     /**
+     * Fill Controller Schema
+     *
+     * @param array &$schema
+     */
+    protected function fillControllerSchema(array &$schema)
+    {
+        data_fill($schema, 'controller.path', 'app/Http/Controllers');
+        data_fill($schema, 'controller.namespace', 'App\Http\Controllers');
+    }
+
+    /**
+     * Fill Request Schema
+     *
+     * @param array &$schema
+     */
+    protected function fillRequestSchema(array &$schema)
+    {
+        data_fill($schema, 'request.path', 'app/Http/Requests');
+        data_fill($schema, 'request.namespace', 'App\Http\Requests');
+    }
+
+    /**
+     * Fill Model Schema
+     *
+     * @param array &$schema
+     */
+    protected function fillModelSchema(array &$schema)
+    {
+        data_fill($schema, 'model.path', 'app');
+        data_fill($schema, 'model.namespace', 'App');
+    }
+
+    /**
+     * Fill View Schema
+     *
+     * @param array &$schema
+     */
+    protected function fillViewSchema(array &$schema)
+    {
+        data_fill($schema, 'view.path', 'resources/views');
+        data_fill($schema, 'view.namespace', '');
+    }
+
+    /**
+     * Fill route schema
+     *
+     * @param array &$schema
+     */
+    protected function fillRouteSchema(array &$schema)
+    {
+        data_fill($schema, 'route.file', 'routes/web.php');
+        data_fill($schema, 'route.name', 'admin::');
+        data_fill($schema, 'route.prefix', 'admin');
+        data_fill($schema, 'route.base_namespace', 'App\Http\Controllers');
+    }
+
+    /**
      * Resolve root schema
      *
      * @param  array $tableSchema
      * @return array
      */
-    protected function resolveTableSchema($tableName, array $tableSchema)
+    protected function resolveTableSchema($tableName, array $tableSchema, array $rootSchema)
     {
         $this->validateTableSchema($tableName, $tableSchema);
 
         data_fill($tableSchema, 'crud', true);
+
+        // Fill controller path and namespace
+        data_fill($tableSchema, 'controller.path', $rootSchema['controller']['path']);
+        data_fill($tableSchema, 'controller.namespace', $rootSchema['controller']['namespace']);
+
+        // Fill request path and namespace
+        data_fill($tableSchema, 'request.path', $rootSchema['request']['path']);
+        data_fill($tableSchema, 'request.namespace', $rootSchema['request']['namespace']);
+
+        // Fill model path and namespace
+        data_fill($tableSchema, 'model.path', $rootSchema['model']['path']);
+        data_fill($tableSchema, 'model.namespace', $rootSchema['model']['namespace']);
+
+        // Fill view path and namespace
+        data_fill($tableSchema, 'view.path', $rootSchema['view']['path']);
+        data_fill($tableSchema, 'view.namespace', $rootSchema['view']['namespace']);
+
+        // Fill route data
+        if (isset($tableSchema['route'])) {
+            $tableSchema['route'] = Util::mergeRecursive($rootSchema['route'], $tableSchema['route']);
+        } else {
+            $tableSchema['route'] = $rootSchema['route'];
+        }
 
         // Resolve singular and plural name
         $tableNameIsSingular = false;

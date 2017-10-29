@@ -5,6 +5,12 @@ namespace LaraSpells\Generator\Schema;
 class Table extends AbstractSchema
 {
 
+    use Concerns\TableViewGetter;
+    use Concerns\TableControllerGetter;
+    use Concerns\TableModelGetter;
+    use Concerns\TableRequestGetter;
+    use Concerns\TableRouteGetter;
+
     protected $tableName;
     protected $rootSchema;
     protected $fields = [];
@@ -130,99 +136,6 @@ class Table extends AbstractSchema
     }
 
     /**
-     * Get controller filepath
-     *
-     * @return string
-     */
-    public function getControllerPath()
-    {
-        return $this->getRootSchema()->getControllerPath($this->getControllerClass(false));
-    }
-
-    /**
-     * Get controller class name
-     *
-     * @param boolean $namespace
-     * @return string
-     */
-    public function getControllerClass($namespace = true)
-    {
-        $table = $this->getName();
-        $controller = $this->get('controller') ?: ucfirst(camel_case($this->getSingularName())).'Controller';
-        return $namespace? $this->getRootSchema()->getControllerClass($controller) : $controller;
-    }
-
-    /**
-     * Get create request filepath
-     *
-     * @return string
-     */
-    public function getCreateRequestPath()
-    {
-        return $this->getRootSchema()->getRequestPath($this->getCreateRequestClass(false));
-    }
-
-    /**
-     * Get create request class name
-     *
-     * @param boolean $namespace
-     * @return string
-     */
-    public function getCreateRequestClass($namespace = true)
-    {
-        $table = $this->getName();
-        $createRequest = $this->get('create_request') ?: 'Create'.ucfirst(camel_case(str_singular($table))).'Request';
-        return $namespace? $this->getRootSchema()->getRequestClass($createRequest) : $createRequest;
-    }
-
-    /**
-     * Get update request filepath
-     *
-     * @return string
-     */
-    public function getUpdateRequestPath()
-    {
-        return $this->getRootSchema()->getRequestPath($this->getUpdateRequestClass(false));
-    }
-
-    /**
-     * Get update request class name
-     *
-     * @param boolean $namespace
-     * @return string
-     */
-    public function getUpdateRequestClass($namespace = true)
-    {
-        $table = $this->getName();
-        $updateRequest = $this->get('update_request') ?: 'Update'.ucfirst(camel_case(str_singular($table))).'Request';
-        return $namespace? $this->getRootSchema()->getRequestClass($updateRequest) : $updateRequest;
-    }
-
-    /**
-     * Get model file path
-     *
-     * @return string
-     */
-    public function getModelPath()
-    {
-        return $this->getRootSchema()->getModelPath($this->getModelClass(false));
-    }
-
-    /**
-     * Get model class name
-     *
-     * @param boolean $namespace
-     * @return string
-     */
-    public function getModelClass($namespace = true)
-    {
-        $table = $this->getName();
-        $model = $this->get('model') ?: ucfirst(camel_case($this->getSingularName()));
-        return $namespace? $this->getRootSchema()->getModelClass($model) : $model;
-    }
-
-
-    /**
      * Get migration file path
      *
      * @return string
@@ -331,103 +244,6 @@ class Table extends AbstractSchema
         return array_values(array_map(function($field) {
             return $field->getColumnName();
         }, $this->getInputableFields()));
-    }
-
-    public function getViewListPath()
-    {
-        return $this->getViewPath('page-list');
-    }
-
-    public function getViewDetailPath()
-    {
-        return $this->getViewPath('page-detail');
-    }
-
-    public function getViewCreatePath()
-    {
-        return $this->getViewPath('form-create');
-    }
-
-    public function getViewEditPath()
-    {
-        return $this->getViewPath('form-edit');
-    }
-
-    public function getViewPath($view)
-    {
-        $table = str_singular($this->getName());
-        return $this->getRootSchema()->getViewpath($table.'/'.$view);
-    }
-
-    public function getViewListName()
-    {
-        return $this->getViewName('page-list');
-    }
-
-    public function getViewDetailName()
-    {
-        return $this->getViewName('page-detail');
-    }
-
-    public function getViewCreateName()
-    {
-        return $this->getViewName('form-create');
-    }
-
-    public function getViewEditName()
-    {
-        return $this->getViewName('form-edit');
-    }
-
-    public function getViewName($view)
-    {
-        $dir = str_singular($this->getName());
-        return $this->getRootSchema()->getView($dir.'.'.$view);
-    }
-
-    public function getRouteListName($namespace = true)
-    {
-        return $this->getRouteName('page-list', $namespace);
-    }
-
-    public function getRouteDetailName($namespace = true)
-    {
-        return $this->getRouteName('page-detail', $namespace);
-    }
-
-    public function getRouteCreateName($namespace = true)
-    {
-        return $this->getRouteName('form-create', $namespace);
-    }
-
-    public function getRoutePostCreateName($namespace = true)
-    {
-        return $this->getRouteName('post-create', $namespace);
-    }
-
-    public function getRouteEditName($namespace = true)
-    {
-        return $this->getRouteName('form-edit', $namespace);
-    }
-
-    public function getRoutePostEditName($namespace = true)
-    {
-        return $this->getRouteName('post-edit', $namespace);
-    }
-
-    public function getRouteDeleteName($namespace = true)
-    {
-        return $this->getRouteName('delete', $namespace);
-    }
-
-    public function getRouteName($action = '', $namespace = true)
-    {
-        return $this->getRootSchema()->getRouteName($this->getRoutePrefix().'.'.$action, $namespace);
-    }
-
-    public function getRoutePrefix()
-    {
-        return str_replace("_", "-", $this->getName());
     }
 
     public function getRelations()

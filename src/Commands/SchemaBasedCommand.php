@@ -3,6 +3,7 @@
 namespace LaraSpells\Generator\Commands;
 
 use Closure;
+use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Routing\Router;
 use InvalidArgumentException;
@@ -11,8 +12,8 @@ use LaraSpells\Generator\Extension;
 use LaraSpells\Generator\SchemaResolver;
 use LaraSpells\Generator\Schema\Schema;
 use LaraSpells\Generator\Template;
+use LaraSpells\Generator\Util;
 use Symfony\Component\Yaml\Yaml;
-use Exception;
 
 abstract class SchemaBasedCommand extends Command
 {
@@ -216,7 +217,7 @@ abstract class SchemaBasedCommand extends Command
                 $files = (array) $value;
                 foreach ($files as $file) {
                     if ($basedir) $file = $basedir.'/'.$file;
-                    $schema = array_merge($schema, $this->loadSchema($file));
+                    $schema = Util::mergeRecursive($this->loadSchema($file), $schema);
                 }
                 unset($schema[$keyword]);
 
@@ -261,7 +262,7 @@ abstract class SchemaBasedCommand extends Command
                         throw new InvalidSchemaException("Cannot extend '{$extendPath}'. Value of '{$extendPath}' is not an array.");
                     }
 
-                    $schema = array_merge($valuesToExtend, $schema);
+                    $schema = Util::mergeRecursive($valuesToExtend, $schema);
                 }
                 unset($schema[$keyword]);
             } elseif (is_array($value)) {
