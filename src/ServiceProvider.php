@@ -6,6 +6,7 @@ use Blade;
 use Illuminate\Support\ServiceProvider as BaseServiceProvider;
 use LaraSpells\Generator\Commands\GenerateCommand;
 use LaraSpells\Generator\Commands\MakeSchemaCommand;
+use LaraSpells\Generator\Commands\ShowCommand;
 
 class ServiceProvider extends BaseServiceProvider
 {
@@ -33,6 +34,7 @@ class ServiceProvider extends BaseServiceProvider
         if ($this->app->runningInConsole()) {
             $this->commands([
                 GenerateCommand::class,
+                ShowCommand::class,
                 MakeSchemaCommand::class,
             ]);
         }
