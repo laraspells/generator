@@ -240,7 +240,8 @@ class GenerateCommand extends SchemaBasedCommand
                 $table = trim($table);
                 $tableSchema = $this->getSchema()->getTable($table);
                 if (!$tableSchema) {
-                    throw new \InvalidArgumentException("Table '{$table}' is not defined in schema");
+                    $this->warn("\n Table '{$table}' is not defined in your schema. \n");
+                    exit;
                 }
                 $tables[] = $tableSchema;
             }
@@ -255,6 +256,20 @@ class GenerateCommand extends SchemaBasedCommand
                 if (count(array_intersect($tableTags, $tags))) {
                     $tables[] = $table;
                 }
+            }
+
+            if (empty($tables)) {
+                if (count($tags) > 1) {
+                    $lastTag = array_pop($tags);
+                    $tags = implode(', ', array_map(function($tag) {
+                        return "'{$tag}'";
+                    }, $tags))." or '{$lastTag}'";
+                } else {
+                    $tags = "'{$tags[0]}'";
+                }
+
+                $this->warn("\n There is no tables tagged {$tags}. \n");
+                exit;
             }
         } else {
             $tables = $this->getSchema()->getTables();
