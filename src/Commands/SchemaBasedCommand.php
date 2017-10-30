@@ -27,9 +27,6 @@ abstract class SchemaBasedCommand extends Command
     public function __construct()
     {
         parent::__construct();
-
-        // Bind command instance for template and extensions
-        app()->instance(self::class, $this);
     }
 
     /**
@@ -40,6 +37,9 @@ abstract class SchemaBasedCommand extends Command
      */
     public function initializeSchema($schemaFile)
     {
+        app()->instance(self::class, $this);
+        app()->instance(static::class, $this);
+
         $this->schemaFile = $schemaFile;
 
         // Parse schema yml file
