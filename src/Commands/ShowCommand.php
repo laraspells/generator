@@ -38,7 +38,7 @@ class ShowCommand extends SchemaBasedCommand
     protected $signature = '
         spell:show
         {schema : Path to schema (yml) file.}
-        {key : Key to show.}
+        {key? : Key to show.}
         {--o|only= : Show only specified keys. Separeted by comma.}
         {--e|except= : Ignoring some keys. Separated by comma.}
     ';
@@ -77,10 +77,21 @@ class ShowCommand extends SchemaBasedCommand
         $this->initializeSchema($schemaFile);
 
         $schema = $this->getSchema()->toArray();
-        $value = array_get($schema, $key);
+
+        if ($key) {
+            if (!array_has($schema, $key)) {
+                return $this->error("\n This schema doesn't have key '{$key}'\n");
+            } else {
+                $value = array_get($schema, $key);
+            }
+        } else {
+            $value = $schema;
+        }
+
         if ($only) {
             $value = array_only($value, explode(',', $only));
         }
+
         if ($except) {
             $value = array_except($value, explode(',', $except));
         }
