@@ -50,8 +50,8 @@ class ModelGenerator extends ClassGenerator
     protected function addRelationMethod($table, $type, $keyFrom, $keyTo)
     {
         $relatedTable = $this->getTableSchema()->getRootSchema()->getTable($table);
-        $modelClass = $relatedTable->getModelClass(false);
-        if ($modelClass == $this->getTableSchema()->getModelClass(false)) {
+        $modelClass = $relatedTable->getModelClass(true);
+        if ($modelClass == $this->getTableSchema()->getModelClass(true)) {
             $modelClass = "static";
         }
 
@@ -73,7 +73,7 @@ class ModelGenerator extends ClassGenerator
         });
 
         $relationParams = [];
-        $relationParams[] = $modelClass.'::class';
+        $relationParams[] = "'{$modelClass}'";
         $relationParams[] = "'{$keyTo}'";
         $relationParams[] = "'{$keyFrom}'";
         $relationParams = implode(", ", $relationParams);
