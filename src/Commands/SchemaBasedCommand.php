@@ -293,7 +293,7 @@ abstract class SchemaBasedCommand extends Command
         }
 
         if (isset($schema[self::KEY_FILE])) {
-            $fileSchema = $schema;
+            $fileSchema = &$schema;
         }
 
         $rkey = "[a-z0-9_-]+";
