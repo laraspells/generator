@@ -17,6 +17,9 @@ use Symfony\Component\Yaml\Yaml;
 
 abstract class SchemaBasedCommand extends Command
 {
+
+    const KEY_FILE = '__FILE__';
+
     protected $originalSchema;
     protected $schemaResolver;
     protected $schema;
@@ -43,7 +46,7 @@ abstract class SchemaBasedCommand extends Command
         $this->schemaFile = $schemaFile;
 
         // Parse schema yml file
-        $arraySchema = $this->resolveExtendsSchema($this->loadSchema($schemaFile));
+        $arraySchema = $this->resolveVariables($this->resolveExtendsSchema($this->loadSchema($schemaFile)));
         $this->originalSchema = $arraySchema;
 
         // Initialize Template
@@ -199,11 +202,13 @@ abstract class SchemaBasedCommand extends Command
 
         $content = file_get_contents($filepath);
         $arraySchema = Yaml::parse($content);
+        $arraySchema[self::KEY_FILE] = $filepath;
+
         return $this->resolveIncludesSchema($arraySchema, dirname($filepath));
     }
 
     /**
-     * Resolve @include(s)
+     * Resolve +include(s)
      *
      * @param array $schema
      * @return array
@@ -237,9 +242,10 @@ abstract class SchemaBasedCommand extends Command
     }
 
     /**
-     * Resolve @extends from array schema
+     * Resolve +extends from array schema
      *
      * @param array $schema
+     * @param array $root
      * @return array
      */
     protected function resolveExtendsSchema(array $schema, array $root = null)
@@ -267,6 +273,60 @@ abstract class SchemaBasedCommand extends Command
                 unset($schema[$keyword]);
             } elseif (is_array($value)) {
                 $schema[$key] = $this->resolveExtendsSchema($value, $root);
+            }
+        }
+
+        return $schema;
+    }
+
+    /**
+     * Resolve ${key} from array schema
+     *
+     * @param array $schema
+     * @param array $root
+     * @return array
+     */
+    protected function resolveVariables(array $schema, array $root = null, array $fileSchema = null)
+    {
+        if (!$root) {
+            $root = $schema;
+        }
+
+        if (isset($schema[self::KEY_FILE])) {
+            $fileSchema = $schema;
+        }
+
+        $rkey = "[a-z0-9_-]+";
+        $rootVarRegex = "/\\$\{(?<var>(?<this>this\.)?(?<key>$rkey(\.$rkey)*))}/i";
+
+        foreach ($schema as $key => $value) {
+            if (is_array($value)) {
+                $schema[$key] = $this->resolveVariables($value, $root, $fileSchema);
+            }
+
+            if (!is_string($value)) continue;
+
+            preg_match_all($rootVarRegex, $value, $matches);
+
+            foreach ($matches['var'] as $i => $var) {
+                $keyVar = $matches['key'][$i];
+                $match = $matches[0][$i];
+                $isThis = (bool) $matches['this'][$i];
+
+                $runningPath = realpath('').'/';
+
+                if ($isThis && !array_has($fileSchema, $keyVar)) {
+                    $schemaFile = str_replace($runningPath, '', $fileSchema[self::KEY_FILE]);
+                    throw new InvalidSchemaException("'{$keyVar}' is undefined in '{$schemaFile}'.");
+                }
+
+                if (!$isThis && !array_has($root, $keyVar)) {
+                    $schemaFile = str_replace($runningPath, '', $root[self::KEY_FILE]);
+                    throw new InvalidSchemaException("'{$keyVar}' is undefined in your schema.");
+                }
+
+                $varValue = $isThis ? array_get($fileSchema, $keyVar) : array_get($root, $keyVar);
+                $schema[$key] = str_replace($match, $varValue, $schema[$key]);
             }
         }
 
