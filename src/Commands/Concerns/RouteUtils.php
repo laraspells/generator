@@ -70,14 +70,13 @@ trait RouteUtils
         $rootSchema = $table->getRootSchema();
         $pk = $table->getPrimaryColumn();
 
-        $routeFile = $table->getRouteFile();
-        $routeNamespace = $table->getRouteNamespace();
-        $routeDomain = $table->getRouteDomain();
-        $routeMiddleware = $table->getRouteMiddleware();
-        $routeBaseName = $table->getRouteName('', true);        // e.g: "blog::posts."
-        $routeCrudName = $table->getRouteName('', true);       // e.g: "posts."
-        $routeCrudPrefix = $table->getRoutePrefix();            // e.g: "posts"
-        $crudController = $table->getControllerClass(false);    // e.g: "PostController"
+        $routeFile = $table->getRouteFile();                        // [table].route.file
+        $routeNamespace = $table->getRouteNamespace();              // [table].route.namespace
+        $routeDomain = $table->getRouteDomain();                    // [table].route.domain
+        $routeMiddleware = $table->getRouteMiddleware();            // [table].route.middleware
+        $routeBaseName = $table->getRouteName('', true);            // [table].route.namespace + [table].route.name
+        $routePrefix = $table->getRouteFullPath();                  // [table].route.prefix + '/' + [table].route.path
+        $crudController = $table->getControllerClass(false);
 
         $missingRoutes = [];
         $crudRouteNames = [
@@ -159,8 +158,8 @@ trait RouteUtils
         if (empty($missingRoutes)) return;
 
         $group = $this->addRouteGroup([
-            'name' => $routeCrudName,
-            'prefix' => $routeCrudPrefix,
+            'name' => $routeBaseName,
+            'prefix' => $routePrefix,
             'namespace' => $routeNamespace,
             'domain' => $routeDomain,
             'middleware' => $routeMiddleware,

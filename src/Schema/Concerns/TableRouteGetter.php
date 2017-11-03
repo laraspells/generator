@@ -9,6 +9,16 @@ trait TableRouteGetter
         return $this->get('route.file');
     }
 
+    public function getRoutePrefix()
+    {
+        return trim($this->get('route.prefix'), '/');
+    }
+
+    public function getRoutePath()
+    {
+        return trim($this->get('route.path') ?: str_replace("_", "-", $this->getName()), '/');
+    }
+
     public function getRouteDomain()
     {
         return $this->get('route.domain');
@@ -17,6 +27,13 @@ trait TableRouteGetter
     public function getRouteMiddleware()
     {
         return $this->get('route.middleware');
+    }
+
+    public function getRouteFullPath()
+    {
+        $path = $this->getRoutePath();
+        $prefix = $this->getRoutePrefix();
+        return "{$prefix}/{$path}";
     }
 
     public function getRouteNamespace($resolve = true)
@@ -42,15 +59,10 @@ trait TableRouteGetter
 
     public function getRouteName($action = '', $includeNamespace = true)
     {
-        $prefix = $this->getRoutePrefix();
+        $path = $this->getRoutePath();
         $namespace = $this->get('route.name');
-        $route = "{$prefix}.{$action}";
+        $route = "{$path}.{$action}";
         return $includeNamespace? $namespace.$route : $route;
-    }
-
-    public function getRoutePrefix()
-    {
-        return str_replace("_", "-", $this->getName());
     }
 
     public function getRouteListName($includeNamespace = true)
