@@ -289,7 +289,7 @@ abstract class SchemaBasedCommand extends Command
     protected function resolveVariables(array $schema, array $root = null, array $fileSchema = null)
     {
         if (!$root) {
-            $root = $schema;
+            $root = &$schema;
         }
 
         if (isset($schema[self::KEY_FILE])) {
