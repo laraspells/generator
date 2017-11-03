@@ -297,7 +297,7 @@ abstract class SchemaBasedCommand extends Command
         }
 
         $rkey = "[a-z0-9_-]+";
-        $rootVarRegex = "/\\$\{(?<var>(?<this>this\.)?(?<key>$rkey(\.$rkey)*))}/i";
+        $varRegex = "/\\$\{(?<var>(?<this>this\.)?(?<key>$rkey(\.$rkey)*))}/i";
 
         foreach ($schema as $key => $value) {
             if (is_array($value)) {
@@ -306,7 +306,7 @@ abstract class SchemaBasedCommand extends Command
 
             if (!is_string($value)) continue;
 
-            preg_match_all($rootVarRegex, $value, $matches);
+            preg_match_all($varRegex, $value, $matches);
 
             foreach ($matches['var'] as $i => $var) {
                 $keyVar = $matches['key'][$i];
