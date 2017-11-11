@@ -51,10 +51,6 @@ class ModelGenerator extends ClassGenerator
     {
         $relatedTable = $this->getTableSchema()->getRootSchema()->getTable($table);
         $modelClass = $relatedTable->getModelClass(true);
-        if ($modelClass == $this->getTableSchema()->getModelClass(true)) {
-            $modelClass = "static";
-        }
-
         $isHasOne = in_array($type, ['has-one']);
         if ($isHasOne) {
             $from = preg_replace("/(^id_|_id$)/", "", $keyFrom);
