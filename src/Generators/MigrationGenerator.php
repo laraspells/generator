@@ -100,7 +100,7 @@ class MigrationGenerator extends ClassGenerator
             if ($unique) $code .= "->unique()";
             if ($indexed) $code .= "->index()";
             if ($nullable) $code .= "->nullable()";
-            if ($defaultValue) $code .= "->default(".$this->phpify($defaultValue).")";
+            if ($field->has('default')) $code .= "->default(".$this->phpify($defaultValue).")";
             if ($description) $code .= "->comment('".addslashes($description)."')";
             $code .= ";";
 
