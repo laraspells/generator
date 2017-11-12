@@ -81,12 +81,35 @@ class ControllerGenerator extends ClassGenerator
 
         $method->appendCode("\$query = \$this->{$data->model->varname}->query();", "initialize-query");
 
+        // Join Query
+        $fieldHasRelations = $this->getInputableFieldsHasRelation();
+        $tableName = $this->getTableSchema()->getName();
+        foreach ($fieldHasRelations as $field) {
+            $rel = $field->getRelation();
+            $method->appendCode("\$query->leftJoin('{$rel['table']}', '{$tableName}.{$rel['key_from']}', '=', '{$rel['table']}.{$rel['key_to']}');");
+        }
+        if (count($fieldHasRelations)) $method->nl();
+
+        // Select Query
+        $selects = $this->getSelects();
+        $method->appendCode("\$query->select(".$method->phpify($selects, true).");");
+        $method->nl();
+
+        // Search Query
         if (count($searchables)) {
             $searchQuery = [];
             foreach(array_values($searchables) as $i => $field) {
                 $column = $field->getColumnName();
                 $queryMethod = ($i == 0) ? "where" : "orWhere";
-                $searchQuery[] = "\$query->{$queryMethod}('{$column}', 'like', \"%{\$keyword}%\");";
+                if ($rel = $field->getRelation()) {
+                    $searchQuery[] = "\$query->{$queryMethod}('{$rel['table']}.{$rel['col_label']}', 'like', \"%{\$keyword}%\");";
+                } else {
+                    if (count($fieldHasRelations)) {
+                        $searchQuery[] = "\$query->{$queryMethod}('{$tableName}.{$column}', 'like', \"%{\$keyword}%\");";
+                    } else {
+                        $searchQuery[] = "\$query->{$queryMethod}('{$column}', 'like', \"%{\$keyword}%\");";
+                    }
+                }
             }
             $searchQuery = implode("\n", $searchQuery);
             $method->appendCode("
@@ -475,6 +498,39 @@ class ControllerGenerator extends ClassGenerator
         return array_filter($this->getTableSchema()->getFields(), function($field) {
             return !empty($field->getRelation()) AND $field->hasInput();
         });
+    }
+
+    protected function getSelects()
+    {
+        $pk = $this->getTableSchema()->getPrimaryField()->getColumnName();
+        $fieldHasRelations = $this->getInputableFieldsHasRelation();
+        $inputableFields = $this->getTableSchema()->getInputableFields();
+        $table = $this->getTableSchema()->getName();
+
+        $selects = [ count($fieldHasRelations) ? "{$table}.{$pk}" : $pk ];
+
+        $selects = array_merge($selects, array_values(array_map(function($field) use ($table, $fieldHasRelations) {
+            $colName = $field->getColumnName();
+            if (count($fieldHasRelations)) {
+                return "{$table}.{$colName}";
+            } else {
+                return $colName;
+            }
+        }, $inputableFields)));
+
+        if (count($fieldHasRelations)) {
+            $selects = array_merge($selects, array_values(array_map(function($field) {
+                $rel = $field->getRelation();
+                $alias = $rel['col_alias'];
+                if ($alias != $rel['col_label']) {
+                    return "{$rel['table']}.{$rel['col_label']} as {$alias}";
+                } else {
+                    return "{$rel['table']}.{$rel['col_label']}";
+                }
+            }, $fieldHasRelations)));
+        }
+
+        return $selects;
     }
 
 }

@@ -224,6 +224,9 @@ class SchemaResolver implements SchemaResolverInterface
             $tableSchema['fields'][$colName] = $this->resolveFieldSchema($colName, $fieldSchema, $tableName);
         }
 
+        // Resolve aliases from relations
+        $tableSchema = $this->resolveAliasesFromFieldsHasRelation($tableSchema);
+
         return $tableSchema;
     }
 
@@ -389,10 +392,6 @@ class SchemaResolver implements SchemaResolverInterface
 
         $tableSingular = str_singular($optionSetting['table']);
         $optionsVarname = $tableSingular.'_options';
-        $columnAlias = null;
-        if (!starts_with($optionSetting['label'], $tableSingular)) {
-            $columnAlias = $tableSingular.'_'.$optionSetting['label'];
-        }
 
         $fieldSchema['relation'] = [
             'table' => $optionSetting['table'],
@@ -401,13 +400,34 @@ class SchemaResolver implements SchemaResolverInterface
             'key_to' => $optionSetting['value'],
             'col_value' => $optionSetting['value'],
             'col_label' => $optionSetting['label'],
-            'col_alias' => $columnAlias,
             'var_name' => $optionsVarname,
         ];
 
         $fieldSchema['input']['options'] = "eval(\"\${$optionsVarname}\")";
 
         return $fieldSchema;
+    }
+
+    protected function resolveAliasesFromFieldsHasRelation(array $tableSchema)
+    {
+        foreach ($tableSchema['fields'] as $col => $opts) {
+            if (!isset($opts['relation']) || !is_array($opts['relation'])) {
+                continue;
+            }
+
+            $tableSchema['fields'][$col]['relation']['col_alias'] = $this->getRelationColumnAlias($opts['relation'], $tableSchema);
+        }
+        return $tableSchema;
+    }
+
+    protected function getRelationColumnAlias($relation, array $tableSchema)
+    {
+        $fields = array_keys($tableSchema['fields']);
+        if (in_array($relation['col_label'], $fields)) {
+            return "{$relation['table']}_{$relation['col_label']}";
+        } else {
+            return $relation['col_label'];
+        }
     }
 
     /**
