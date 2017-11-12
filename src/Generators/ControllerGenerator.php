@@ -86,7 +86,11 @@ class ControllerGenerator extends ClassGenerator
         $tableName = $this->getTableSchema()->getName();
         foreach ($fieldHasRelations as $field) {
             $rel = $field->getRelation();
-            $method->appendCode("\$query->leftJoin('{$rel['table']}', '{$tableName}.{$rel['key_from']}', '=', '{$rel['table']}.{$rel['key_to']}');");
+            if (isset($rel['table_alias'])) {
+                $method->appendCode("\$query->leftJoin('{$rel['table']} as {$rel['table_alias']}', '{$tableName}.{$rel['key_from']}', '=', '{$rel['table_alias']}.{$rel['key_to']}');");
+            } else {
+                $method->appendCode("\$query->leftJoin('{$rel['table']}', '{$tableName}.{$rel['key_from']}', '=', '{$rel['table']}.{$rel['key_to']}');");
+            }
         }
         if (count($fieldHasRelations)) $method->nl();
 
@@ -102,7 +106,8 @@ class ControllerGenerator extends ClassGenerator
                 $column = $field->getColumnName();
                 $queryMethod = ($i == 0) ? "where" : "orWhere";
                 if ($rel = $field->getRelation()) {
-                    $searchQuery[] = "\$query->{$queryMethod}('{$rel['table']}.{$rel['col_label']}', 'like', \"%{\$keyword}%\");";
+                    $relatedTable = isset($rel['table_alias']) ? $rel['table_alias'] : $rel['table'];
+                    $searchQuery[] = "\$query->{$queryMethod}('{$relatedTable}.{$rel['col_label']}', 'like', \"%{\$keyword}%\");";
                 } else {
                     if (count($fieldHasRelations)) {
                         $searchQuery[] = "\$query->{$queryMethod}('{$tableName}.{$column}', 'like', \"%{\$keyword}%\");";
@@ -522,10 +527,11 @@ class ControllerGenerator extends ClassGenerator
             $selects = array_merge($selects, array_values(array_map(function($field) {
                 $rel = $field->getRelation();
                 $alias = $rel['col_alias'];
+                $relatedTable = isset($rel['table_alias']) ? $rel['table_alias'] : $rel['table'];
                 if ($alias != $rel['col_label']) {
-                    return "{$rel['table']}.{$rel['col_label']} as {$alias}";
+                    return "{$relatedTable}.{$rel['col_label']} as {$alias}";
                 } else {
-                    return "{$rel['table']}.{$rel['col_label']}";
+                    return "{$relatedTable}.{$rel['col_label']}";
                 }
             }, $fieldHasRelations)));
         }

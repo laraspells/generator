@@ -221,11 +221,8 @@ class SchemaResolver implements SchemaResolverInterface
 
         // Resolve fields
         foreach($tableSchema['fields'] as $colName => $fieldSchema) {
-            $tableSchema['fields'][$colName] = $this->resolveFieldSchema($colName, $fieldSchema, $tableName);
+            $tableSchema['fields'][$colName] = $this->resolveFieldSchema($colName, $fieldSchema, $tableName, $tableSchema);
         }
-
-        // Resolve aliases from relations
-        $tableSchema = $this->resolveAliasesFromFieldsHasRelation($tableSchema);
 
         return $tableSchema;
     }
@@ -236,7 +233,7 @@ class SchemaResolver implements SchemaResolverInterface
      * @param  array $fieldSchema
      * @return array
      */
-    protected function resolveFieldSchema($colName, array $fieldSchema, $tableName)
+    protected function resolveFieldSchema($colName, array $fieldSchema, $tableName, array $tableSchema)
     {
         $this->validateFieldSchema($colName, $fieldSchema, $tableName);
 
@@ -288,7 +285,7 @@ class SchemaResolver implements SchemaResolverInterface
         // Resolve field by type
         $fieldTypeResolver = 'resolveFieldType'.ucfirst(camel_case($fieldSchema['type']));
         if (method_exists($this, $fieldTypeResolver)) {
-            $fieldSchema = $this->{$fieldTypeResolver}($colName, $fieldSchema, $tableName);
+            $fieldSchema = $this->{$fieldTypeResolver}($colName, $fieldSchema, $tableName, $tableSchema);
         }
 
         // Resolve field by input type
@@ -298,7 +295,7 @@ class SchemaResolver implements SchemaResolverInterface
             $inputType = $fieldSchema['input']['type'];
             $inputTypeResolver = 'resolveFieldInput'.ucfirst(camel_case($inputType));
             if (method_exists($this, $inputTypeResolver)) {
-                $fieldSchema = $this->{$inputTypeResolver}($colName, $fieldSchema, $tableName);
+                $fieldSchema = $this->{$inputTypeResolver}($colName, $fieldSchema, $tableName, $tableSchema);
             }
         }
 
@@ -323,43 +320,43 @@ class SchemaResolver implements SchemaResolverInterface
         return $fieldSchema;
     }
 
-    protected function resolveFieldInputFile($colName, $fieldSchema, $tableName)
+    protected function resolveFieldInputFile($colName, $fieldSchema, $tableName, $tableSchema)
     {
         data_fill($fieldSchema, 'display', 'link');
         return $fieldSchema;
     }
 
-    protected function resolveFieldInputImage($colName, $fieldSchema, $tableName)
+    protected function resolveFieldInputImage($colName, $fieldSchema, $tableName, $tableSchema)
     {
         data_fill($fieldSchema, 'display', 'image-link');
         return $fieldSchema;
     }
 
-    protected function resolveFieldInputSelect($colName, $fieldSchema, $tableName)
+    protected function resolveFieldInputSelect($colName, $fieldSchema, $tableName, $tableSchema)
     {
-        return $this->resolveOptionableField($colName, $fieldSchema, $tableName);
+        return $this->resolveOptionableField($colName, $fieldSchema, $tableName, $tableSchema);
     }
 
-    protected function resolveFieldInputRadio($colName, $fieldSchema, $tableName)
+    protected function resolveFieldInputRadio($colName, $fieldSchema, $tableName, $tableSchema)
     {
-        return $this->resolveOptionableField($colName, $fieldSchema, $tableName);
+        return $this->resolveOptionableField($colName, $fieldSchema, $tableName, $tableSchema);
     }
 
-    protected function resolveFieldInputCheckbox($colName, $fieldSchema, $tableName)
+    protected function resolveFieldInputCheckbox($colName, $fieldSchema, $tableName, $tableSchema)
     {
         data_fill($fieldSchema, 'input.multiple', true);
-        return $this->resolveOptionableField($colName, $fieldSchema, $tableName);
+        return $this->resolveOptionableField($colName, $fieldSchema, $tableName, $tableSchema);
     }
 
-    protected function resolveFieldInputSelectMultiple($colName, $fieldSchema, $tableName)
+    protected function resolveFieldInputSelectMultiple($colName, $fieldSchema, $tableName, $tableSchema)
     {
         data_fill($fieldSchema, 'input.multiple', true);
-        return $this->resolveOptionableField($colName, $fieldSchema, $tableName);
+        return $this->resolveOptionableField($colName, $fieldSchema, $tableName, $tableSchema);
     }
 
-    protected function resolveOptionableField($colName, $fieldSchema, $tableName)
+    protected function resolveOptionableField($colName, $fieldSchema, $tableName, $tableSchema)
     {
-        $fieldSchema = $this->resolveRelationFromOptionableField($colName, $fieldSchema, $tableName);
+        $fieldSchema = $this->resolveRelationFromOptionableField($colName, $fieldSchema, $tableName, $tableSchema);
         if (is_array($fieldSchema['input']['options'])) {
             $options = [];
             foreach($fieldSchema['input']['options'] as $value => $label) {
@@ -370,7 +367,7 @@ class SchemaResolver implements SchemaResolverInterface
         return $fieldSchema;
     }
 
-    protected function resolveRelationFromOptionableField($colName, $fieldSchema, $tableName)
+    protected function resolveRelationFromOptionableField($colName, $fieldSchema, $tableName, $tableSchema)
     {
         if (!isset($fieldSchema['input']['options'])) {
             return $fieldSchema;
@@ -403,30 +400,32 @@ class SchemaResolver implements SchemaResolverInterface
             'var_name' => $optionsVarname,
         ];
 
+        if ($optionSetting['table'] == $tableName) {
+            $fieldSchema['relation']['table_alias'] = preg_replace("/^id_|_id$/", "", $colName);
+        }
+
+        $fieldSchema['relation']['col_alias'] = $this->getRelationColumnAlias($fieldSchema['relation'], $tableSchema);
+
         $fieldSchema['input']['options'] = "eval(\"\${$optionsVarname}\")";
 
         return $fieldSchema;
     }
 
-    protected function resolveAliasesFromFieldsHasRelation(array $tableSchema)
-    {
-        foreach ($tableSchema['fields'] as $col => $opts) {
-            if (!isset($opts['relation']) || !is_array($opts['relation'])) {
-                continue;
-            }
-
-            $tableSchema['fields'][$col]['relation']['col_alias'] = $this->getRelationColumnAlias($opts['relation'], $tableSchema);
-        }
-        return $tableSchema;
-    }
-
     protected function getRelationColumnAlias($relation, array $tableSchema)
     {
+        $colLabel = $relation['col_label'];
+        $fk = $relation['key_from'];
         $fields = array_keys($tableSchema['fields']);
-        if (in_array($relation['col_label'], $fields)) {
-            return "{$relation['table']}_{$relation['col_label']}";
+        if (in_array($colLabel, $fields)) {
+            if (starts_with($fk, "id_")) {
+                return preg_replace("/^id_/", "", $fk);
+            } elseif(ends_with($fk, "_id")) {
+                return preg_replace("/_id$/", "", $fk);
+            } else {
+                return "{$relation['table']}_{$colLabel}";
+            }
         } else {
-            return $relation['col_label'];
+            return $colLabel;
         }
     }
 
@@ -655,20 +654,8 @@ class SchemaResolver implements SchemaResolverInterface
     protected function getFieldValueAccess(array $fieldSchema)
     {
         if (isset($fieldSchema['relation'])) {
-            $type = $fieldSchema['relation']['type'];
-            $keyFrom = $fieldSchema['relation']['key_from'];
-            $relatedTableName = $fieldSchema['relation']['table'];
-            $colLabel = $fieldSchema['relation']['col_label'];
-
-            $isHasOne = in_array($type, ['has-one']);
-            if ($isHasOne) {
-                $from = preg_replace("/(^id_|_id$)/", "", $keyFrom);
-                $methodName = camel_case($from);
-            } else {
-                $methodName = camel_case($relatedTableName);
-            }
-
-            return '${? varname ?}->'.$methodName.'->'.$colLabel;
+            $colName = isset($fieldSchema['relation']['col_alias']) ? $fieldSchema['relation']['col_alias'] : $fieldSchema['relation']['col_label'];
+            return '${? varname ?}->'.$colName;
         } else {
             return '${? varname ?}->{? column ?}';
         }
