@@ -200,7 +200,7 @@ class SchemaResolver implements SchemaResolverInterface
 
         $tableSchema = array_merge([
             'timestamps' => true,
-            'label' => ucwords(snake_case(camel_case(str_singular($tableName)), ' '))
+            'label' => ucwords(snake_case(camel_case($tableSchema['singular']), ' '))
         ], $tableSchema);
 
         // Add field id as primary key if PK is not exists

@@ -56,8 +56,8 @@ trait TableRequestGetter
      */
     public function getCreateRequestClass($namespace = true)
     {
-        $table = $this->getName();
-        $createRequest = $this->get('request.create_class') ?: 'Create'.ucfirst(camel_case(str_singular($table))).'Request';
+        $singularTable = $this->getSingularName();
+        $createRequest = $this->get('request.create_class') ?: 'Create'.ucfirst(camel_case($singularTable)).'Request';
         return $namespace? $this->getRequestClass($createRequest) : $createRequest;
     }
 
@@ -79,8 +79,8 @@ trait TableRequestGetter
      */
     public function getUpdateRequestClass($namespace = true)
     {
-        $table = $this->getName();
-        $updateRequest = $this->get('request.update_class') ?: 'Update'.ucfirst(camel_case(str_singular($table))).'Request';
+        $singularTable = $this->getSingularName();
+        $updateRequest = $this->get('request.update_class') ?: 'Update'.ucfirst(camel_case($singularTable)).'Request';
         return $namespace? $this->getRequestClass($updateRequest) : $updateRequest;
     }
 

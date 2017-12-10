@@ -290,8 +290,8 @@ class Table extends AbstractSchema
         }
 
         if (!isset($schema['label'])) {
-            $table = $schema['table'];
-            $schema['label'] = ucwords(snake_case(camel_case(str_singular($table)), ' '));
+            $singularName = isset($schema['singular']) ? $schema['singular'] : str_singular($schema['table']);
+            $schema['label'] = ucwords(snake_case(camel_case($singularName), ' '));
         }
 
         $schema['fields'] = $fields;

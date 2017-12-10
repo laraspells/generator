@@ -12,7 +12,7 @@ trait TableViewGetter
 
     public function getViewDirectory()
     {
-        return $this->get('view.directory') ?: str_singular($this->getName());
+        return $this->get('view.directory') ?: $this->getSingularName();
     }
 
     public function getViewNamespace()
