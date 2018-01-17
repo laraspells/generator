@@ -38,17 +38,17 @@ trait TableRouteGetter
 
     public function getRouteNamespace($resolve = true)
     {
-        $namespace = $this->get('route.namespace');
+        $namespace = $this->has('route.namespace') ? $this->get('route.namespace') : $this->getControllerNamespace();
 
         if ($resolve) {
             $baseNamespace = $this->getRouteBaseNamespace();
             if (starts_with($namespace, $baseNamespace)) {
-                return trim(str_replace($baseNamespace, '', $namespace), '/');
+                return trim(str_replace($baseNamespace, '', $namespace), '\\');
             } else {
-                return trim($namespace, '/');
+                return trim($namespace, '\\');
             }
         } else {
-            return trim($namespace, '/');
+            return trim($namespace, '\\');
         }
     }
 
