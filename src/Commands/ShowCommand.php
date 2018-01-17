@@ -39,6 +39,7 @@ class ShowCommand extends SchemaBasedCommand
         spell:show
         {schema : Path to schema (yml) file.}
         {key? : Key to show.}
+        {--O|original : Show schema before resolved.}
         {--o|only= : Show only specified keys. Separeted by comma.}
         {--e|except= : Ignoring some keys. Separated by comma.}
     ';
@@ -72,11 +73,11 @@ class ShowCommand extends SchemaBasedCommand
         $key = $this->argument('key');
         $only = $this->option('only');
         $except = $this->option('except');
+        $original = $this->option('original');
 
         // Initialize template and schema.
         $this->initializeSchema($schemaFile);
-
-        $schema = $this->getSchema()->toArray();
+        $schema = $original ? $this->originalSchema : $this->getSchema()->toArray();
 
         if ($key) {
             if (!array_has($schema, $key)) {
