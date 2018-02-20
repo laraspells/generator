@@ -276,6 +276,7 @@ class SchemaResolver implements SchemaResolverInterface
         // Set input max length
         if (
             isset($fieldSchema['length'])
+            AND isset($fieldSchema['input'])
             AND in_array($fieldSchema['input']['type'], ['text', 'textarea'])
             AND !isset($fieldSchema['input']['maxlength'])
         ) {
