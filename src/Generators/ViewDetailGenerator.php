@@ -5,6 +5,7 @@ namespace LaraSpells\Generator\Generators;
 use LaraSpells\Generator\Stub;
 use LaraSpells\Generator\Traits\Concerns\TableUtils;
 
+// @TODO: rename to ViewShowGenerator
 class ViewDetailGenerator extends ViewGenerator
 {
 
@@ -17,8 +18,8 @@ class ViewDetailGenerator extends ViewGenerator
         $data['page_title'] = 'Detail '.$this->tableSchema->getLabel();
         $data['varname'] = $tableData->model_varname;
         $data['primary_key'] = $tableData->primary_key;
-        $data['route_list'] = $tableData->route->page_list;
-        $data['route_edit'] = $tableData->route->form_edit;
+        $data['route_list'] = $tableData->route->index;
+        $data['route_edit'] = $tableData->route->edit;
         $data['fields'] = $this->generateFields();
         return $data;
     }

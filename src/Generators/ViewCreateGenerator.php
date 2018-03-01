@@ -26,12 +26,12 @@ class ViewCreateGenerator extends ViewGenerator
 
     protected function getFormId()
     {
-        return "form-create-".$this->tableSchema->getSingularName();
+        return "create-".$this->tableSchema->getSingularName();
     }
 
     protected function getActionUrl()
     {
-        $routeName = $this->tableSchema->getRouteCreateName();
+        $routeName = $this->tableSchema->getRouteStoreName();
         return "{{ route('{$routeName}') }}";
     }
 

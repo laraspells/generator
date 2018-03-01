@@ -60,7 +60,7 @@ class ControllerGenerator extends ClassGenerator
         $method->appendCode($codeSetModels, "set-models");
     }
 
-    protected function setMethodPageList(MethodGenerator $method)
+    protected function setMethodIndex(MethodGenerator $method)
     {
         $data = $this->getTableData();
         $searchables = $this->getTableSchema()->getSearchableFields();
@@ -131,11 +131,11 @@ class ControllerGenerator extends ClassGenerator
             \$data['title'] = 'List {$data->label}';
             \$data['pagination'] = \$query->paginate(\$limit);
 
-            return view('{$data->view->page_list}', \$data);
+            return view('{$data->view->index}', \$data);
         ");
     }
 
-    protected function setMethodPageDetail(MethodGenerator $method)
+    protected function setMethodShow(MethodGenerator $method)
     {
         $data = $this->getTableData();
         $method->addArgument('request', static::CLASS_REQUEST);
@@ -147,7 +147,7 @@ class ControllerGenerator extends ClassGenerator
             $docblock->setReturn(static::CLASS_RESPONSE);
         });
 
-        $view = $data->view->page_detail;
+        $view = $data->view->show;
         $initModelCode = $this->getInitModelCode();
         $method->appendCode($initModelCode);
         $method->nl();
@@ -157,7 +157,7 @@ class ControllerGenerator extends ClassGenerator
         $method->appendCode("return view('{$view}', \$data);");
     }
 
-    protected function setMethodFormCreate(MethodGenerator $method)
+    protected function setMethodCreate(MethodGenerator $method)
     {
         $fieldsHasRelation = $this->getInputableFieldsHasRelation();
         $data = $this->getTableData();
@@ -176,10 +176,10 @@ class ControllerGenerator extends ClassGenerator
             $method->appendCode("\$data['{$varName}'] = \$this->{$methodName}();");
         }
         $method->nl();
-        $method->appendCode("return view('{$data->view->form_create}', \$data);");
+        $method->appendCode("return view('{$data->view->create}', \$data);");
     }
 
-    protected function setMethodPostCreate(MethodGenerator $method)
+    protected function setMethodStore(MethodGenerator $method)
     {
         $data = $this->getTableData();
         $method->addArgument('request', $data->request->class_create_with_namespace);
@@ -209,7 +209,7 @@ class ControllerGenerator extends ClassGenerator
             }
 
             \$message = '{$data->label} has been created!';
-            return redirect()->route('{$data->route->page_list}')->with('info', \$message);
+            return redirect()->route('{$data->route->index}')->with('info', \$message);
         ");
     }
 
@@ -231,7 +231,7 @@ class ControllerGenerator extends ClassGenerator
         ";
     }
 
-    protected function setMethodFormEdit(MethodGenerator $method)
+    protected function setMethodEdit(MethodGenerator $method)
     {
         $fieldsHasRelation = $this->getInputableFieldsHasRelation();
         $data = $this->getTableData();
@@ -247,7 +247,7 @@ class ControllerGenerator extends ClassGenerator
         $initModelCode = $this->getInitModelCode();
         $method->appendCode($initModelCode);
         $method->nl();
-        $view = $data->view->form_edit;
+        $view = $data->view->edit;
         $method->appendCode("\$data['title'] = 'Form Create {$data->label}';");
         $method->appendCode("\$data['{$data->model_varname}'] = \$this->resolveFormData(\${$data->model_varname}->toArray());");
         foreach($fieldsHasRelation as $field) {
@@ -260,7 +260,7 @@ class ControllerGenerator extends ClassGenerator
         $method->appendCode("return view('{$view}', \$data);");
     }
 
-    protected function setMethodPostEdit(MethodGenerator $method)
+    protected function setMethodUpdate(MethodGenerator $method)
     {
         $data = $this->getTableData();
         $method->addArgument('request', $data->request->class_update_with_namespace);
@@ -307,11 +307,11 @@ class ControllerGenerator extends ClassGenerator
             }
 
             \$message = '{$data->label} has been updated!';
-            return redirect()->route('{$data->route->page_list}')->with('info', \$message);
+            return redirect()->route('{$data->route->index}')->with('info', \$message);
         ");
     }
 
-    protected function setMethodDelete(MethodGenerator $method)
+    protected function setMethodDestroy(MethodGenerator $method)
     {
         $data = $this->getTableData();
         $method->addArgument('request', static::CLASS_REQUEST);
@@ -335,7 +335,7 @@ class ControllerGenerator extends ClassGenerator
             }
 
             \$message = '{$data->label} has been deleted!';
-            return redirect()->route('{$data->route->page_list}')->with('info', \$message);
+            return redirect()->route('{$data->route->index}')->with('info', \$message);
         ");
     }
 

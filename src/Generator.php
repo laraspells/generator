@@ -33,10 +33,10 @@ class Generator
     protected $generatorCreateRequest       = 'LaraSpells\Generator\Generators\CreateRequestGenerator';
     protected $generatorUpdateRequest       = 'LaraSpells\Generator\Generators\UpdateRequestGenerator';
     protected $generatorModel               = 'LaraSpells\Generator\Generators\ModelGenerator';
-    protected $generatorViewPageList        = 'LaraSpells\Generator\Generators\ViewListGenerator';
-    protected $generatorViewPageDetail      = 'LaraSpells\Generator\Generators\ViewDetailGenerator';
-    protected $generatorViewFormCreate      = 'LaraSpells\Generator\Generators\ViewCreateGenerator';
-    protected $generatorViewFormEdit        = 'LaraSpells\Generator\Generators\ViewEditGenerator';
+    protected $generatorViewIndex           = 'LaraSpells\Generator\Generators\ViewListGenerator';
+    protected $generatorViewShow            = 'LaraSpells\Generator\Generators\ViewDetailGenerator';
+    protected $generatorViewCreate          = 'LaraSpells\Generator\Generators\ViewCreateGenerator';
+    protected $generatorViewEdit            = 'LaraSpells\Generator\Generators\ViewEditGenerator';
     protected $generatorServiceProvider     = 'LaraSpells\Generator\Generators\ServiceProviderGenerator';
 
     public function __construct($schemaFile)
@@ -271,142 +271,142 @@ class Generator
     }
 
     /**
-     * Set generator ViewPageList
+     * Set generator ViewIndex
      *
      * @param string $class
      * @return void
      */
-    public function setGeneratorViewPageList($class)
+    public function setGeneratorViewIndex($class)
     {
         $this->assertClassOrSubClass($class, ViewListGenerator::class);
-        $this->generatorViewPageList = $class;
+        $this->generatorViewIndex = $class;
     }
 
     /**
-     * Get Generator ViewPageList
+     * Get Generator ViewIndex
      *
      * @return string
      */
-    public function getGeneratorViewPageList()
+    public function getGeneratorViewIndex()
     {
-        return $this->generatorViewPageList;
+        return $this->generatorViewIndex;
     }
 
     /**
-     * Generate ViewPageList
+     * Generate ViewIndex
      *
      * @param  LaraSpells\Generator\Schema\Table $table
      * @return void
      */
-    public function generateViewPageList(Table $table)
+    public function generateViewIndex(Table $table)
     {
-        $generatorClass = $this->getGeneratorViewPageList();
-        $generator = new $generatorClass($table, $this->getTemplate()->getStubContent('page-list.stub'));
+        $generatorClass = $this->getGeneratorViewIndex();
+        $generator = new $generatorClass($table, $this->getTemplate()->getStubContent('index.stub'));
         return $generator->generateCode();
     }
 
     /**
-     * Set generator ViewPageDetail
+     * Set generator ViewShow
      *
      * @param string $class
      * @return void
      */
-    public function setGeneratorViewPageDetail($class)
+    public function setGeneratorViewShow($class)
     {
         $this->assertClassOrSubClass($class, ViewDetailGenerator::class);
-        $this->generatorViewPageDetail = $class;
+        $this->generatorViewShow = $class;
     }
 
     /**
-     * Get Generator ViewPageDetail
+     * Get Generator ViewShow
      *
      * @return string
      */
-    public function getGeneratorViewPageDetail()
+    public function getGeneratorViewShow()
     {
-        return $this->generatorViewPageDetail;
+        return $this->generatorViewShow;
     }
 
     /**
-     * Generate ViewPageDetail
+     * Generate ViewShow
      *
      * @param  LaraSpells\Generator\Schema\Table $table
      * @return void
      */
-    public function generateViewPageDetail(Table $table)
+    public function generateViewShow(Table $table)
     {
-        $generatorClass = $this->getGeneratorViewPageDetail();
-        $generator = new $generatorClass($table, $this->getTemplate()->getStubContent('page-detail.stub'));
+        $generatorClass = $this->getGeneratorViewShow();
+        $generator = new $generatorClass($table, $this->getTemplate()->getStubContent('show.stub'));
         return $generator->generateCode();
     }
 
     /**
-     * Set generator ViewFormCreate
+     * Set generator ViewCreate
      *
      * @param string $class
      * @return void
      */
-    public function setGeneratorViewFormCreate($class)
+    public function setGeneratorViewCreate($class)
     {
         $this->assertClassOrSubClass($class, ViewCreateGenerator::class);
-        $this->generatorViewFormCreate = $class;
+        $this->generatorViewCreate = $class;
     }
 
     /**
-     * Get Generator ViewFormCreate
+     * Get Generator ViewCreate
      *
      * @return string
      */
-    public function getGeneratorViewFormCreate()
+    public function getGeneratorViewCreate()
     {
-        return $this->generatorViewFormCreate;
+        return $this->generatorViewCreate;
     }
 
     /**
-     * Generate ViewFormCreate
+     * Generate ViewCreate
      *
      * @param  LaraSpells\Generator\Schema\Table $table
      * @return void
      */
-    public function generateViewFormCreate(Table $table)
+    public function generateViewCreate(Table $table)
     {
-        $generatorClass = $this->getGeneratorViewFormCreate();
-        $generator = new $generatorClass($table, $this->getTemplate()->getStubContent('form-create.stub'));
+        $generatorClass = $this->getGeneratorViewCreate();
+        $generator = new $generatorClass($table, $this->getTemplate()->getStubContent('create.stub'));
         return $generator->generateCode();
     }
 
     /**
-     * Set generator ViewFormEdit
+     * Set generator ViewEdit
      *
      * @param string $class
      * @return void
      */
-    public function setGeneratorViewFormEdit($class)
+    public function setGeneratorViewEdit($class)
     {
         $this->assertClassOrSubClass($class, ViewEditGenerator::class);
-        $this->generatorViewFormEdit = $class;
+        $this->generatorViewEdit = $class;
     }
 
     /**
-     * Get Generator ViewFormEdit
+     * Get Generator ViewEdit
      *
      * @return string
      */
-    public function getGeneratorViewFormEdit()
+    public function getGeneratorViewEdit()
     {
-        return $this->generatorViewFormEdit;
+        return $this->generatorViewEdit;
     }
 
     /**
-     * Generate ViewFormEdit
+     * Generate ViewEdit
      *
      * @param  LaraSpells\Generator\Schema\Table $table
      * @return void
      */
-    public function generateViewFormEdit(Table $table)
+    public function generateViewEdit(Table $table)
     {
-        $generatorClass = $this->getGeneratorViewFormEdit();
-        $generator = new $generatorClass($table, $this->getTemplate()->getStubContent('form-edit.stub'));
+        $generatorClass = $this->getGeneratorViewEdit();
+        $generator = new $generatorClass($table, $this->getTemplate()->getStubContent('edit.stub'));
         return $generator->generateCode();
     }
 

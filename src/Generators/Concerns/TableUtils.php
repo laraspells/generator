@@ -73,19 +73,19 @@ trait TableUtils
                     'file' => $schema->getControllerPath(),
                 ],
                 'view' => [
-                    'page_list' => $schema->getViewListName(),
-                    'page_detail' => $schema->getViewDetailName(),
-                    'form_create' => $schema->getViewCreateName(),
-                    'form_edit' => $schema->getViewEditName(),
+                    'index' => $schema->getViewListName(),
+                    'show' => $schema->getViewDetailName(),
+                    'create' => $schema->getViewCreateName(),
+                    'edit' => $schema->getViewEditName(),
                 ],
                 'route' => [
-                    'page_list' => $schema->getRouteListName(),
-                    'page_detail' => $schema->getRouteDetailName(),
-                    'form_create' => $schema->getRouteCreateName(),
-                    'post_create' => $schema->getRoutePostCreateName(),
-                    'form_edit' => $schema->getRouteEditName(),
-                    'post_edit' => $schema->getRoutePostEditName(),
-                    'delete' => $schema->getRouteDeleteName()
+                    'index' => $schema->getRouteIndexName(),
+                    'show' => $schema->getRouteShowName(),
+                    'create' => $schema->getRouteCreateName(),
+                    'store' => $schema->getRouteStoreName(),
+                    'edit' => $schema->getRouteEditName(),
+                    'update' => $schema->getRouteUpdateName(),
+                    'destroy' => $schema->getRouteDestroyName()
                 ],
             ];
 

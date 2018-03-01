@@ -16,7 +16,7 @@ trait TableRouteGetter
 
     public function getRoutePath()
     {
-        return trim($this->get('route.path') ?: str_replace("_", "-", $this->getName()), '/');
+        return trim($this->get('route.path') ?: str_replace("_", "-", $this->getSingularName()), '/');
     }
 
     public function getRouteDomain()
@@ -65,39 +65,39 @@ trait TableRouteGetter
         return $includeNamespace? $namespace.$route : $route;
     }
 
-    public function getRouteListName($includeNamespace = true)
+    public function getRouteIndexName($includeNamespace = true)
     {
-        return $this->getRouteName('page-list', $includeNamespace);
+        return $this->getRouteName('index', $includeNamespace);
     }
 
-    public function getRouteDetailName($includeNamespace = true)
+    public function getRouteShowName($includeNamespace = true)
     {
-        return $this->getRouteName('page-detail', $includeNamespace);
+        return $this->getRouteName('show', $includeNamespace);
     }
 
     public function getRouteCreateName($includeNamespace = true)
     {
-        return $this->getRouteName('form-create', $includeNamespace);
+        return $this->getRouteName('create', $includeNamespace);
     }
 
-    public function getRoutePostCreateName($includeNamespace = true)
+    public function getRouteStoreName($includeNamespace = true)
     {
-        return $this->getRouteName('post-create', $includeNamespace);
+        return $this->getRouteName('store', $includeNamespace);
     }
 
     public function getRouteEditName($includeNamespace = true)
     {
-        return $this->getRouteName('form-edit', $includeNamespace);
+        return $this->getRouteName('edit', $includeNamespace);
     }
 
-    public function getRoutePostEditName($includeNamespace = true)
+    public function getRouteUpdateName($includeNamespace = true)
     {
-        return $this->getRouteName('post-edit', $includeNamespace);
+        return $this->getRouteName('update', $includeNamespace);
     }
 
-    public function getRouteDeleteName($includeNamespace = true)
+    public function getRouteDestroyName($includeNamespace = true)
     {
-        return $this->getRouteName('delete', $includeNamespace);
+        return $this->getRouteName('destroy', $includeNamespace);
     }
 
 }

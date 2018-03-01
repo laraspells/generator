@@ -52,12 +52,12 @@ class ViewEditGenerator extends ViewCreateGenerator
         $tableData = $this->getTableData();
         $modelVarname = $tableData->model_varname;
         $pk = $tableData->primary_key;
-        $routeName = $tableData->route->post_edit;
+        $routeName = $tableData->route->update;
         return "{{ route('{$routeName}', [\${$modelVarname}['{$pk}']]) }}";
     }
 
     protected function getFormId()
     {
-        return "form-edit-".$this->tableSchema->getSingularName();
+        return "edit-".$this->tableSchema->getSingularName();
     }
 }

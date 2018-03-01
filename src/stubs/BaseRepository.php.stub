@@ -92,7 +92,7 @@ abstract class {? classname ?}
     public function deleteById($id)
     {
         $record = $this->model->find($id);
-        return $record? $record->delete() : true;
+        return $record? $record->destroy() : true;
     }
 
     /**

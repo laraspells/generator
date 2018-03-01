@@ -80,78 +80,78 @@ trait RouteUtils
 
         $missingRoutes = [];
         $crudRouteNames = [
-            'list' => $table->getRouteListName(true),               // e.g: "blog::posts.page-list"
-            'page_detail' => $table->getRouteDetailName(true),      // e.g: "blog::posts.page-detail"
-            'form_create' => $table->getRouteCreateName(true),      // e.g: "blog::posts.form-create"
-            'post_create' => $table->getRoutePostCreateName(true),  // e.g: "blog::posts.post-create"
-            'form_edit' => $table->getRouteEditName(true),          // e.g: "blog::posts.form-edit"
-            'post_edit' => $table->getRoutePostEditName(true),      // e.g: "blog::posts.post-edit"
-            'delete' => $table->getRouteDeleteName(true),           // e.g: "blog::posts.delete"
+            'index' => $table->getRouteIndexName(true),             // e.g: "blog::posts.index"
+            'show' => $table->getRouteShowName(true),               // e.g: "blog::posts.show"
+            'create' => $table->getRouteCreateName(true),           // e.g: "blog::posts.create"
+            'store' => $table->getRouteStoreName(true),             // e.g: "blog::posts.store"
+            'edit' => $table->getRouteEditName(true),               // e.g: "blog::posts.edit"
+            'update' => $table->getRouteUpdateName(true),           // e.g: "blog::posts.update"
+            'destroy' => $table->getRouteDestroyName(true),         // e.g: "blog::posts.destroy"
         ];
         $resolveName = function($name) use ($routeBaseName) {
             return substr($name, strlen($routeBaseName));
         };
 
-        if (!$this->hasRouteNamed($crudRouteNames['list'])) {
+        if (!$this->hasRouteNamed($crudRouteNames['index'])) {
             $missingRoutes[] = [
                 'method' => 'get',
-                'path' => '/',
-                'uses' => $crudController.'@pageList',
-                'name' => $resolveName($crudRouteNames['list'])
+                'path' => '',
+                'uses' => $crudController.'@index',
+                'name' => $resolveName($crudRouteNames['index'])
             ];
         }
 
-        if (!$this->hasRouteNamed($crudRouteNames['form_create'])) {
+        if (!$this->hasRouteNamed($crudRouteNames['create'])) {
             $missingRoutes[] = [
                 'method' => 'get',
                 'path' => 'create',
-                'uses' => $crudController.'@formCreate',
-                'name' => $resolveName($crudRouteNames['form_create'])
+                'uses' => $crudController.'@create',
+                'name' => $resolveName($crudRouteNames['create'])
             ];
         }
 
-        if (!$this->hasRouteNamed($crudRouteNames['post_create'])) {
+        if (!$this->hasRouteNamed($crudRouteNames['store'])) {
             $missingRoutes[] = [
                 'method' => 'post',
-                'path' => 'create',
-                'uses' => $crudController.'@postCreate',
-                'name' => $resolveName($crudRouteNames['post_create'])
+                'path' => '',
+                'uses' => $crudController.'@store',
+                'name' => $resolveName($crudRouteNames['store'])
             ];
         }
 
-        if (!$this->hasRouteNamed($crudRouteNames['form_edit'])) {
+        if (!$this->hasRouteNamed($crudRouteNames['show'])) {
             $missingRoutes[] = [
                 'method' => 'get',
-                'path' => 'edit/{'.$pk.'}',
-                'uses' => $crudController.'@formEdit',
-                'name' => $resolveName($crudRouteNames['form_edit'])
+                'path' => '{'.$pk.'}',
+                'uses' => $crudController.'@show',
+                'name' => $resolveName($crudRouteNames['show'])
             ];
         }
 
-        if (!$this->hasRouteNamed($crudRouteNames['post_edit'])) {
-            $missingRoutes[] = [
-                'method' => 'post',
-                'path' => 'edit/{'.$pk.'}',
-                'uses' => $crudController.'@postEdit',
-                'name' => $resolveName($crudRouteNames['post_edit'])
-            ];
-        }
-
-        if (!$this->hasRouteNamed($crudRouteNames['delete'])) {
+        if (!$this->hasRouteNamed($crudRouteNames['edit'])) {
             $missingRoutes[] = [
                 'method' => 'get',
-                'path' => 'delete/{'.$pk.'}',
-                'uses' => $crudController.'@delete',
-                'name' => $resolveName($crudRouteNames['delete'])
+                'path' => '{'.$pk.'}/edit',
+                'uses' => $crudController.'@edit',
+                'name' => $resolveName($crudRouteNames['edit'])
             ];
         }
 
-        if (!$this->hasRouteNamed($crudRouteNames['page_detail'])) {
+        if (!$this->hasRouteNamed($crudRouteNames['update'])) {
             $missingRoutes[] = [
-                'method' => 'get',
-                'path' => 'view/{'.$pk.'}',
-                'uses' => $crudController.'@pageDetail',
-                'name' => $resolveName($crudRouteNames['page_detail'])
+                'method' => 'put',
+                'path' => '{'.$pk.'}',
+                'uses' => $crudController.'@update',
+                'name' => $resolveName($crudRouteNames['update'])
+            ];
+        }
+
+        if (!$this->hasRouteNamed($crudRouteNames['destroy'])) {
+            $missingRoutes[] = [
+                'method' => 'delete',
+                'path' => '{'.$pk.'}',
+                'uses' => $crudController.'@destroy',
+                'name' => $resolveName($crudRouteNames['destroy'])
             ];
         }
 

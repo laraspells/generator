@@ -39,42 +39,42 @@ trait TableViewGetter
 
     public function getViewListPath()
     {
-        return $this->getViewPath('page-list');
+        return $this->getViewPath('index');
     }
 
     public function getViewDetailPath()
     {
-        return $this->getViewPath('page-detail');
+        return $this->getViewPath('show');
     }
 
     public function getViewCreatePath()
     {
-        return $this->getViewPath('form-create');
+        return $this->getViewPath('create');
     }
 
     public function getViewEditPath()
     {
-        return $this->getViewPath('form-edit');
+        return $this->getViewPath('edit');
     }
 
     public function getViewListName()
     {
-        return $this->getViewName('page-list');
+        return $this->getViewName('index');
     }
 
     public function getViewDetailName()
     {
-        return $this->getViewName('page-detail');
+        return $this->getViewName('show');
     }
 
     public function getViewCreateName()
     {
-        return $this->getViewName('form-create');
+        return $this->getViewName('create');
     }
 
     public function getViewEditName()
     {
-        return $this->getViewName('form-edit');
+        return $this->getViewName('edit');
     }
 
 }

@@ -170,16 +170,16 @@ class GenerateCommand extends SchemaBasedCommand
         $this->setGeneratorInstance(ControllerGenerator::class, $this->makeGenerator(ControllerGenerator::class));
         $this->setGeneratorInstance(ModelGenerator::class, $this->makeGenerator(ModelGenerator::class));
         $this->setGeneratorInstance(ViewListGenerator::class, $this->makeGenerator(ViewListGenerator::class, [
-            'stubContent' => $this->getTemplate()->getStubContent('page-list.stub')
+            'stubContent' => $this->getTemplate()->getStubContent('index.stub')
         ]));
         $this->setGeneratorInstance(ViewDetailGenerator::class, $this->makeGenerator(ViewDetailGenerator::class, [
-            'stubContent' => $this->getTemplate()->getStubContent('page-detail.stub')
+            'stubContent' => $this->getTemplate()->getStubContent('show.stub')
         ]));
         $this->setGeneratorInstance(ViewCreateGenerator::class, $this->makeGenerator(ViewCreateGenerator::class, [
-            'stubContent' => $this->getTemplate()->getStubContent('form-create.stub')
+            'stubContent' => $this->getTemplate()->getStubContent('create.stub')
         ]));
         $this->setGeneratorInstance(ViewEditGenerator::class, $this->makeGenerator(ViewEditGenerator::class, [
-            'stubContent' => $this->getTemplate()->getStubContent('form-edit.stub')
+            'stubContent' => $this->getTemplate()->getStubContent('edit.stub')
         ]));
     }
 
@@ -334,7 +334,7 @@ class GenerateCommand extends SchemaBasedCommand
         $this->generateUpdateRequestForTable($table);
         $this->generateViews($table);
         $this->addCrudMissingRoutes($table);
-        $this->addConfigMenu($table->getRouteListName(), $table->getLabel(), ['icon' => $table->get('icon')]);
+        $this->addConfigMenu($table->getRouteIndexName(), $table->getLabel(), ['icon' => $table->get('icon')]);
     }
 
     /**

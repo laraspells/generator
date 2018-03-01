@@ -107,10 +107,10 @@ abstract class SchemaBasedCommand extends Command
         $folderStub = $template->getFolderStub();
         $folderView = $template->getFolderView();
         $requiredFiles = [
-            $folderStub.'/page-list.stub',
-            $folderStub.'/page-detail.stub',
-            $folderStub.'/form-create.stub',
-            $folderStub.'/form-edit.stub',
+            $folderStub.'/index.stub',
+            $folderStub.'/show.stub',
+            $folderStub.'/create.stub',
+            $folderStub.'/edit.stub',
             $folderView.'/partials/fields/text.blade.php',
             $folderView.'/partials/fields/number.blade.php',
             $folderView.'/partials/fields/email.blade.php',

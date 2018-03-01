@@ -5,6 +5,7 @@ namespace LaraSpells\Generator\Generators;
 use LaraSpells\Generator\Stub;
 use LaraSpells\Generator\Traits\Concerns\TableUtils;
 
+// @TODO: rename to ViewIndexGenerator
 class ViewListGenerator extends ViewGenerator
 {
 
@@ -82,9 +83,13 @@ class ViewListGenerator extends ViewGenerator
                         <td class="text-center column-number">{{ $pagination->firstItem() + $i }}</td>
                         '.implode("\n", $tbodys).'
                         <td width="200" class="text-center column-action">
-                            <a class="btn btn-sm btn-edit btn-default" href="{{ route(\''.$tableData->route->page_detail.'\', [$'.$tableData->model_varname.'->getKey()]) }}">Show</a>
-                            <a class="btn btn-sm btn-edit btn-primary" href="{{ route(\''.$tableData->route->form_edit.'\', [$'.$tableData->model_varname.'->getKey()]) }}">Edit</a>
-                            <a class="btn btn-sm btn-delete btn-danger" href="{{ route(\''.$tableData->route->delete.'\', [$'.$tableData->model_varname.'->getKey()]) }}">Delete</a>
+                            <a class="btn btn-sm btn-edit btn-default" href="{{ route(\''.$tableData->route->show.'\', [$'.$tableData->model_varname.'->getKey()]) }}">Show</a>
+                            <a class="btn btn-sm btn-edit btn-primary" href="{{ route(\''.$tableData->route->edit.'\', [$'.$tableData->model_varname.'->getKey()]) }}">Edit</a>
+                            <form style="display:inline;" onclick="return confirm(\'Are you sure to delete this data?\')" method="POST" action="{{ route(\''.$tableData->route->destroy.'\', [$'.$tableData->model_varname.'->getKey()]) }}">
+                                {!! csrf_field() !!}
+                                {{ method_field("DELETE") }}
+                                <button class="btn btn-sm btn-delete btn-danger" href="">Delete</button>
+                            </form>
                         </td>
                     </tr>
                     @endforeach

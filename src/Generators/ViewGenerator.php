@@ -36,10 +36,10 @@ class ViewGenerator extends BaseGenerator
             'schema' => $tableSchema->getRootSchema()->toArray(),
             'table' => $tableSchema->toArray(),
             'view_namespace' => $viewNamespace? $viewNamespace.'::' : '',
-            'route_list' => $tableSchema->getRouteListName(),
+            'route_list' => $tableSchema->getRouteIndexName(),
             'route_create' => $tableSchema->getRouteCreateName(),
             'route_edit' => $tableSchema->getRouteEditName(),
-            'route_delete' => $tableSchema->getRouteDeleteName(),
+            'route_delete' => $tableSchema->getRouteDestroyName(),
         ];
     }
 
