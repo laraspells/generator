@@ -48,6 +48,7 @@ class SchemaResolver implements SchemaResolverInterface
     protected $availableInputTypes = [
         'text',
         'textarea',
+        'password',
         'file',
         'image',
         'number',
