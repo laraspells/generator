@@ -199,6 +199,11 @@ class Field extends AbstractSchema
         return in_array("required", $this->getRules());
     }
 
+    public function isHidden()
+    {
+        return $this->get('hidden') === true;
+    }
+
     public function isInputFile()
     {
         return in_array($this->getInputType(), ['file', 'image']);

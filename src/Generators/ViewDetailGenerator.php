@@ -30,7 +30,7 @@ class ViewDetailGenerator extends ViewGenerator
         $fields = $this->tableSchema->getFields();
         $code = $this->makeCodeGenerator();
         foreach($fields as $field) {
-            if ($field->get('hidden') === true) {
+            if ($field->isHidden()) {
                 continue;
             }
             $column = $field->getColumnName();

@@ -30,8 +30,13 @@ class ModelGenerator extends ClassGenerator
         $fillables = $this->tableSchema->getFillableColumns();
         $this->setParentClass(static::CLASS_MODEL);
         $this->addProperty('table', 'string', 'protected', $data->table_name, 'Table name');
-        $this->addProperty('fillable', 'array', 'protected', $fillables, 'Fillable columns');
         $this->addProperty('primaryKey', 'string', 'protected', $data->primary_key, 'The primary key for the model');
+        $this->addProperty('fillable', 'array', 'protected', $fillables, 'Fillable columns');
+
+        $hiddenFields = $this->tableSchema->getHiddenFields();
+        if (count($hiddenFields)) {
+            $this->addProperty('hidden', 'array', 'protected', array_keys($hiddenFields), 'The attributes that should be hidden for arrays.');
+        }
 
         if ($usingSoftDelete) {
             $this->useTrait('Illuminate\Database\Eloquent\SoftDeletes');

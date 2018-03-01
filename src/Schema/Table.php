@@ -185,6 +185,17 @@ class Table extends AbstractSchema
         return $this->get('icon');
     }
 
+    /**
+     * Get hidden fields
+     *
+     * @return array
+     */
+    public function getHiddenFields()
+    {
+        return array_filter($this->getFields(), function($field) {
+            return $field->isHidden();
+        });
+    }
 
     /**
      * Get fields that need to input file

@@ -39,7 +39,7 @@ class ViewListGenerator extends ViewGenerator
         $theads = [];
         $bodys = [];
         foreach($inputableFields as $field) {
-            if ($field->get('hidden') === true) {
+            if ($field->isHidden() === true) {
                 continue;
             }
 
