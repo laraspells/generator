@@ -322,6 +322,14 @@ class SchemaResolver implements SchemaResolverInterface
         return $fieldSchema;
     }
 
+    protected function resolveFieldInputPassword($colName, $fieldSchema, $tableName, $tableSchema)
+    {
+        data_fill($fieldSchema, 'input_resolver', "bcrypt({? value ?})");
+        data_fill($fieldSchema, 'data_resolver', "''");
+        data_fill($fieldSchema, 'hidden', true);
+        return $fieldSchema;
+    }
+
     protected function resolveFieldInputFile($colName, $fieldSchema, $tableName, $tableSchema)
     {
         data_fill($fieldSchema, 'display', 'link');

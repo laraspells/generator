@@ -39,6 +39,10 @@ class ViewListGenerator extends ViewGenerator
         $theads = [];
         $bodys = [];
         foreach($inputableFields as $field) {
+            if ($field->get('hidden') === true) {
+                continue;
+            }
+
             $col = $field->getColumnName();
             $tableCode = $field->getTableCode() ?: '{{ ${? varname ?}[\'{? column ?}\'] }}';
             $label = $field->getLabel();
