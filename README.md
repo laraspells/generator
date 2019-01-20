@@ -5,6 +5,12 @@ LaraSpell is Laravel CRUD generator that generate laravel code.
 So you can modify generated files as you need, without limitation.
 And all you need to customize it is just some PHP and Laravel knowledges.
 
+## Demo (Video)
+
+* https://www.facebook.com/em.sifa/videos/2073212012693128/
+* https://www.facebook.com/em.sifa/videos/2180691341945194/
+* https://www.facebook.com/em.sifa/posts/2212262218788106
+
 ## Features
 
 * Limitless Customization
